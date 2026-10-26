@@ -1,0 +1,17 @@
+<!--
+    Key bindings, loaded by the client on its own and never listed in the TOCs.
+    Each name is what the client saves a player's key against, so a shipped
+    binding keeps its name for good.
+
+    Toggle BBB Spellbook (Features/Spellbook/Key-Bindings.lua) calls
+    a global, since Bindings.xml can call nothing else. Buff Duty's Buff Key
+    (Features/Thanks-for-the-Buff/Buff-Window-Keys.lua) clicks a hidden secure
+    button, which picks the next buff on the list and casts it; a macro clicks
+    the same button: /click TFTBBuffIndividual.
+-->
+<Bindings>
+	<Binding name="MACROSPELLBOOK_TOGGLE" header="BAGSBUFFSBUTTONS" category="ADDONS">
+		BagsBuffsButtons_ToggleSpellbook()
+	</Binding>
+	<Binding name="CLICK TFTBBuffIndividual:LeftButton" category="ADDONS" />
+</Bindings>
