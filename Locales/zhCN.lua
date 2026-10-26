@@ -1,0 +1,1911 @@
+local L = LibStub("AceLocale-3.0"):NewLocale("Bags-Buffs-Buttons", "zhCN")
+if not L then
+	return
+end
+
+--------------------------------------------------------------------------------
+-- Brand
+--------------------------------------------------------------------------------
+
+--[[
+    The add-on has two names. ADDON_TITLE, the full name, is for window
+    titles and anywhere the add-on is talked about; ADDON_SHORT_NAME is for
+    tooltips and the chat prints ("BBB // ..."). Both are proper nouns and
+    stay as written in every locale, as does the full name inside any
+    sentence below.
+]]
+L["ADDON_TITLE"] = "Bags Buffs & Buttons"
+L["ADDON_SHORT_NAME"] = "BBB"
+
+L["CHAT_LOADED"] =
+	"版本 %s。设置（包括禁用此消息的选项）位于 设置选项 > 插件 > Bags Buffs & Buttons。喜欢这个插件吗？告诉朋友，在 CurseForge 上收藏它，或在它的 GitHub 页面上点击 Star。(="
+L["OPTIONS_LEVEL_UP_TITLE"] = "帮助 Bags Buffs & Buttons 升级"
+L["OPTIONS_LEVEL_UP_THANKS"] = "感谢你选择 Bags Buffs & Buttons！"
+
+--------------------------------------------------------------------------------
+-- Connoisseur & Restocker
+--------------------------------------------------------------------------------
+
+-- Every string from here to Thanks for the Buff is Connoisseur & Restocker's.
+
+--------------------------------------------------------------------------------
+-- Macro Names
+--------------------------------------------------------------------------------
+
+--[[
+    Macro names cannot exceed 16 total characters. Macros are found by name, so
+    a shipped name never changes: a new translation creates a second macro and
+    leaves every player's existing one stale on their action bar.
+]]
+
+L["MACRO_BANDAGE"] = "- 绷带"
+L["MACRO_EXPLOSIVES"] = "- 爆炸物"
+L["MACRO_FEED_PET"] = "- 喂养宠物"
+L["MACRO_FOOD"] = "- 食物"
+L["MACRO_HEALTH_POTION"] = "- 治疗药水"
+L["MACRO_HEALTHSTONE"] = "- 治疗石"
+L["MACRO_MANA_GEM"] = "- 法力宝石"
+L["MACRO_MANA_POTION"] = "- 法力药水"
+L["MACRO_POISONS"] = "- 毒药"
+L["MACRO_SOULSTONE"] = "- 灵魂石"
+L["MACRO_WATER"] = "- 水"
+
+--------------------------------------------------------------------------------
+-- Common
+--------------------------------------------------------------------------------
+
+-- Joins the items of a list: a Readiness Report clause, the Restocker's "Couldn't move" list, or the characters on a Restock List.
+L["LIST_SEPARATOR"] = "、"
+-- The decimal mark in a number the code prints, such as the Readiness Report's 2.5-minute choice.
+L["DECIMAL_SEPARATOR"] = "."
+
+--------------------------------------------------------------------------------
+-- Pet Diets
+--------------------------------------------------------------------------------
+
+--[[
+    Diet names as returned by the pet diet reader, which is localized. These
+    values MUST match the client's strings exactly (verify in-game with a pet
+    out: /dump GetPetFoodTypes() on Era and TBC,
+    /dump C_PetInfo.GetPetFoodTypes() on Forever). Used to build
+    ns.PET_DIET_MAP in Data/Data.lua.
+
+    They are ALSO the food checkbox labels in the staples pop-up, so they
+    read as ordinary labels while carrying that hard constraint. Translate them
+    as the client's own diet words, never as the nicer label they look like --
+    a locale that "improves" one here stops matching that client's strings and
+    silently breaks pet-food selection for everyone playing in it.
+]]
+
+L["DIET_BREAD"] = "面包"
+L["DIET_CHEESE"] = "奶酪"
+L["DIET_FISH"] = "鱼"
+L["DIET_FRUIT"] = "水果"
+L["DIET_FUNGUS"] = "蘑菇"
+L["DIET_MEAT"] = "肉"
+
+--------------------------------------------------------------------------------
+-- Chat Messages
+--------------------------------------------------------------------------------
+
+-- { item link, item ID, zone, subzone, map ID, Discord link }
+L["MESSAGE_BUG_REPORT"] =
+	"看来你发现了一个错误！%s (%s) 无法在 %s > %s (%s) 使用。请将此问题报告给我们，以便修复。谢谢！%s"
+L["MESSAGE_NO_ITEM"] = "背包中未找到合适的%s。"
+L["MESSAGE_MACRO_SLOTS_FULL"] =
+	"由于你的宏栏位已满，部分 Connoisseur & Restocker 宏未能创建。请删除不再使用的宏以腾出栏位，或在 设置选项 > 插件 > Connoisseur & Restocker > 宏 中关闭不需要的 Connoisseur & Restocker 宏。"
+--[[
+    Printed once after the add-on creates one or more of its macros, so a new
+    player learns they exist. %s is "/m", the game's own macro command, colored
+    at the call site. "General" is the macro window's tab for account-wide
+    macros; use the client's own name for that tab. The macro names are this
+    locale's own MACRO_FOOD and MACRO_WATER values, written exactly as this
+    locale ships them.
+]]
+L["MESSAGE_MACROS_READY"] =
+	'你的宏已准备就绪。输入 %s，打开"通用宏"标签页，然后把 - 食物、- 水 等宏拖到你的动作条上。'
+-- The mini-map button's Right-Click and Middle-Click. %s is the item's link.
+L["MESSAGE_IGNORE_ADDED"] = "%s 已加入此角色的忽略列表。"
+-- %d is how many items the Middle-Click took off the list: exactly one, or two or more.
+L["MESSAGE_IGNORE_CLEARED_ONE"] = "已从此角色的忽略列表中清除 1 件物品。"
+L["MESSAGE_IGNORE_CLEARED_MANY"] = "已从此角色的忽略列表中清除 %d 件物品。"
+
+L["CHAT_OPTIONS_IN_COMBAT"] = "出于安全考虑，战斗中无法打开选项界面。"
+
+--------------------------------------------------------------------------------
+-- Readiness Report
+--------------------------------------------------------------------------------
+
+--[[
+    Printed when a ready check starts, as a header plus up to three lines. Each
+    line is a set of "Label : a, b, c" clauses joined by ". ", and every part of
+    it is dropped when it has nothing to say -- a clean character prints nothing
+    at all, so there is no all-clear string here and must not be one.
+
+    The joins are keys of their own so a locale can use its own punctuation:
+    READINESS_CLAUSE_FORMAT puts a clause's label before its items, the items
+    are joined with LIST_SEPARATOR, and the clauses with
+    READINESS_CLAUSE_SEPARATOR.
+]]
+
+L["READINESS_TITLE"] = "就绪报告"
+-- { clause label, its items }
+L["READINESS_CLAUSE_FORMAT"] = "%s%s"
+L["READINESS_CLAUSE_SEPARATOR"] = "。"
+
+-- Clause labels, in the order the lines print them.
+L["READINESS_MISSING_BUFFS"] = "缺少增益："
+L["READINESS_EXPIRING"] = "即将到期："
+L["READINESS_MISSING_ITEMS"] = "缺少物品："
+L["READINESS_DAMAGED_GEAR"] = "受损装备："
+L["READINESS_CHARACTER"] = "角色："
+L["READINESS_QUESTIONABLE_GEAR"] = "装备了非战斗装备："
+
+--[[
+    What the report calls each thing. The Readiness Report panel labels its
+    switches with these same keys, so a switch names exactly the line it
+    controls; a switch that needs other words than its line (Main Hand Weapon
+    Buff, PvP Flag On) keeps an OPTIONS_READINESS_* label of its own, and
+    Scroll Buffs borrows FEATURE_SCROLL_BUFFS, the Macros feature it needs.
+    Well Fed, Main Hand and Off Hand are the client's own names (the buff,
+    MAINHANDSLOT and SECONDARYHANDSLOT), so they have no keys here, and
+    READINESS_PET_FORMAT puts Well Fed in the pet's line (%s is that name).
+
+    Deliberately its own set rather than the shared LABEL_* keys the macro
+    messages use: those name an item you are being offered ("Health Potion"),
+    these name a gap in your preparation ("Healing Potion"), and the two want
+    to be reworded independently.
+]]
+L["READINESS_FLASK"] = "合剂或 2 种药剂"
+L["READINESS_PET_FORMAT"] = "%s（宠物）"
+L["READINESS_SCROLLS"] = "卷轴"
+L["READINESS_SOULSTONE"] = "灵魂石未激活"
+L["READINESS_HEALTHSTONE"] = "治疗石"
+L["READINESS_MANA_GEM"] = "法力宝石"
+L["READINESS_HEALING_POTION"] = "治疗药水"
+L["READINESS_MANA_POTION"] = "法力药水"
+L["READINESS_BANDAGES"] = "绷带"
+L["READINESS_PVP_ON"] = "PvP 已开启"
+
+-- { buff name, whole minutes left }
+L["READINESS_TIME_MINUTES"] = "%s %d 分钟"
+-- %s is the buff name; used when under a minute is left.
+L["READINESS_TIME_EXPIRING"] = "%s 不足 1 分钟"
+-- { dominant talent tree, slash-joined point spread }
+L["READINESS_SPECIALIZATION_FORMAT"] = "%s (%s)"
+-- Talent points the character has not spent: exactly one, or %d for two or more.
+L["READINESS_UNSPENT_TALENTS_ONE"] = "1 个未使用的天赋点"
+L["READINESS_UNSPENT_TALENTS_MANY"] = "%d 个未使用的天赋点"
+
+--------------------------------------------------------------------------------
+-- ConnoisseurTip Messages
+--------------------------------------------------------------------------------
+
+-- Printed in chat by macro bodies via /run ConnoisseurTip("key") or ConnoisseurTipIf, and TIP_EMPTY_* via ConnoisseurNoItem. See Features/Macros/Runtime.lua.
+
+L["TIP_PET_NO_FOOD"] = "你目前没有任何对宠物有用的食物。"
+-- The four %s are the client's names for Call Pet, Dismiss Pet, Feed Pet and Revive Pet, in that order.
+L["TIP_PET_NO_SKILLS_FORMAT"] = "你目前还没有学会%s、%s、%s或%s。"
+L["TIP_PET_NO_MEND"] = "你目前还没有学会治疗宠物。"
+L["TIP_NO_HAND_POISON"] = "这把武器所选的毒药已用完。"
+
+-- %s is the localized spell name, resolved at print time.
+L["TIP_DONT_KNOW_SPELL"] = "你目前还没有学会%s。"
+
+--[[
+    A Mage's Food, Water or Mana Gem macro, or a Warlock's Healthstone or
+    Soulstone macro, pressed with none in the bags by a character who knows the
+    spell that makes it. { LABEL_* name, MACRO_* name }: "No Water in your
+    bags. Right-Click - Water to conjure more." Mages conjure, warlocks create,
+    the same verbs as NOTE_CONJURE and NOTE_CREATE.
+]]
+L["TIP_EMPTY_CONJURE"] = "你的背包里没有%s了。右键点击 %s 制造更多。"
+L["TIP_EMPTY_CREATE"] = "你的背包里没有%s了。右键点击 %s 制造一颗。"
+
+--------------------------------------------------------------------------------
+-- Minimap Tooltip
+--------------------------------------------------------------------------------
+
+--[[
+    The two Food macro features. Both names fill OPTIONS_MODE_DESCRIPTION's %s,
+    and Scroll Buffs labels the Readiness Report's switch. In every *_FORMAT key
+    that names the buff, here and below, %s is the client's name for "Well Fed".
+]]
+L["FEATURE_BUFF_FOOD"] = "增益食物"
+L["FEATURE_SCROLL_BUFFS"] = "卷轴增益"
+
+--[[
+    The mini-map tooltip's two switches, each a block with a description line.
+    Buff Food and Scroll Buffs share one block and one click, which turns both
+    on or off together. The Readiness Report's block takes its title from
+    READINESS_TITLE.
+]]
+L["MINIMAP_BUFF_FOOD_SCROLLS"] = "增益食物与卷轴"
+L["MINIMAP_BUFF_FOOD_SCROLLS_DESCRIPTION_FORMAT"] =
+	'使用提供"%s"的食物，并在进食前补上缺少的卷轴增益。'
+
+--[[
+    Item titles in the mini-map tooltip. A title sits alone on its row and its
+    item is right-aligned on the row beneath, so neither has to stay short;
+    with nothing to show, MESSAGE_NO_ITEM takes the item's row. Current Pet
+    Food opens the Hunter's class block, and the two poison titles open the
+    Rogue's.
+]]
+L["MINIMAP_BEST_FOOD"] = "当前食物"
+L["MINIMAP_BEST_PET_FOOD"] = "当前宠物食物"
+L["MINIMAP_MAIN_HAND_POISON"] = "主手毒药"
+L["MINIMAP_OFF_HAND_POISON"] = "副手毒药"
+
+-- The Ignore List block. The count stands in for a list too long to show, so it is never one and needs no singular.
+L["MINIMAP_IGNORE_LIST"] = "忽略列表"
+L["MINIMAP_IGNORE_COUNT"] = "%d 件物品"
+L["MENU_IGNORE"] = "忽略"
+L["MENU_CLEAR_IGNORE"] = "清除忽略列表"
+
+--[[
+    Restocker Report block in the mini-map tooltip. While the outstanding
+    restocking orders are few enough to fit, it lists them under the header,
+    one item per row; past that it shows only how many there are, beside the
+    header. An order is one Restock List row with Buy switched on that is still
+    short in your bags, so the count is of rows and not of missing units -- nine
+    outstanding orders can be nine single juices or nine full stacks. The header
+    beside it supplies the "restocking", so the count only needs the noun.
+
+    The count only ever stands in for a list too long to show, so it is never
+    one and needs no singular.
+
+    The count sits in the tooltip's right column, beside the header, so it has
+    to stay short enough to read as a value rather than a sentence. The
+    all-stocked case has no header and no count: STOCKED replaces the whole
+    row, on a wrapping line of its own, so it can be a full sentence. EMPTY is
+    the line under the header when the list holds nothing at all, which is not
+    the same as being stocked.
+
+    ITEM_COUNT is the right-hand value of a listed row: { have, wanted }, the
+    ratio RESTOCKER_REMINDER_ITEM prints. Wordless, so there is nothing to
+    translate, but a key anyway for the same reason that one is.
+]]
+L["MINIMAP_RESTOCKER_REPORT"] = "Restocker 报告"
+L["MINIMAP_RESTOCKER_NEEDED"] = "%d 项未完成订单"
+L["MINIMAP_RESTOCKER_ITEM_COUNT"] = "%d/%d"
+L["MINIMAP_RESTOCKER_STOCKED"] = "恭喜，你的补给已全部备齐！"
+L["MINIMAP_RESTOCKER_EMPTY"] = "你的清单是空的。"
+
+--[[
+    The Restocker List block, above the class notes: its title, a line saying
+    what the list is for, and its click, which sits beside MINIMAP_OPEN. "Your
+    list" in the description and in MINIMAP_RESTOCKER_EMPTY is this list. The
+    Options entry is always the tooltip's last block and has no action label.
+]]
+L["MENU_RESTOCKER"] = "Restocker 清单"
+L["MENU_RESTOCKER_DESCRIPTION"] = "购买你清单上的物品，并在银行存取。"
+L["MENU_RESTOCKER_KEYBIND"] = "Shift + 右键点击"
+L["MENU_OPTIONS"] = "BBB 选项"
+L["MENU_OPTIONS_KEYBIND"] = "Shift + 中键点击"
+
+--------------------------------------------------------------------------------
+-- Class Notes
+--------------------------------------------------------------------------------
+
+--[[
+    The class block of the mini-map tooltip: a class-colored header, which is
+    the client's name for the player's class and has no key here, the items
+    the class's own macro will use (a Hunter's pet food, a Rogue's two poisons,
+    titled in the Minimap Tooltip section above), then one group per macro.
+]]
+
+--[[
+    A group is the macro's name, then one row per click: the click on the left
+    and what it does on the right. The right-hand column never wraps, so each
+    result stays a few words. A spell the row casts is named by the client
+    (Mend Pet, Ritual of Refreshment, Ritual of Souls) and has no key here, and
+    a plain click reuses MINIMAP_LEFT_CLICK, MINIMAP_RIGHT_CLICK or
+    MINIMAP_MIDDLE_CLICK.
+]]
+L["NOTE_MACRO_FEED_PET"] = "喂养宠物宏"
+L["NOTE_MACRO_FOOD_WATER"] = "食物与水宏"
+L["NOTE_MACRO_MANA_GEM"] = "法力宝石宏"
+L["NOTE_MACRO_HEALTHSTONE"] = "治疗石宏"
+L["NOTE_MACRO_SOULSTONE"] = "灵魂石宏"
+L["NOTE_MACRO_POISONS"] = "毒药宏"
+
+-- Hunter. NOTE_PET_MEND_CLICK is the click that casts Mend Pet: a Right-Click, or any click during combat.
+L["NOTE_PET_CALL_FEED_REVIVE"] = "召唤、喂养或复活"
+L["NOTE_PET_MEND_CLICK"] = "右键点击，或战斗中点击"
+L["NOTE_HOLD_SHIFT"] = "按住 Shift"
+L["NOTE_PET_FORCE_REVIVE"] = "强制复活"
+L["NOTE_HOLD_CONTROL"] = "按住 Ctrl"
+L["NOTE_PET_DISMISS"] = "解散"
+
+--[[
+    Mage and Warlock. The verb tracks the real spell names, which differ by
+    class: mages Conjure, warlocks Create. A second Right-Click makes the next
+    rank down, since the bags hold one of each rank.
+
+    Target downranking is per-macro, not block-wide: it applies only to the
+    mage's Food and Water and the warlock's Healthstone, so each line closes
+    the group it belongs to. "One" in the warlock's line is a Healthstone.
+]]
+L["NOTE_CONJURE"] = "制造"
+L["NOTE_CREATE"] = "制造"
+L["NOTE_RIGHT_CLICK_AGAIN"] = "再次右键点击"
+L["NOTE_LOWER_RANK_BACKUP"] = "低等级备用"
+L["NOTE_MAGE_TARGET_LEVEL"] = "以等级较低的玩家为目标，即可按其等级制造。"
+L["NOTE_WARLOCK_TARGET_LEVEL"] = "以等级较低的玩家为目标，即可按其等级制造一颗治疗石。"
+
+-- Rogue. A Left-Click and a Right-Click on the Poisons macro show the client's slot names, MAINHANDSLOT and SECONDARYHANDSLOT.
+L["NOTE_POISONS_WINDOW"] = "毒药窗口"
+L["NOTE_POISONS_REPLACED"] = "自动替换旧毒药。"
+
+--------------------------------------------------------------------------------
+-- Item Labels
+--------------------------------------------------------------------------------
+
+--[[
+    One label per macro type, dropped as-is into MESSAGE_NO_ITEM ("No suitable
+    %s found...") from ConnoisseurNoItem and the mini-map tooltip. LABEL_WATER
+    is also the staples pop-up's Water checkbox.
+]]
+
+L["LABEL_BANDAGE"] = "绷带"
+L["LABEL_EXPLOSIVE"] = "爆炸物"
+L["LABEL_FOOD"] = "食物"
+L["LABEL_HEALTH_POTION"] = "治疗药水"
+L["LABEL_HEALTHSTONE"] = "治疗石"
+L["LABEL_MANA_GEM"] = "法力宝石"
+L["LABEL_MANA_POTION"] = "法力药水"
+L["LABEL_PET_FOOD"] = "宠物食物"
+L["LABEL_POISON"] = "毒药"
+L["LABEL_SOULSTONE"] = "灵魂石"
+L["LABEL_WATER"] = "水"
+
+--------------------------------------------------------------------------------
+-- UI Labels
+--------------------------------------------------------------------------------
+
+-- Generic labels used in the mini-map tooltip.
+
+L["MINIMAP_ENABLED"] = "已启用"
+L["MINIMAP_DISABLED"] = "已禁用"
+L["MINIMAP_TOGGLE"] = "切换"
+L["MINIMAP_OPEN"] = "打开"
+L["MINIMAP_LEFT_CLICK"] = "左键点击"
+L["MINIMAP_RIGHT_CLICK"] = "右键点击"
+L["MINIMAP_MIDDLE_CLICK"] = "中键点击"
+L["MINIMAP_SHIFT_LEFT"] = "Shift + 左键点击"
+
+--------------------------------------------------------------------------------
+-- Mode Values
+--------------------------------------------------------------------------------
+
+--[[
+    The one when-to-use list, offered by every mode dropdown: Prioritize Buff
+    Food, Enable Scroll Buffs, Use Pet Food Buffs, and Use Conjured Food &
+    Water First. %s in OPTIONS_MODE_DESCRIPTION is the feature's name,
+    FEATURE_BUFF_FOOD, FEATURE_SCROLL_BUFFS or OPTIONS_PET_HEADER; the
+    conjured dropdown has hover text of its own. The dropdowns have no
+    caption, so each value carries its own "when". Leveling means below the
+    client's max level.
+
+    In the mini-map tooltip, the Buff Food & Scrolls block, while a switch is
+    on but no choice applies, shows that choice's label in place of
+    MINIMAP_ENABLED, so every label has to read as a state too.
+]]
+L["OPTIONS_MODE_DESCRIPTION"] =
+	"选择你的食物宏何时提供%s：总是提供，或仅在单人时、小队或团队中、团队中、练级时或满级时提供。"
+L["MODE_ALWAYS"] = "总是"
+L["MODE_SOLO"] = "单人时"
+L["MODE_PARTY"] = "在小队或团队中时"
+L["MODE_RAID"] = "在团队中时"
+L["MODE_LEVELING"] = "练级时"
+L["MODE_MAX_LEVEL"] = "满级时"
+
+--------------------------------------------------------------------------------
+-- Inventory Report
+--------------------------------------------------------------------------------
+
+--[[
+    The block Features/Inventory-Report.lua adds under an item's own tooltip
+    lines. Its header is "C & R // Inventory Report": ADDON_SHORT_NAME, then the
+    title, in the chat prints' branded colors, with the total at its right
+    edge. Under it, one line per character, this one first: the name on the
+    left (the client's own character names, so no keys here), its counts at
+    the right edge.
+
+    Keep the counts short: they share a line with a name, and the tooltip is
+    as wide as its longest line.
+]]
+L["INVENTORY_REPORT_TITLE"] = "库存报告"
+-- A character's bags, then its bank: "Bag 39, Bank 1". The words show gray and each count white.
+L["INVENTORY_REPORT_COUNTS"] = "背包 %s，银行 %s"
+-- The same row when only one of the two holds some; a place holding none is left out.
+L["INVENTORY_REPORT_BAG"] = "背包 %s"
+L["INVENTORY_REPORT_BANK"] = "银行 %s"
+-- On the header's right: every character on the realm added up, the word gray and the count white.
+L["INVENTORY_REPORT_TOTAL"] = "总计 %s"
+
+--------------------------------------------------------------------------------
+-- Options Panel
+--------------------------------------------------------------------------------
+
+-- Welcome Message
+L["OPTIONS_WELCOME_MESSAGE"] = "启用欢迎消息"
+L["OPTIONS_WELCOME_MESSAGE_DESCRIPTION"] = "登录时在聊天框中输出欢迎消息。"
+
+-- Minimap Button
+L["OPTIONS_MINIMAP_BUTTON"] = "启用小地图按钮"
+L["OPTIONS_MINIMAP_BUTTON_DESCRIPTION"] = "显示小地图按钮。"
+
+-- Features: each feature's master switch, also on the panel that configures it.
+-- Options: each add-on's heading page
+L["OPTIONS_TFTB_DESCRIPTION"] =
+	"自动通过密语或表情感谢每一位为你施加增益的玩家，并用一键施放的缺失增益提醒，让你的团队、你自己和你的武器始终保持增益。还会提醒你大餐、传送门、召唤和灵魂之井。礼数周到，全自动。"
+L["OPTIONS_SPELLBOOK_DESCRIPTION"] =
+	"在新的法术书标签页中一键把每个职业法术做成鼠标悬停宏、光标施放宏和自我施放宏，无需宏语法。升级、训练或切换专精时会自动更新。右键即可添加焦点、停止施法、自动攻击、宠物攻击或使用饰品。"
+
+L["OPTIONS_MACROS_ENABLE"] = "启用宏更新"
+L["OPTIONS_MACROS_ENABLE_DESCRIPTION"] =
+	"随着背包变化，让你的 Connoisseur & Restocker 宏始终指向你最好的物品。关闭后，每个宏都保持最后的状态。"
+L["OPTIONS_RESTOCKER_ENABLE"] = "启用 Restocker"
+L["OPTIONS_RESTOCKER_ENABLE_DESCRIPTION"] =
+	"根据你的补货清单购买物品并存入银行，并在存货不足时提醒你。关闭后会停用全部功能，包括补货清单窗口。"
+
+-- The label before a panel's Example line, which shows a chat print as it will arrive.
+L["SAMPLE_EXAMPLE"] = "示例：%s"
+
+--[[
+    /Commands. Both halves of each line are locale keys: the literal, which
+    stays identical in every locale since a slash command has nothing to
+    translate, and its description.
+]]
+L["OPTIONS_COMMANDS_HEADER"] = "/Commands"
+L["OPTIONS_COMMAND"] = "/bbb"
+L["OPTIONS_COMMAND_DESCRIPTION"] = "打开此插件的选项界面。"
+L["RESTOCKER_COMMAND"] = "/restock"
+L["RESTOCKER_COMMAND_DESCRIPTION"] = "打开你的补货清单。"
+
+L["OPTIONS_LEVEL_UP_INTRO"] =
+	"这个插件由热爱这款游戏、希望让每个人都尽可能玩得开心的玩家打造。我们永远不会请求捐款。真正让我们满足的，是知道我们的工作让你的游戏体验更好了一点。如果确实如此，我们很想听你说说！"
+L["OPTIONS_LEVEL_UP_WAYS"] = "以下是你可以帮助我们触达更多玩家的几种方式。"
+L["OPTIONS_LEVEL_UP_FEEDBACK"] =
+	"• 分享反馈：发现了错误或有新想法？请在 Discord 上告诉我们。你的反馈能帮助我们改进插件，也随时欢迎提交拉取请求。"
+L["OPTIONS_LEVEL_UP_FRIEND"] =
+	"• 告诉朋友：认识可能会喜欢这个插件的人吗？告诉他们吧。口口相传能帮助更多玩家发现优秀的插件。"
+L["OPTIONS_LEVEL_UP_CURSEFORGE"] =
+	"• 在 CurseForge 上收藏：打开下方的 CurseForge 链接，登录后点击 Download 按钮下方的星标。收藏能帮助更多玩家发现这个插件。"
+L["OPTIONS_LEVEL_UP_GITHUB"] =
+	"• 在 GitHub 上点 Star：打开下方的 GitHub 链接，登录后点击右上角的 Star。星标能帮助项目获得更多免费开发者工具的资格。"
+
+L["OPTIONS_FEEDBACK"] = "反馈与支持"
+L["OPTIONS_FEEDBACK_LINKS_HEADER"] = "反馈与支持链接"
+L["OPTIONS_CURSEFORGE"] = "CurseForge"
+L["OPTIONS_GITHUB"] = "GitHub"
+L["OPTIONS_DISCORD"] = "Discord"
+L["OPTIONS_WAGO"] = "Wago"
+L["OPTIONS_COPY_LINK"] = "要复制链接，请点击其输入框，然后按 Ctrl+A 和 Ctrl+C。"
+L["OPTIONS_VERSION"] = "版本 %s"
+
+--[[
+    Macros panel. TAB_MACROS is the panel's label in the settings tree and the
+    title on the page; OPTIONS_MACROS_DESCRIPTION is the intro beneath it, which
+    orients the player to the page's two halves -- which macros exist, then how
+    each one behaves. The Which Macros to Create header below titles the first
+    section, after the page's two headerless toggles, Enable Macro Updates and
+    Macro Names on Buttons.
+]]
+L["TAB_MACROS"] = "宏"
+L["OPTIONS_MACROS_DESCRIPTION"] =
+	"Connoisseur & Restocker 会为每种消耗品各建立一个宏，并随着背包变化保持更新，让你动作条上的按钮始终取用你身上最好的物品。请在下方选择要创建哪些宏，然后设置每个宏如何挑选物品。"
+
+-- Macro Names on Buttons
+L["OPTIONS_MACRO_NAMES"] = "在按钮上显示宏名称"
+L["OPTIONS_MACRO_NAMES_DESCRIPTION"] =
+	"在你的动作条按钮上显示宏名称文字，Connoisseur & Restocker 默认会隐藏这些文字。"
+
+--[[
+    Which Macros to Create. "General" in the description is the Macros
+    window's tab for account-wide macros; use the client's own name for it. The
+    button under the checkboxes opens that window.
+]]
+L["OPTIONS_MACROS_TO_CREATE_HEADER"] = "要创建的宏"
+L["OPTIONS_ENABLE_MACROS_DESCRIPTION"] =
+	'选择 Connoisseur & Restocker 要创建并维护哪些宏。关闭某个宏也会将其移除。它们位于宏界面的"通用宏"标签页中，可直接拖到你的动作条上。'
+L["OPTIONS_OPEN_MACRO_WINDOW"] = "打开宏界面"
+L["OPTIONS_OPEN_MACRO_WINDOW_DESCRIPTION"] =
+	'打开游戏的宏界面并切换到"通用宏"标签页，这些宏就在那里。'
+--[[
+    Hover text on each Which Macros to Create toggle, whose own label names
+    the macro. It says "this macro" because a LABEL_* is not every macro's
+    name: Feed Pet's label is Pet Food.
+]]
+L["OPTIONS_MACRO_TOGGLE_DESCRIPTION"] = "创建并维护此宏，取消勾选时会将其移除。"
+
+--[[
+    Food & Water: Prioritize Buff Food, Enable Scroll Buffs, Use Conjured
+    Food & Water First, and Use Restock List Food & Water Last, in page
+    order. One description serves all four, so each option's hover text says
+    what it does.
+]]
+L["OPTIONS_FOOD_WATER_HEADER"] = "食物与水"
+L["OPTIONS_FOOD_WATER_DESCRIPTION"] =
+	"你的食物和水宏会使用背包中最好的食物和饮料。这些选项可以让增益食物、卷轴或魔法制造的食物和水优先，并让补货清单中的食物和水最后使用。"
+
+--[[
+    Buff Food, the first option under Food & Water. Its hover text carries the
+    arena exception, which the mini-map tooltip's shared Buff Food & Scrolls
+    line has no room for.
+]]
+L["OPTIONS_BUFF_FOOD"] = "优先增益食物"
+L["OPTIONS_BUFF_FOOD_DESCRIPTION_FORMAT"] =
+	'缺少"%s"增益时，优先使用可提供该增益的食物，竞技场中除外。'
+
+-- Scroll Buffs, the second option under Food & Water.
+L["OPTIONS_USE_SCROLLS"] = "启用卷轴增益"
+L["OPTIONS_USE_SCROLLS_DESCRIPTION"] =
+	"你的食物宏第一次按下时会使用缺少的卷轴，再按一次则进食；以友方玩家为目标或身处竞技场时会跳过卷轴。"
+L["OPTIONS_SCROLL_TYPES"] = "在检查中包含卷轴类型"
+-- The other five scroll types are labeled with the client's stat names (SPELL_STAT1_NAME to SPELL_STAT5_NAME); Protection has none.
+L["OPTIONS_SCROLL_PROTECTION"] = "保护"
+-- Hover text on each scroll type and pet food type; %s is the scroll type's label or the pet food's item name.
+L["OPTIONS_BUFF_TYPE_DESCRIPTION"] = '检查缺少的增益时包含"%s"。'
+
+-- Use Conjured Food & Water First, the third option under Food & Water.
+L["OPTIONS_CONJURED_FIRST"] = "优先使用魔法制造的食物与水"
+L["OPTIONS_CONJURED_FIRST_DESCRIPTION"] =
+	'魔法制造的食物和水不花钱，并会在你下线后不久消失，因此你的食物和水宏会优先使用它们，即使背包里有恢复量更高的物品。开启"优先增益食物"时，增益食物仍然最先使用。'
+L["OPTIONS_CONJURED_FIRST_MODE_DESCRIPTION"] =
+	"选择魔法制造的食物和水何时优先：总是优先，或仅在单人时、小队或团队中、团队中、练级时或满级时优先。"
+
+-- Use Restock List Food & Water Last, the fourth option under Food & Water.
+L["OPTIONS_RESTOCK_LAST"] = "最后使用补货清单中的食物与水"
+L["OPTIONS_RESTOCK_LAST_DESCRIPTION"] =
+	"当两种食物或饮料恢复量相同时，你的食物和水宏会先使用不在补货清单上的那种，把补货清单购买的留到以后。"
+
+-- Potions & Healthstones
+L["OPTIONS_POTIONS_HEADER"] = "药水与治疗石"
+L["OPTIONS_POTIONS_DESCRIPTION"] =
+	"宏在战斗中无法更改（这是暴雪的限制），因此每个药水和治疗石宏都预先包含你最好的物品以及最多两个备用物品。在较长的战斗中，图标和提示可能会过时并显示错误的物品，但点击该宏将始终使用你背包中实际拥有的最佳物品。"
+L["OPTIONS_POTIONS_USE_FOOD_AND_WATER"] = "非战斗时在药水宏中使用食物与水"
+L["OPTIONS_POTIONS_USE_FOOD_AND_WATER_DESCRIPTION"] =
+	"非战斗时，你的治疗药水宏会食用你最好的食物，法力药水宏会饮用你最好的水。战斗中则照旧使用你的药水。卷轴、宠物食物和魔法制造仍保留在食物和水宏中。"
+L["OPTIONS_COMBINE_HEALTHSTONES"] = "将治疗石合并到治疗药水宏中"
+L["OPTIONS_COMBINE_HEALTHSTONES_DESCRIPTION"] =
+	"将你最好的治疗石添加到治疗药水宏的底部，这样按一次即可同时使用药水和治疗石。"
+
+-- Mana Gems & Runes
+L["OPTIONS_MANA_GEMS_HEADER"] = "法力宝石与符文"
+-- In both Mana Gem texts the two %s are the client's names for Demonic Rune and Dark Rune, in that order, each with its icon.
+L["OPTIONS_MANA_GEMS_DESCRIPTION_FORMAT"] =
+	"%s、%s以及另外几种法力物品，都与法力宝石共享冷却时间。符文使用时会消耗生命值，因此除非你选择加入，否则法力宝石宏不会包含其中任何一种。"
+L["OPTIONS_INCLUDE_MANA_RUNES"] = "将符文与其他法力物品加入法力宝石宏"
+L["OPTIONS_INCLUDE_MANA_RUNES_DESCRIPTION_FORMAT"] =
+	"将你的%s、%s，以及任何其他与法力宝石共享冷却时间的法力物品，和你的法力宝石一同排序，这样当其中某件物品是你的最佳选择，或你的法力宝石用完时，法力宝石宏就会使用该物品。"
+
+-- Buff Re-Application
+L["OPTIONS_REAPPLY_HEADER"] = "增益重新应用"
+L["OPTIONS_REAPPLY_SECTION_DESCRIPTION"] =
+	"宏在战斗中无法更改，因此战斗中途到期的增益会一直缺失，直到战斗结束。"
+L["OPTIONS_REAPPLY"] = "提前补充即将到期的增益"
+L["OPTIONS_REAPPLY_DESCRIPTION"] =
+	"将剩余时间低于你所设阈值的增益食物、卷轴增益和宠物食物增益视为已到期，让你的宏在开怪前提供新的增益。"
+--[[
+    Threshold dropdown, beside the Re-Apply toggle. It has no caption, so the
+    values carry the "when" themselves.
+]]
+L["OPTIONS_REAPPLY_THRESHOLD_DESCRIPTION"] =
+	"设置增益离到期还剩多久时，你的宏就会提供新的增益。"
+L["REAPPLY_THRESHOLD_ONE"] = "当剩余不足 1 分钟时"
+L["REAPPLY_THRESHOLD_MANY"] = "当剩余不足 %d 分钟时"
+
+-- Pet Food Buffs
+L["OPTIONS_PET_HEADER"] = "宠物食物增益"
+L["OPTIONS_PET_SECTION_DESCRIPTION_FORMAT"] = '少数食物会为你的宠物提供专属的"%s"增益。'
+L["OPTIONS_USE_PET_BUFFS"] = "使用宠物食物增益"
+L["OPTIONS_USE_PET_BUFFS_DESCRIPTION_FORMAT"] =
+	'当你的宠物缺少"%s"增益时，将宠物食物加入你的食物宏，竞技场中除外。'
+-- The pet food toggles under this heading carry the client's own item names, so they have no keys here.
+L["OPTIONS_PET_BUFF_TYPES"] = "在检查中包含宠物食物类型"
+
+-- Explosives
+L["OPTIONS_EXPLOSIVES_HEADER"] = "爆炸物"
+L["OPTIONS_EXPLOSIVES_DESCRIPTION"] =
+	"@player 选项会跳过目标指示圈，直接将爆炸物在你脚下引爆，非常适合目标处于近战距离时使用。另一个键则照常投掷。"
+L["OPTIONS_EXPLOSIVES_CLICK_LAYOUT"] = "点击方式"
+L["OPTIONS_EXPLOSIVES_CLICK_LAYOUT_DESCRIPTION"] =
+	"选择用哪个键投掷爆炸物，用哪个键将它在你脚下引爆。"
+-- Each layout names its Left-Click alone: Right-Click always does the other, and the short value fits the standard dropdown.
+L["EXPLOSIVES_MODE_ATPLAYER"] = "左键点击 @player"
+L["EXPLOSIVES_MODE_TOSS"] = "左键点击投掷"
+
+--[[
+    Class & Race panel (Options-Class-Race.lua), nested under Macros. TAB_CLASS_RACE
+    is its label in the settings tree and the title on the page;
+    OPTIONS_CLASS_RACE_DESCRIPTION is the intro beneath it.
+]]
+L["TAB_CLASS_RACE"] = "职业与种族"
+L["OPTIONS_CLASS_RACE_DESCRIPTION"] =
+	"这些选项会针对某个职业或种族调整你的宏。所有分区在每个角色上都会显示。"
+
+-- The class and race sections' headers; %s is the client's name for the class or race, or OPTIONS_FORSAKEN_HEADER.
+L["OPTIONS_CLASS_HEADER_FORMAT"] = "职业选项：%s"
+L["OPTIONS_RACE_HEADER_FORMAT"] = "种族选项：%s"
+
+-- Druids
+L["OPTIONS_DRUID_DESCRIPTION"] =
+	"需要 DruidMacroHelper 插件。开启后，你的治疗药水、法力药水和治疗石宏会让你脱离形态、使用物品，再让你回到熊形态或猎豹形态，取决于你在复选框旁选择的那个。"
+L["OPTIONS_DRUID_MACRO_HELPER"] = "启用 DruidMacroHelper 整合"
+L["OPTIONS_DRUID_MACRO_HELPER_DESCRIPTION"] =
+	"使用 DruidMacroHelper (/dmh) 为治疗药水、法力药水和治疗石构建变形宏。"
+--[[
+    Return-form dropdown, beside the DruidMacroHelper toggle. The macro
+    powershifts out of form, uses the consumable, then returns to this one, so
+    the values name that return, which is why the dropdown needs no caption.
+]]
+L["OPTIONS_DRUID_RETURN_FORM_DESCRIPTION"] = "选择你的变形宏在使用物品后让你返回哪种形态。"
+L["DRUID_FORM_BEAR"] = "返回熊形态"
+L["DRUID_FORM_CAT"] = "返回猎豹形态"
+
+-- Rogues
+L["OPTIONS_POISONS_DESCRIPTION"] =
+	"让毒药宏始终装载每种毒药类型可用的最高等级。左键涂抹副手，右键涂抹主手，已有毒药会自动替换。"
+L["OPTIONS_POISON_MAIN_HAND"] = "主手毒药类型"
+L["OPTIONS_POISON_OFF_HAND"] = "副手毒药类型"
+L["OPTIONS_POISON_MAIN_HAND_DESCRIPTION"] = "选择你的毒药宏在右键点击时涂抹到主手的毒药。"
+L["OPTIONS_POISON_OFF_HAND_DESCRIPTION"] = "选择你的毒药宏在左键点击时涂抹到副手的毒药。"
+--[[
+    Shared by the Rogue (Stealth) and Night Elf (Shadowmeld) eating toggles.
+    In both hover texts %s is the client's name for the spell the macro
+    appends.
+]]
+L["OPTIONS_STEALTH_EATING"] = "启用进食时潜行"
+L["OPTIONS_STEALTH_EATING_SPELL_DESCRIPTION"] = "将%s添加到你的食物宏中，以便你在进食时潜行。"
+
+-- Night Elves
+L["OPTIONS_STEALTH_DRINKING"] = "启用喝水时潜行"
+L["OPTIONS_STEALTH_DRINKING_SPELL_DESCRIPTION"] = "将%s添加到你的水宏中，以便你在喝水时潜行。"
+L["OPTIONS_STEALTH_PICK_ONE"] =
+	"专业提示：只选一个。你可以同时进食和喝水，但潜行后再进食或喝水会解除潜行。"
+
+--[[
+    Forsaken. Headed with our own word, the race's lore name, since the client
+    names it Undead; in the five texts after the header, %s is the client's
+    name for Cannibalize. Drinking shows only where Cannibalize restores mana.
+]]
+L["OPTIONS_FORSAKEN_HEADER"] = "被遗忘者"
+L["OPTIONS_CANNIBALIZE_DESCRIPTION"] =
+	"选中一个你杀死的人型生物或亡灵，你的宏会在%s不在冷却中时施放它，节省你的食物和饮料。如果无法施放（尸体超出距离，或该技能正在冷却），则照常进食或喝水。"
+L["OPTIONS_CANNIBALIZE_EATING"] = "使用%s代替进食"
+L["OPTIONS_CANNIBALIZE_EATING_DESCRIPTION"] =
+	"当你的目标是%s可用的尸体且该技能不在冷却中时，你的食物宏会施放它而不是进食。否则照常进食。卷轴和增益食物仍然优先。"
+L["OPTIONS_CANNIBALIZE_DRINKING"] = "使用%s代替喝水"
+L["OPTIONS_CANNIBALIZE_DRINKING_DESCRIPTION"] =
+	"当你的目标是%s可用的尸体且该技能不在冷却中时，你的水宏会施放它而不是喝水。否则照常喝水。增益饮料仍然优先。"
+
+--[[
+    Ignore List panel (Options-Ignore-List.lua). One tree scope per list: the
+    Global list, then the character playing and every other character with
+    something ignored, each under its profile's name, which is never
+    translated and has no key here. The rows are items, so the copy here is
+    the panel description, the scope and promote labels, the add box, Remove,
+    the empty-list line, and LOADING_ITEM, the placeholder shown while the
+    client is still resolving an item's name (the mini-map tooltip, the Macros
+    panel, and the staples pop-up use it too). The mini-map tooltip's section
+    keeps its own MINIMAP_IGNORE_LIST and MENU_CLEAR_IGNORE keys.
+]]
+L["TAB_IGNORE_LIST"] = "忽略列表"
+L["OPTIONS_IGNORE_LIST_DESCRIPTION"] =
+	"被忽略的物品永远不会被任何宏选用。食物、水、药水，任何东西都一样。全局列表对所有角色生效；角色列表只对该角色生效。右键点击小地图按钮可忽略你当前的最佳食物。"
+L["OPTIONS_IGNORE_GLOBAL"] = "全局"
+L["OPTIONS_IGNORE_PROMOTE_DESCRIPTION"] = "将此物品移至全局列表，使其在所有角色上都被忽略。"
+L["OPTIONS_IGNORE_ADD_FROM_BAGS"] = "从背包添加"
+L["OPTIONS_IGNORE_ADD_FROM_BAGS_DESCRIPTION"] =
+	"从你携带的物品中任选一件。打开选项界面时背包会关闭，所以这里代替了把物品拖到此处的操作。"
+L["OPTIONS_IGNORE_ADD_ID"] = "按物品 ID 添加"
+L["OPTIONS_IGNORE_ADD_ID_DESCRIPTION"] =
+	"输入物品 ID，或在此输入框处于焦点时按住 Shift + 点击聊天中的物品链接。"
+L["OPTIONS_IGNORE_ADD_ID_INVALID"] = "输入物品 ID，或按住 Shift + 点击聊天中的物品链接。"
+L["OPTIONS_IGNORE_REMOVE"] = "移除"
+L["OPTIONS_IGNORE_EMPTY"] = "此列表为空。"
+L["OPTIONS_IGNORE_CLEAR"] = "清空列表"
+L["OPTIONS_IGNORE_CLEAR_DESCRIPTION"] =
+	"移除此列表中的所有物品。列表为空的角色会从左侧列表中消失，除非是你当前正在玩的角色。"
+L["OPTIONS_IGNORE_CLEAR_CONFIRM"] = "移除此列表中的所有物品？此操作无法撤销。"
+-- %d is the item ID, shown while the client is still resolving the item.
+L["LOADING_ITEM"] = "正在载入 ID：%d"
+
+--[[
+    Restocker options panel. The tree label stays "Restocker" in every locale:
+    it is the feature's proper name, so there is nothing in it to translate.
+]]
+L["TAB_RESTOCKER"] = "Restocker"
+L["OPTIONS_RESTOCKER_DESCRIPTION"] =
+	"根据你的补货清单保持背包物资充足，自动向商人购买，并在背包与银行之间搬运物品。输入 %s 打开清单。"
+L["OPTIONS_RESTOCKER_OPEN_BANK"] = "在银行打开"
+L["OPTIONS_RESTOCKER_OPEN_BANK_DESCRIPTION"] = "访问银行时打开你的补货清单。"
+L["OPTIONS_RESTOCKER_OPEN_MERCHANT"] = "在商人处打开"
+L["OPTIONS_RESTOCKER_OPEN_MERCHANT_DESCRIPTION"] = "访问商人时打开你的补货清单。"
+-- The header over the three reminder rows below, which follow the Staples Pop-Up and Gold Reserve rows on the page.
+L["OPTIONS_RESTOCKER_REMINDERS_HEADER"] = "提醒"
+L["OPTIONS_RESTOCKER_REMIND"] = "启用城镇补货提醒"
+L["OPTIONS_RESTOCKER_REMIND_DESCRIPTION"] =
+	"当补货清单尚有缺口，且你抵达旅店或城市，或登录时已身处其中，在聊天中输出提醒。"
+L["OPTIONS_RESTOCKER_MERCHANT_REMIND"] = "启用商人补货提醒"
+L["OPTIONS_RESTOCKER_MERCHANT_REMIND_DESCRIPTION"] = "关闭商人窗口时，报告所有未完成的补货订单。"
+L["OPTIONS_RESTOCKER_BANK_REMIND"] = "启用银行补货提醒"
+L["OPTIONS_RESTOCKER_BANK_REMIND_DESCRIPTION"] = "关闭银行时，报告所有未完成的补货订单。"
+
+--[[
+    The Gold Reserve: the floor the merchant restock never spends below. The
+    dropdown beside it writes each amount as a number and the gold coin, so
+    its values have no strings; AMOUNT_DESCRIPTION is its hover text.
+]]
+L["OPTIONS_RESTOCKER_GOLD_RESERVE"] = "启用金币储备"
+L["OPTIONS_RESTOCKER_GOLD_RESERVE_DESCRIPTION"] = "补货永远不会花掉你在此预留的金币。"
+L["OPTIONS_RESTOCKER_GOLD_RESERVE_AMOUNT_DESCRIPTION"] = "设置补货始终为你保留的金币数量。"
+
+--[[
+    How much each reminder says. Simple is the headline alone; Verbose adds a
+    line per item, showing how many you have against how many you want.
+
+    One word each, deliberately: they sit in the dropdown beside each reminder,
+    which has no caption, and read there as how much it says.
+]]
+L["OPTIONS_RESTOCKER_REMIND_MODE_DESCRIPTION"] =
+	"选择提醒只有一行，还是为你缺少的每件物品各加一行。"
+L["OPTIONS_RESTOCKER_MODE_SIMPLE"] = "简洁"
+L["OPTIONS_RESTOCKER_MODE_VERBOSE"] = "详细"
+
+L["OPTIONS_RESTOCKER_REMIND_SOUND"] = "播放声音"
+L["OPTIONS_RESTOCKER_REMIND_SOUND_DESCRIPTION"] = "在提醒的同时播放提示音，适合聊天繁忙的时候。"
+L["OPTIONS_RESTOCKER_SOUND_PREVIEW"] = "点击试听提示音。"
+
+L["OPTIONS_RESTOCKER_WINDOW_HEADER"] = "补货清单窗口"
+L["OPTIONS_RESTOCKER_WINDOW_DESCRIPTION"] = "选择你的补货清单何时自动打开。"
+
+--[[
+    The Inventory Report's switch, under a header that is the report's own
+    title (INVENTORY_REPORT_TITLE, in the Inventory Report section above).
+]]
+L["OPTIONS_INVENTORY_REPORT_SECTION_DESCRIPTION"] =
+	"在物品提示中显示你在本服务器所有角色上共有多少件该物品。"
+L["OPTIONS_INVENTORY_REPORT"] = "在物品提示中启用库存报告"
+L["OPTIONS_INVENTORY_REPORT_DESCRIPTION"] =
+	"在物品提示中加入该物品在你的背包、银行和其他角色身上各有多少件。如果其他插件已经显示这些数量，请将其关闭。"
+
+--[[
+    Praise for the adopted Restocker code. The three names are proper nouns and
+    stay as written in every locale; the sentences around them translate.
+]]
+L["OPTIONS_RESTOCKER_PRAISE_HEADER"] = "致谢"
+L["OPTIONS_RESTOCKER_PRAISE"] =
+	"我一直很喜欢 Restocker，很感激能有机会让它在 Connoisseur & Restocker 中延续下去。非常感谢编写最初 Auto Restocker 的 ChiliFajita，以及在经典怀旧服与熊猫人之谜期间一直维护它的 kvakvs 和 guardycmw。"
+
+-- Readiness Report
+L["TAB_READINESS_REPORT"] = "就绪报告"
+L["OPTIONS_READINESS_ENABLE"] = "在就位确认时启用就绪报告"
+L["OPTIONS_READINESS_ENABLE_DESCRIPTION"] = "为此账号的所有角色开启就绪报告。"
+--[[
+    Says what the report does AND that it stays quiet, because the quiet is the
+    feature: a player who turns this on and sees nothing for three pulls has to
+    know that is the report working rather than the report broken.
+]]
+L["OPTIONS_READINESS_DESCRIPTION"] =
+	"就位确认开始时，输出一份仅你可见的清单，列出仍需处理的事项；如果你已准备就绪，则完全不会输出任何内容。"
+
+--[[
+    The reset button under the master toggle. It needs a control of its own
+    because these settings are account-wide: the stock Reset Profile reaches
+    only the active profile, so nothing else on any panel can return them to
+    their defaults.
+
+    The confirm names the one consequence a player would not otherwise predict.
+    Off is what the report ships as, so resetting switches it back off, and a
+    page that emptied itself with no warning would read as a bug.
+]]
+L["OPTIONS_READINESS_RESET"] = "重置就绪报告设置"
+L["OPTIONS_READINESS_RESET_DESCRIPTION"] = "将本页的所有复选框和两个阈值恢复为默认值。"
+L["OPTIONS_READINESS_RESET_CONFIRM"] =
+	"将就绪报告的所有设置重置为默认值？这也会重新关闭报告本身。"
+
+--[[
+    The three sections, each a real header over the switches it covers. They
+    name what the line is called in chat, so the panel and the report read as
+    the same feature.
+]]
+L["OPTIONS_READINESS_BUFFS_HEADER"] = "缺少增益"
+L["OPTIONS_READINESS_ITEMS_HEADER"] = "缺少物品"
+L["OPTIONS_READINESS_CHARACTER_HEADER"] = "角色"
+
+-- Missing Buffs
+L["OPTIONS_READINESS_FLASK_DESCRIPTION"] =
+	"缺少合剂时提醒。一瓶合剂，或战斗药剂与守护药剂各一瓶，均视为已满足。"
+L["OPTIONS_READINESS_WELL_FED_DESCRIPTION_FORMAT"] =
+	'缺少"%s"增益时提醒。需要在宏页面中开启增益食物。'
+L["OPTIONS_READINESS_PET_WELL_FED_DESCRIPTION_FORMAT"] =
+	'你的宠物缺少"%s"增益时提醒。需要在宏页面中开启宠物食物增益，并且已召唤出宠物。'
+L["OPTIONS_READINESS_SCROLLS_DESCRIPTION"] =
+	"缺少卷轴增益时提醒。需要在宏页面中开启卷轴增益，并且只检查该处所选的卷轴类型。"
+--[[
+    The one entry that asks about the GROUP rather than the player's own bags,
+    which the helper text has to say outright: a raid carrying seven unused
+    stones is not covered, and one deployed stone covers it.
+]]
+L["OPTIONS_READINESS_SOULSTONE_DESCRIPTION"] =
+	"当队伍中没有人身上有生效的灵魂石时提醒；背包里的灵魂石不算。仅提醒能制造灵魂石的术士。"
+L["OPTIONS_READINESS_MAIN_HAND"] = "主手武器增益"
+--[[
+    Says the Shaman exemption outright, because a main-hand line that goes quiet
+    the moment a Shaman joins reads as a broken switch otherwise.
+]]
+L["OPTIONS_READINESS_MAIN_HAND_DESCRIPTION"] =
+	"主手武器没有临时附魔时提醒。任何附魔都算，且队伍中有萨满祭司时不会报告此项。"
+L["OPTIONS_READINESS_OFF_HAND"] = "副手武器增益"
+L["OPTIONS_READINESS_OFF_HAND_DESCRIPTION"] =
+	"副手武器没有临时附魔时提醒。任何附魔都算：磨刀石、油剂、毒药或萨满祭司的武器增益。"
+--[[
+    Names the OTHER threshold so the two cannot be mistaken for each other: the
+    Macros panel has one that decides when a macro treats a buff as spent, and
+    this one only decides when the report mentions it.
+]]
+L["OPTIONS_READINESS_EXPIRING"] = "增益到期时间少于"
+L["OPTIONS_READINESS_EXPIRING_DESCRIPTION"] =
+	"列出你身上所有即将到期的增益，而不仅是 Connoisseur & Restocker 施加的那些；此设置与宏页面中的增益重新应用相互独立。"
+-- %s is a whole or half number of minutes.
+L["OPTIONS_READINESS_EXPIRING_MINUTES"] = "%s 分钟"
+-- The one-minute entry alone; one plural template cannot render it grammatically.
+L["OPTIONS_READINESS_EXPIRING_MINUTES_ONE"] = "1 分钟"
+L["OPTIONS_READINESS_EXPIRING_THRESHOLD_DESCRIPTION"] =
+	"设置增益离到期还剩多久时，报告才会列出它。"
+
+-- Missing Items
+L["OPTIONS_READINESS_HEALTHSTONE_DESCRIPTION"] =
+	"当你身上没有治疗石时提醒。仅当队伍中有可以索要的术士，或你自己就是术士时才提醒。"
+L["OPTIONS_READINESS_MANA_GEM_DESCRIPTION"] =
+	"当你身上没有法力宝石时提醒。仅提醒能制造法力宝石的法师。"
+L["OPTIONS_READINESS_HEALING_POTION_DESCRIPTION"] =
+	"当你身上没有治疗药水时提醒，因为战斗中没人能递给你药水。"
+L["OPTIONS_READINESS_MANA_POTION_DESCRIPTION"] =
+	"当你身上没有法力药水时提醒。仅当你的角色是使用法力的职业时才提醒。"
+-- %s is the client's name for the First Aid skill line.
+L["OPTIONS_READINESS_BANDAGES_SKILL_DESCRIPTION"] = "当你身上没有%s技能允许使用的绷带时提醒。"
+L["OPTIONS_READINESS_DURABILITY"] = "受损装备低于"
+L["OPTIONS_READINESS_DURABILITY_DESCRIPTION"] =
+	"链接耐久度低于该值的每件已装备物品；按单件计算，因此即使只有一把武器损坏也会显示。"
+-- %d is a durability percentage.
+L["OPTIONS_READINESS_DURABILITY_PERCENT"] = "%d%%"
+L["OPTIONS_READINESS_DURABILITY_THRESHOLD_DESCRIPTION"] =
+	"设置物品耐久度降到多低时，报告才会链接它。"
+
+-- Character
+L["OPTIONS_READINESS_SPECIALIZATION"] = "当前天赋"
+L["OPTIONS_READINESS_SPECIALIZATION_DESCRIPTION"] = "输出你的天赋分配，以及尚未使用的点数。"
+L["OPTIONS_READINESS_PVP"] = "PvP 标记开启"
+L["OPTIONS_READINESS_PVP_DESCRIPTION"] = "当你的 PvP 标记开启时发出警告。"
+L["OPTIONS_READINESS_QUESTIONABLE_GEAR"] = "装备了非战斗装备"
+L["OPTIONS_READINESS_NONCOMBAT_GEAR_DESCRIPTION"] =
+	"链接不该出现在战斗中的已装备物品，比如骑乘装备或钓鱼装备。"
+
+--------------------------------------------------------------------------------
+-- Restocker Window & Chat
+--------------------------------------------------------------------------------
+
+-- Chat messages printed by the Restocker feature (Features/Restocker/).
+L["RESTOCKER_PROFILE_EXISTS"] = '已存在名为"%s"的清单。'
+--[[
+    %d is the item ID the player typed. Written into the add box itself while
+    the window is open, so it shares that box's width with
+    RESTOCKER_ADD_PLACEHOLDER and has to stay as short; printed to chat when the
+    window is closed.
+]]
+L["RESTOCKER_UNKNOWN_ITEM"] = "没有 ID 为 %d 的物品。"
+L["RESTOCKER_BANK_NOT_OPEN"] = "银行未打开。"
+L["RESTOCKER_DISABLED"] = "Restocker 已关闭。请在 设置选项 > 插件 > Connoisseur & Restocker 中开启。"
+--[[
+    %s is the /restock slash command, colored at the call site. Only the bank flow
+    prints this, so the Shift hint names the bank; Shift is read as the window
+    opens (ns.OnRestockerBankFrameOpened), not stored as a preference.
+]]
+L["RESTOCKER_COMPLETE"] =
+	"补货完成。打开银行时按住 Shift 可跳过补货。输入 %s 编辑你的补货清单。"
+L["RESTOCKER_STOPPED_BOTH_FULL"] = "补货已停止。你的背包和银行都已满。"
+L["RESTOCKER_STOPPED_BANK_FULL"] = "补货已停止。你的银行已满；请腾出一格后重新打开。"
+L["RESTOCKER_STOPPED_BAG_FULL"] = "补货已停止。你的背包已满；请腾出一格后重新打开银行。"
+L["RESTOCKER_STOPPED_NO_PROGRESS"] = "补货已停止。无法继续进行。"
+L["RESTOCKER_STOPPED_COULD_NOT_MOVE"] = "补货已停止。无法移动：%s。"
+-- { count, item name }
+L["RESTOCKER_STUCK_ITEM_FORMAT"] = "%dx %s"
+L["RESTOCKER_STUCK_ITEM_EXTRA_FORMAT"] = "%dx %s (多余)"
+L["RESTOCKER_STOPPED_ERROR"] = "补货因错误而停止：%s"
+--[[
+    Printed during a merchant restock when the crafting-reagent buyer stands
+    down: this merchant stocks some of the reagents the Restock List needs but
+    not all of them, and reagents buy all-or-nothing (VendorStocksAllReagents in
+    Features/Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
+]]
+L["RESTOCKER_REAGENTS_SKIPPED"] =
+	"这个商人没有出售你的毒药所需的全部材料。跳过购买这些材料。"
+-- Printed on reaching an inn or a city while the Restock List is short of something.
+L["RESTOCKER_TOWN_REMINDER"] = "在城里的时候别忘了补货！"
+
+--[[
+    Headline for the merchant and bank reminders, which report on the way out
+    rather than nudging on arrival, so the count is the message. The in-town
+    reminder keeps its own line above.
+
+    The count is of restocking orders -- Restock List rows with Buy switched on
+    that are still short in your bags -- so it never says "items", and never
+    puts a bare count after "short": "short 9 apples" reads as nine apples
+    missing, while the number here is nine ROWS, each short by anything from one
+    juice to a full stack. "Order" can only mean a line on a list, and it is the
+    word the code uses (BuildPurchaseOrder, purchaseOrders).
+
+    "Outstanding" is load-bearing, not decoration. "Restocking order" alone can
+    be read as the sequence restocking happens in, and the list UI is sortable,
+    so the word forcing the purchase-order sense has to stay beside the noun.
+    Same job as "filled" on RESTOCKER_RESTOCKED_ONE -- never print the bare
+    noun without one of them.
+]]
+L["RESTOCKER_STILL_SHORT_ONE"] = "还有 1 项补货订单未完成。"
+L["RESTOCKER_STILL_SHORT_MANY"] = "还有 %d 项补货订单未完成。"
+
+--[[
+    Level-up upgrades. The headline makes the Restock List the subject, so
+    there is no item count to agree with and one string covers any number of
+    swaps; the line under it is { old link, old amount, new link, new amount },
+    outgoing tier on the left and incoming on the right.
+
+    Both amounts are carried because they are not always equal: a swap onto a
+    tier the list already holds merges the two rows, so the new amount is the
+    sum rather than the old amount moved across.
+]]
+L["RESTOCKER_UPGRADED"] = "你的补货清单已升级。"
+L["RESTOCKER_UPGRADED_ITEM"] = "%sx%d 升级为 %sx%d。"
+
+--[[
+    Verbose follow-up line, one per short item: { have, wanted, item link }.
+    Shared by all three reminders. Wordless on purpose -- the headline above it
+    supplies the context, so there is nothing here to translate. It stays a
+    locale key anyway so a locale that needs a different order can reorder it
+    (same as RESTOCKER_STUCK_ITEM_FORMAT).
+]]
+L["RESTOCKER_REMINDER_ITEM"] = "%d/%d %s"
+
+--[[
+    Printed after buying at a vendor. Counts restocking orders FILLED -- Restock
+    List rows and poison ingredients whose whole requested amount was ordered --
+    not BuyMerchantItem calls. Forty juice bought in two stacks of twenty is one
+    order filled; six of a requested twenty is not one at all, and belongs to
+    the partial line below.
+
+    The claim has to be earned: PurchaseMerchantItem returns nothing, and the
+    caller decides filled or partly filled once per order, after the last slot,
+    from the units that order bought. What the vendor did not stock is
+    deliberately not mentioned here: the mini-map's Restocker Report owns the
+    outstanding state, this line owns the event, and neither repeats the other.
+]]
+L["RESTOCKER_RESTOCKED_ONE"] = "已完成 1 项补货订单。"
+L["RESTOCKER_RESTOCKED_MANY"] = "已完成 %d 项补货订单。"
+
+--[[
+    The vendor had some of what an order asked for but not all of it. Its own
+    line rather than a clause on the one above, so the two counts stay
+    independent and a mixed run needs no combined string -- both print when
+    both are non-zero, and a run with no partials never mentions them.
+
+    Without this line, a partial buy would spend gold and say nothing, since
+    "filled" has to stay false for it.
+]]
+L["RESTOCKER_RESTOCKED_PARTIAL_ONE"] = "有 1 项补货订单仅部分完成。"
+L["RESTOCKER_RESTOCKED_PARTIAL_MANY"] = "有 %d 项补货订单仅部分完成。"
+-- Printed after the counts above when the bags ran out of room before every order was bought.
+L["RESTOCKER_BAGS_FULL_PARTIAL"] = "背包在全部购买完成前就已装满。"
+-- Printed after the counts above when gold ran out before every order was bought, while the Gold Reserve is off.
+L["RESTOCKER_OUT_OF_GOLD"] = "金币不足，无法完成补货。"
+--[[
+    RESTOCKER_OUT_OF_GOLD's line while the Gold Reserve is on, whole so each
+    locale joins its sentences its own way. %s is the reserve with the gold
+    coin. Nothing waits at this merchant: the next merchant visit buys whatever
+    fits above the reserve, which is what the second sentence says.
+]]
+L["RESTOCKER_OUT_OF_GOLD_RESERVE"] =
+	"已在你的金币储备（%s）处停止购买。剩下的会在你下次来访、有多余金币时购买。"
+
+-- /restock help lines. The command literals stay in code; these are the descriptions, and the show line reuses RESTOCKER_COMMAND_DESCRIPTION.
+
+-- Stands for the list name the player types after a /restock profile subcommand.
+L["RESTOCKER_HELP_NAME_PLACEHOLDER"] = "[名称]"
+L["RESTOCKER_HELP_PROFILE_ADD"] = "添加一个以该名称命名的清单。"
+L["RESTOCKER_HELP_PROFILE_DELETE"] = "删除该名称的清单。"
+L["RESTOCKER_HELP_PROFILE_RENAME"] = "将当前清单重命名为该名称。"
+L["RESTOCKER_HELP_PROFILE_COPY"] = "用该名称的清单副本替换当前清单。"
+L["RESTOCKER_HELP_PROFILE_USE"] = "将此角色切换到该名称的清单。"
+
+--[[
+    Starter List pop-up, the staples window: offers staples at login when the
+    Restock List is empty, and on demand from the Restock List window's Pick
+    Staples button. The staples logic is in
+    Features/Restocker/Restocker-Starter-List.lua, the window in
+    Options/Options-Starter-List-Popup.lua. The six
+    food staples reuse the DIET_ keys above, so each food row carries the
+    client's own pet diet name.
+
+    The title is its own, and the call site puts the add-on's full name in
+    front of it (ADDON_TITLE // STARTER_POPUP_TITLE): at login this window
+    opens with nothing else of the add-on's on screen, so its title bar is
+    all that says whose it is.
+
+    The intro is one paragraph: an opening sentence that answers to how the
+    window was reached (LOGIN when it opened by itself at login, which checks
+    a few staples before it opens; otherwise EMPTY over an empty list and
+    STOCKED over one that has items), then HOW, which says what a check
+    does. The two are run together with a space at the call site, so each
+    has to stand as whole sentences.
+    The way back in (COMMAND_HINT) is a second paragraph, shown only when the
+    window opened by itself at login; from the Pick Staples button the list it
+    names is open right behind it.
+]]
+L["STARTER_POPUP_TITLE"] = "基础物资"
+L["STARTER_POPUP_INTRO_LOGIN"] = "我们已为你的职业勾选了一些基础物资，帮你快速上手。"
+L["STARTER_POPUP_INTRO_EMPTY"] = "你的补货清单是空的，我们来添加一些物品好让你上手。"
+-- Shown instead when the window is opened over a list that already has items on it.
+L["STARTER_POPUP_INTRO_STOCKED"] = "挑选你想保持备足的基础物资。"
+L["STARTER_POPUP_INTRO_HOW"] =
+	"你勾选的一切都会在你打开商人或银行时自动补足。大多数基础物资会随着等级提升自动升级，所以你手上永远是当前最好的。"
+-- %s is the /restock slash command, colored at the call site.
+L["STARTER_POPUP_COMMAND_HINT"] = "你随时可以输入 %s 来调整这份清单，或稍后添加更多物品。"
+--[[
+    The first section's heading names the Water row that closes its grid as
+    well; the food-only heading is the fallback for a section with no Water row.
+]]
+L["STARTER_POPUP_FOOD_AND_WATER_HEADER"] = "食物与水"
+L["STARTER_POPUP_FOOD_HEADER"] = "食物"
+L["STARTER_POPUP_AMMO_HEADER"] = "弹药"
+-- The two ammo staples; the Water label reuses LABEL_WATER above.
+L["STARTER_POPUP_BULLETS"] = "子弹"
+L["STARTER_POPUP_ARROWS"] = "箭矢"
+--[[
+    The Reagents & Tools section: the Hearthstone, plus each class's tools and
+    spell reagents. Rogues additionally get a Poisons section of their own,
+    whose note under the header opens with the client's name for the class
+    (rogue-colored at the call site) to say the ingredients take care of
+    themselves. Both sections name their rows with the client's own item
+    names, so neither has row labels here.
+]]
+L["STARTER_POPUP_REAGENTS_HEADER"] = "材料与工具"
+L["STARTER_POPUP_POISONS_HEADER"] = "毒药"
+-- %s is the client's name for the Rogue class, rogue-colored; the spaced colon is deliberate.
+L["STARTER_POPUP_POISONS_NOTE"] =
+	"%s ：将成品毒药加入你的清单，Connoisseur & Restocker 会在任何出售全部所需材料的商人处自动购买这些材料。"
+--[[
+    Checkbox tooltips: { item name, amount }. The first is for ladder items;
+    the second for single-tier reagents, which never upgrade.
+]]
+L["STARTER_POPUP_ITEM_DESCRIPTION"] =
+	"将 %s 加入你的补货清单，在背包中保留 %d 个，并随着你的等级自动升级。"
+L["STARTER_POPUP_ITEM_DESCRIPTION_STATIC"] = "将 %s 加入补货清单，并在背包中保留 %d 个。"
+--[[
+    The stacks dropdown beside each staple that takes an amount. The label is
+    unit-agnostic, since a stack is whatever its item stacks to; the tooltip
+    below carries that item's own stack size as %d.
+]]
+L["STARTER_POPUP_STACK_ONE"] = "1 组"
+L["STARTER_POPUP_STACK_MANY"] = "%d 组"
+L["STARTER_POPUP_STACKS_DESCRIPTION"] = "要保持备足多少组，每组 %d 个。"
+--[[
+    The same dropdown where the staple does not stack (Soul Shards): the
+    choices are bare numbers, so only the tooltip needs words.
+]]
+L["STARTER_POPUP_COUNT_DESCRIPTION"] =
+	"要保持备足多少个；这些物品无法堆叠，因此每个都会占用一个背包格。"
+
+--[[
+    Restock List window UI. The title names what the window holds, after the
+    add-on's full name (ADDON_TITLE // RESTOCKER_WINDOW_TITLE); the feature
+    that acts on it stays "Restocker".
+]]
+L["RESTOCKER_WINDOW_TITLE"] = "补货清单"
+L["RESTOCKER_FILTER_PLACEHOLDER"] = "筛选物品……"
+L["RESTOCKER_FILTER_CLEAR_TOOLTIP"] = "清除"
+L["RESTOCKER_ADD_BUTTON"] = "添加"
+--[[
+    The button that opens the staples pop-up over the window, on the control
+    row and on an empty list, and its tooltip. "Check" is the pop-up's own
+    word (STARTER_POPUP_INTRO_HOW).
+]]
+L["RESTOCKER_PICK_STAPLES_BUTTON"] = "挑选基础物资"
+L["RESTOCKER_PICK_STAPLES_TOOLTIP"] =
+	"从适合你职业和等级的基础物资中选择：食物、水、弹药、毒药和施法材料。勾选一项即可将其加入此清单，取消勾选则会将其移除。"
+L["RESTOCKER_ADD_TOOLTIP_TITLE"] = "添加物品"
+L["RESTOCKER_ADD_TOOLTIP_BODY"] =
+	"将背包中的物品拖到这里或此窗口的任意位置，或输入物品 ID 后按回车。"
+--[[
+    In-box placeholder for the add box; the tooltip above carries the detail.
+    Kept to a phrase rather than a sentence: the box shares its row with two
+    other fields and is sized to this English hint, so a longer one is cut off.
+]]
+L["RESTOCKER_ADD_PLACEHOLDER"] = "拖入物品或输入物品 ID"
+--[[
+    Written into the add box, in place of the placeholder above, when what was
+    typed is neither an item ID nor an item the client can place by name. Same
+    width budget as the placeholder. RESTOCKER_UNKNOWN_ITEM, for an ID with no
+    item behind it, shows the same way.
+]]
+L["RESTOCKER_ADD_NOT_FOUND"] = "请改为输入物品 ID。"
+-- Written into the add box the same way, when the item dropped or typed is already on the list.
+L["RESTOCKER_ADD_DUPLICATE"] = "已在此清单中。"
+--[[
+    The bag menu on the control row, between the filter and the add box. The
+    caption is all the closed menu shows and is its tooltip's title; it has
+    room for about 24 characters, and a longer one is cut off. NONE is the one
+    line the open menu holds when the bags have nothing the list lacks. Title
+    case and no terminal punctuation for both, like every menu entry.
+]]
+L["RESTOCKER_ADD_FROM_BAGS"] = "从背包添加物品"
+L["RESTOCKER_ADD_FROM_BAGS_TOOLTIP"] =
+	"你背包中尚未加入此清单的所有物品。点击其中一件即可添加。"
+L["RESTOCKER_ADD_FROM_BAGS_NONE"] = "背包中没有可添加的物品"
+
+--[[
+    The list bar across the top of the window: the selector, the characters on
+    the list, and Manage Lists.
+
+    USED_BY's %s is those characters, the client's own names joined with
+    LIST_SEPARATOR, which also joins them on the selector's menu and in the
+    delete confirmation. Each name is colored by its class at the call site.
+    Keep USED_BY short: the line shares its row with the selector and the
+    Manage Lists button, and truncates when it outgrows the space. MANAGE is
+    that button's caption and the title of its tooltip.
+]]
+L["RESTOCKER_PROFILE_LABEL"] = "清单"
+L["RESTOCKER_PROFILE_TOOLTIP"] = "点击为此角色切换到其他补货清单，或新建一个清单。"
+L["RESTOCKER_USED_BY"] = "使用者：%s"
+L["RESTOCKER_MANAGE"] = "管理清单"
+L["RESTOCKER_MANAGE_TOOLTIP"] = "新建一个清单，或复制、重命名、删除此清单。"
+--[[
+    The Manage Lists menu, top to bottom. Menu entries take title case and no
+    terminal punctuation, like every title in the window. New List is also the
+    last entry on the selector's own menu.
+]]
+L["RESTOCKER_NEW_PROFILE"] = "新清单"
+L["RESTOCKER_MANAGE_COPY"] = "将此清单复制为新清单"
+L["RESTOCKER_RENAME_PROFILE"] = "重命名此清单"
+L["RESTOCKER_MANAGE_DELETE"] = "删除此清单"
+-- %s becomes "<list name> Copy"; numbered if that name is taken.
+L["RESTOCKER_PROFILE_COPY_NAME"] = "%s 副本"
+-- The button that commits a rename, beside the field Rename This List opens, and that button's tooltip.
+L["RESTOCKER_RENAME_LABEL"] = "重命名"
+L["RESTOCKER_RENAME_TOOLTIP"] = "重命名此清单，对所有使用它的角色生效。"
+--[[
+    The delete confirmation, a paragraph per fact, joined with blank lines in
+    code: QUESTION, the list's name (colored at the call site), what happens
+    next, and FINAL.
+
+    "What happens next" is SHARED followed by SWITCH or LAST, run together as
+    one paragraph, so each has to stand as a full sentence. SHARED appears only
+    when other characters are on the list; its %s is their names, joined with
+    LIST_SEPARATOR, and ONE or MANY follows how many there are.
+
+    SWITCH says where this character lands: %s is the top list in the List
+    selector, colored at the call site. LAST stands in for it when the list
+    being deleted is the only one, which is the one delete that makes a list.
+]]
+L["RESTOCKER_DELETE_LIST_QUESTION"] = "确定要删除此清单吗？"
+L["RESTOCKER_DELETE_LIST_SHARED_ONE"] = "%s 也在使用此清单，下次登录时将进入一个同名的空清单。"
+L["RESTOCKER_DELETE_LIST_SHARED_MANY"] =
+	"%s 也在使用此清单，下次登录时将各自进入一个同名的空清单。"
+L["RESTOCKER_DELETE_LIST_SWITCH"] = "你将切换到 %s。"
+L["RESTOCKER_DELETE_LIST_LAST"] = "这是仅剩的一个清单，因此你将从一个新的空清单开始。"
+L["RESTOCKER_DELETE_LIST_FINAL"] = "此操作无法撤销。"
+--[[
+    The Upgrade toggle. One string serves both the column heading and every
+    row's checkbox, so it has to read for a single item and for the whole
+    column at once -- which is why it names categories rather than "this item".
+
+    The categories are exactly the ladder kinds in each flavor folder's
+    Consumable-Upgrade-Paths-{Game}.lua: food, water, arrow and bullet, poison,
+    healing and mana potion, and the class reagents. Naming anything else here
+    promises an upgrade that never arrives, since the toggle is disabled on any
+    item that is not on a ladder -- which on a real list is most of them.
+]]
+L["RESTOCKER_UPGRADE_TOOLTIP_TITLE"] = "随等级升级"
+L["RESTOCKER_UPGRADE_TOOLTIP_BODY"] =
+	"允许 Connoisseur & Restocker 在你升级时，将食物、水、弹药、毒药、药水和职业施法材料升级为更好的物品。"
+
+--[[
+    The band labels drawn over the Bank and Merchant column groups, and the
+    Upgrade column's caption. The bands name the place an item moves to or
+    from, so the column captions under them can stay one word each.
+]]
+L["RESTOCKER_ROW_BANK"] = "银行"
+L["RESTOCKER_ROW_MERCHANT"] = "商人"
+L["RESTOCKER_ROW_UPGRADE"] = "升级"
+
+--[[
+    Column headings over the list.
+
+    Keep these SHORT. Every heading but Item can widen its column, and every
+    pixel a heading takes comes out of the item name beside it. Six full-length
+    headings do not fit beside a readable name at the smallest window size.
+
+    "Take" and "Store" are short because they never appear alone: both sit
+    under a "Bank" band, which is what makes them exact. Translate them as a
+    pair with that band in mind, and keep them a single short word each.
+]]
+L["RESTOCKER_COLUMN_ITEM"] = "物品"
+L["RESTOCKER_COLUMN_WITHDRAW"] = "取出"
+L["RESTOCKER_COLUMN_DEPOSIT"] = "存入"
+L["RESTOCKER_COLUMN_REPUTATION"] = "声望"
+--[[
+    The row's target, beside the item's name: how many the list keeps in the
+    bags. "Keep" rather than "Amount" because the number is a standing target,
+    not a quantity to buy, and because 0 then reads as what it does -- keep
+    none, which with Store on sends the whole stock to the bank. The keys, the
+    code and the saved rows still call it the amount.
+]]
+L["RESTOCKER_COLUMN_AMOUNT"] = "保留"
+
+--[[
+    A toggle column's heading sets the column for every item shown. HINT closes
+    the heading's tooltip; ON and OFF are the two entries of the menu a click on
+    the heading opens, where %d is how many of the items shown the column can be
+    set on. Menu entries: title case, no terminal punctuation.
+]]
+L["RESTOCKER_COLUMN_BULK_HINT"] = "点击此标题，可为当前显示的所有物品设置此项。"
+L["RESTOCKER_BULK_ON"] = "为显示的 %d 件物品开启"
+L["RESTOCKER_BULK_OFF"] = "为显示的 %d 件物品关闭"
+
+L["RESTOCKER_GROUP_OTHER"] = "未分类"
+--[[
+    Temporary group holding items added during this viewing of the window. It
+    sorts above every real item type and disappears when the window closes.
+]]
+L["RESTOCKER_GROUP_NEW"] = "新增"
+--[[
+    The category pane's first entry, above the item types. Selected by default,
+    and the way back to the whole list once a type has been picked, so it has
+    to read as "everything" rather than as another type.
+]]
+L["RESTOCKER_GROUP_ALL"] = "全部物品"
+--[[
+    What the list area shows in place of rows. EMPTY_ is a list with nothing on
+    it: a heading (title case), a body of two sentences (the two ways to add,
+    then what the list does with what is on it), the Pick Staples button
+    (RESTOCKER_PICK_STAPLES_BUTTON), and a hint under it. NO_MATCH_ is one line
+    for a list that has items and is showing none: the filter matches nothing,
+    or the selected category just lost its last item.
+]]
+L["RESTOCKER_EMPTY_TITLE"] = "此清单中还没有物品"
+L["RESTOCKER_EMPTY_BODY"] =
+	"挑选食物、水或职业施法材料等基础物资，或通过上方的菜单添加背包中的任何物品。此清单中的物品会自动补足或存入你的银行，让你的背包保持整洁。"
+L["RESTOCKER_EMPTY_DROP_HINT"] = "将物品拖到此窗口的任意位置也能添加。"
+L["RESTOCKER_NO_MATCH_FILTER"] = "此清单中没有符合筛选条件的物品。"
+L["RESTOCKER_NO_MATCH_GROUP"] = "此分类中已没有物品。"
+
+--[[
+    The status line under the list. The orders count itself is
+    RESTOCKER_STILL_SHORT_ONE / _MANY above, and the all-stocked line is
+    MINIMAP_RESTOCKER_STOCKED, so the window, the reminders and the mini-map
+    tooltip say the same thing in the same words.
+
+    NO_ORDERS is the in-between: nothing for a merchant to fill, but a row with
+    Buy off is still short in the bags (its Keep number is yellow), so the
+    congratulation would be untrue. "Outstanding" stays beside the noun, as in
+    the counts.
+
+    REPORT_MORE closes the orders tooltip when the list is longer than it shows:
+    %d is how many were left out. REMOVED_ITEM's %s is the item's icon and name,
+    and UNDO is the button beside it that puts the item back; UNDO_TOOLTIP
+    renders in the title slot.
+]]
+L["RESTOCKER_NO_ORDERS"] = "没有未完成的补货订单。"
+L["RESTOCKER_REPORT_MORE"] = "还有 %d 项"
+L["RESTOCKER_REMOVED_ITEM"] = "已移除 %s。"
+L["RESTOCKER_UNDO"] = "撤销"
+L["RESTOCKER_UNDO_TOOLTIP"] = "将此物品放回清单"
+
+-- Title slot: title case, no terminal period. The line under it is body text.
+L["RESTOCKER_REMOVE_TOOLTIP"] = "将此物品从补货清单中移除"
+L["RESTOCKER_REMOVE_TOOLTIP_UNDO"] = "你可以在窗口底部撤销此操作。"
+--[[
+    The Keep box and its heading, which share one tooltip: the title, and KEEP
+    under it, which explains the number. There is no editing hint: the box
+    saves as it is typed in, so nothing has to be pressed.
+]]
+L["RESTOCKER_AMOUNT_TOOLTIP_TITLE"] = "在背包中保留"
+L["RESTOCKER_AMOUNT_TOOLTIP_KEEP"] =
+	'要在背包中保留多少个。背包中的数量少于此数时，该数字会显示为黄色；若设为 0 并开启"存入"，则会将其全部存入银行。'
+L["RESTOCKER_BUY_LABEL"] = "购买"
+L["RESTOCKER_BUY_TOOLTIP_TITLE"] = "向商人购买"
+L["RESTOCKER_BUY_TOOLTIP_BODY"] = "商人窗口打开时，向商人购买所需数量。"
+
+--[[
+    Some vendor slots hold only a few units and trickle back over time, which is
+    how Classic sells its scarce consumables. Extra empties those slots outright
+    rather than buying the shortfall, so the tooltip has to say what it buys and
+    that only limited stock counts.
+]]
+L["RESTOCKER_EXTRA_LABEL"] = "额外"
+L["RESTOCKER_EXTRA_TOOLTIP_TITLE"] = "额外购买"
+L["RESTOCKER_EXTRA_TOOLTIP_STOCK"] =
+	"买下商人此物品的全部限量库存（即每次只有少量、会慢慢刷新的商品），即使超出你的保留数量。"
+L["RESTOCKER_DEPOSIT_TOOLTIP_TITLE"] = "存入银行"
+--[[
+    Both this line and the Extra one above name the Keep column, so they are
+    coupled to RESTOCKER_COLUMN_AMOUNT: a locale that renders that heading
+    differently has to say the same word here, or the sentence points at a
+    column the player cannot find.
+]]
+L["RESTOCKER_DEPOSIT_TOOLTIP_BODY"] =
+	"银行打开时，将多余的物品存入银行；若保留栏填写 0，则全部存入。"
+L["RESTOCKER_WITHDRAW_TOOLTIP_TITLE"] = "从银行取出"
+L["RESTOCKER_WITHDRAW_TOOLTIP_BODY"] = "银行打开时，从银行取出所需物品。"
+
+-- Required-reputation control (per-item vendor gate).
+L["RESTOCKER_REPUTATION_MENU_TITLE"] = "所需声望"
+--[[
+    { standing label, discount percent }. The standings are the client's own
+    labels (FACTION_STANDING_LABEL5 to 8), so only "Any" has a key here.
+
+    Run through string.format, so its literal percent sign is escaped as %%,
+    as is RESTOCKER_REPUTATION_TOOLTIP_DISCOUNTS' below.
+]]
+L["RESTOCKER_REPUTATION_DISCOUNT_FORMAT"] = "%s (优惠 %d%%)"
+L["RESTOCKER_REPUTATION_ANY"] = "任意"
+L["RESTOCKER_REPUTATION_TOOLTIP_TITLE"] = "所需商人声望"
+--[[
+    The four %s are the client's labels for Friendly, Honored, Revered and
+    Exalted, in that order, each followed by its discount; the percent signs are
+    escaped as %% because the line goes through string.format. With no standing
+    required the cell draws a dash rather than the word "Any", which is why the
+    last sentence names the dash; "Any" is still the menu's first entry.
+]]
+L["RESTOCKER_REPUTATION_TOOLTIP_DISCOUNTS"] =
+	"点击设置 Connoisseur & Restocker 向商人购买前所需的声望等级；声望还会降低价格：%s 5%%，%s 10%%，%s 15%%，%s 20%%。短横线表示向任何商人购买。"
+
+--[[
+    Why a cell cannot be set on its row: the tooltip a dimmed cell shows under
+    its column's title, in place of the column's own explanation. Extra and
+    Rep ride on Buy; Upgrade needs a ladder with somewhere to go, which a quest
+    item lacks outright and the Hearthstone lacks for having one tier.
+]]
+L["RESTOCKER_EXTRA_NOT_APPLICABLE"] = '此物品的"购买"已关闭，因此无法额外购买。'
+L["RESTOCKER_REPUTATION_NOT_APPLICABLE"] = '此物品的"购买"已关闭，因此声望要求不适用。'
+L["RESTOCKER_UPGRADE_NOT_APPLICABLE"] = "此物品没有可升级的更好版本。"
+
+--------------------------------------------------------------------------------
+-- Thanks for the Buff
+--------------------------------------------------------------------------------
+
+-- Every string from here to Spellbook is Thanks for the Buff's.
+
+--------------------------------------------------------------------------------
+-- Messages
+--------------------------------------------------------------------------------
+
+-- Buff & gift announcements
+L["MESSAGE_BUFFED"] = "%s 给你施放了 %s！"
+L["MESSAGE_GAVE_YOU"] = "%s 给了你 %s！"
+L["MESSAGE_GAVE_GROUP"] = "%s 给你的队伍提供了 %s！"
+L["MESSAGE_USED_ITEM"] = "%s 对你使用了 %s！"
+L["MESSAGE_USED_SPELL"] = "%s 对你施放了 %s！"
+L["MESSAGE_SET_OUT"] = "%s 摆放了 %s！"
+L["MESSAGE_OPENED"] = "%s 开启了 %s！"
+
+-- Thank-you
+L["MESSAGE_WHISPER_THANKS"] = "感谢你的 %s"
+L["MESSAGE_SELECT_PLAYER"] = "请先以一名玩家为目标。"
+L["MESSAGE_CANT_THANK_SELF"] = "你不能感谢自己！"
+
+--------------------------------------------------------------------------------
+-- Text Fragments
+--------------------------------------------------------------------------------
+
+L["UNKNOWN_SPELL"] = "未知法术"
+
+--------------------------------------------------------------------------------
+-- Options: Main Panel
+--------------------------------------------------------------------------------
+
+L["OPTIONS_EXAMPLE"] = "示例：%s"
+
+--------------------------------------------------------------------------------
+-- Options: Buff Panels
+--------------------------------------------------------------------------------
+
+-- Stranger Buffs
+L["TAB_STRANGERS"] = "来自陌生人的增益"
+L["STRANGERS_ENABLE"] = "启用对陌生人增益的感谢"
+L["STRANGERS_ENABLE_DESCRIPTION"] = "开启对队伍外玩家所施增益的感谢。"
+L["STRANGERS_DESCRIPTION"] = "在开放世界中，感谢队伍外的玩家为你施放的增益。"
+-- The dropdown values carry the unit, so these labels do not repeat it.
+L["STRANGERS_OVERALL_COOLDOWN"] = "感谢冷却时间"
+L["STRANGERS_OVERALL_COOLDOWN_DESCRIPTION"] =
+	"设置两轮感谢之间的间隔，无论增益来自谁。设为零则对每个增益都表示感谢。"
+L["STRANGERS_SOURCE_COOLDOWN"] = "同一玩家感谢冷却时间"
+L["STRANGERS_SOURCE_COOLDOWN_DESCRIPTION"] =
+	"设置对同一名玩家两次感谢之间的间隔。设为零则对每个增益都表示感谢。"
+L["STRANGERS_MIN_DURATION"] = "最短增益持续时间"
+L["STRANGERS_MIN_DURATION_DESCRIPTION"] =
+	"忽略持续时间短于此值的增益。设为零则对每个增益都作出反应。"
+
+-- Teammate Buffs
+L["TAB_TEAMMATES"] = "来自队友的增益"
+L["TEAMMATES_ENABLE"] = "启用对队友增益的感谢"
+L["TEAMMATES_ENABLE_DESCRIPTION"] = "开启对小队或团队成员为你施放的增益和冷却技能的感谢。"
+L["TEAMMATES_DESCRIPTION"] = "感谢小队和团队成员对你施放的增益与冷却技能。"
+
+-- Service Alerts
+L["TAB_SERVICES"] = "服务提醒"
+L["SERVICES_ENABLE"] = "启用服务提醒"
+L["SERVICES_ENABLE_DESCRIPTION"] =
+	"开启对大餐、灵魂之井、传送门以及其他为你的队伍摆放的帮助的提醒。"
+L["SERVICES_DESCRIPTION"] =
+	"有人为你的队伍摆出帮助时作出反应：大餐、灵魂之井、传送门和修理机器人。"
+
+-- Send Good News
+L["TAB_GOOD_NEWS"] = "发送好消息"
+L["GOOD_NEWS_DESCRIPTION"] =
+	"让被你施加增益的玩家知道你为他们施放了什么；对于短时增益，还会告知能持续多久。"
+L["GOOD_NEWS_ENABLE"] = "启用好消息"
+L["GOOD_NEWS_ENABLE_DESCRIPTION"] =
+	"开启一条密语，告诉被你施加增益的玩家你为他们施放了什么。"
+L["GOOD_NEWS_SCOPE"] = "接收者"
+L["GOOD_NEWS_SCOPE_ALWAYS"] = "任何被你增益的人"
+L["GOOD_NEWS_SCOPE_GROUP"] = "仅小队或团队成员"
+L["GOOD_NEWS_SCOPE_DESCRIPTION"] =
+	"设置谁会收到好消息密语：任何被你增益的人，或仅限你的队伍成员。"
+L["GOOD_NEWS_MESSAGES_HEADER"] = "好消息信息"
+L["GOOD_NEWS_MESSAGES_DESCRIPTION"] = "被你增益的玩家会收到的密语。"
+--[[
+    The message box's tooltip, in three parts. LIMIT's %d is a real placeholder
+    and gets formatted; TOKENS carries a literal %a for the reader to copy and so
+    must never reach string.format. Joined into one line at the point of use.
+]]
+L["GOOD_NEWS_MESSAGE_INPUT_DESCRIPTION"] = "设置密语的内容。留空则使用默认文本。"
+L["GOOD_NEWS_MESSAGE_LIMIT"] = "最大长度：%d。"
+L["GOOD_NEWS_MESSAGE_TOKENS"] = "%a 会变成技能链接，持续时间不足一分钟时还会附上持续时间。"
+--[[
+    Appended to the ability link inside %a when the buff has a readable duration
+    under a minute. A whole clause rather than a bare number so it can be reworded
+    per language.
+]]
+L["GOOD_NEWS_DURATION_CLAUSE"] = "持续 %s"
+
+-- Shared across the buff panels
+L["TRACKED_HEADER"] = "追踪的技能"
+L["TRACKED_GROUP_ITEMS"] = "物品"
+L["TRACKED_ITEM_PENDING"] = "物品 #%d"
+L["TRACKED_SPELL_PENDING"] = "法术 #%d"
+
+-- Shared by Send Good News and the Thank You Button
+L["WHISPER_MESSAGE"] = "密语信息"
+L["WHISPER_MESSAGE_RESET"] = "重置"
+L["WHISPER_MESSAGE_RESET_DESCRIPTION"] = "将密语信息恢复为默认文本。"
+
+--------------------------------------------------------------------------------
+-- Shared: Praise and Notifications
+--------------------------------------------------------------------------------
+
+--[[
+    The two section headers every buff panel is built from: what the other player
+    sees, then what only you get. Key prefixes match the header the control
+    appears under.
+]]
+L["PRAISE_HEADER"] = "感谢密语与表情"
+L["NOTIFICATIONS_HEADER"] = "通知"
+L["PRAISE_DESCRIPTION"] = "对方玩家看到的内容：一条感谢密语、一个表情，或两者兼有。"
+L["NOTIFICATIONS_DESCRIPTION"] = "只有你会收到的内容：一条文字提示、一段音效，或两者兼有。"
+
+-- Also titles the Thank You Button's emote grid, so it carries no PRAISE_ prefix.
+L["EMOTES_SELECT"] = "选择表情"
+
+L["PRAISE_WHISPER_ENABLE"] = "启用感谢密语"
+L["PRAISE_WHISPER_DESCRIPTION"] = "向为你施加增益的玩家密语致谢。"
+L["PRAISE_EMOTES_ENABLE"] = "启用表情"
+L["PRAISE_EMOTES_DESCRIPTION"] = "用表情表达你的谢意。战斗中会暂缓发送表情。"
+L["PRAISE_DELAY_ENABLE"] = "启用感谢延迟"
+L["PRAISE_DELAY_DESCRIPTION"] =
+	"在发送密语和表情前稍作等待，避免你的感谢与增益在同一瞬间出现。通知不受影响。"
+L["PRAISE_DELAY_LENGTH_DESCRIPTION"] = "设置发送密语和表情前的等待时长。"
+
+L["NOTIFICATIONS_PRINT_ENABLE"] = "启用文字提示"
+L["NOTIFICATIONS_PRINT_DESCRIPTION"] = "获得增益时，显示一条只有你能看到的信息。"
+L["NOTIFICATIONS_SOUND_ENABLE"] = "启用音效"
+L["NOTIFICATIONS_SOUND_DESCRIPTION"] = "获得增益时播放音效。只有你能听到。"
+L["NOTIFICATIONS_SOUND_PREVIEW_DESCRIPTION"] = "播放该音效，让你在开启前先试听。"
+
+--------------------------------------------------------------------------------
+-- Tracked Ability Groups
+--------------------------------------------------------------------------------
+
+--[[
+    Labels for multi-member tracked groups that no single game record names
+    (Data/{Game}/Tracked-Abilities-{Game}.lua). Single spells and items, and a
+    group named after one of its own items, take their names from the client.
+]]
+L["GROUP_PORTALS"] = "传送门"
+L["GROUP_RESISTANCE_CAULDRONS"] = "抗性大锅"
+L["GROUP_REPAIR_BOTS"] = "修理机器人"
+
+--------------------------------------------------------------------------------
+-- Options: Buff Duty
+--------------------------------------------------------------------------------
+
+L["TAB_BUFF_WINDOW"] = "增益值班"
+L["BUFF_WINDOW_DESCRIPTION"] = "显示谁缺少你的增益。点击图标即可施放。"
+L["BUFF_WINDOW_ENABLE"] = "启用增益值班"
+L["BUFF_WINDOW_ENABLE_DESCRIPTION"] =
+	"开启增益值班，即列出缺少你可施放增益的队伍成员的窗口。"
+L["BUFF_WINDOW_NO_BUFFS"] =
+	"你的职业没有此列表中的增益，因此该窗口在这个角色上永远不会出现。"
+-- When to Show: Solo and In Group, each with Always or In Instance, then the classes.
+L["BUFF_WINDOW_WHEN_HEADER"] = "显示时机"
+L["BUFF_WINDOW_WHEN_DESCRIPTION"] = "选择窗口何时可以出现。"
+L["BUFF_WINDOW_WHEN_SOLO"] = "单人"
+L["BUFF_WINDOW_WHEN_SOLO_DESCRIPTION"] = "不在小队或团队中时显示窗口。"
+L["BUFF_WINDOW_WHEN_GROUP"] = "在队伍中"
+L["BUFF_WINDOW_WHEN_GROUP_DESCRIPTION"] = "在小队或团队中时显示窗口。"
+L["BUFF_WINDOW_WHERE_DESCRIPTION"] =
+	"设置窗口在哪里显示：任何地方，或仅在地下城、团队副本、战场和竞技场内。"
+L["BUFF_WINDOW_WHERE_ALWAYS"] = "总是"
+L["BUFF_WINDOW_WHERE_INSTANCE"] = "在副本中"
+L["BUFF_WINDOW_CLASSES_DESCRIPTION"] = "在玩这些职业时显示窗口。"
+L["BUFF_WINDOW_CLASS_DESCRIPTION"] = "在玩此职业时显示窗口。"
+L["BUFF_WINDOW_HEADER"] = "窗口"
+L["BUFF_WINDOW_WINDOW_DESCRIPTION"] = "让窗口留在你放置的位置，或在战斗中不挡视线。"
+L["BUFF_WINDOW_LOCK"] = "锁定窗口"
+L["BUFF_WINDOW_LOCK_DESCRIPTION"] = "使窗口无法移动。解锁后，可拖动其背景来移动窗口。"
+L["BUFF_WINDOW_HIDE_IN_COMBAT"] = "战斗中隐藏"
+L["BUFF_WINDOW_HIDE_IN_COMBAT_DESCRIPTION"] =
+	"在战斗中隐藏窗口。战斗中列表无法更新，因此保持显示的窗口会停留在最后的状态，直到战斗结束。"
+L["BUFF_WINDOW_SHOW_HEADER"] = "在窗口中显示"
+L["BUFF_WINDOW_SHOW_DESCRIPTION"] =
+	"将你自己的增益、为你施放增益的陌生人以及你的目标加入窗口。"
+L["BUFF_WINDOW_FAVOR_ENABLE"] = "礼尚往来"
+L["BUFF_WINDOW_FAVOR_ENABLE_DESCRIPTION"] =
+	"列出最近为你施放增益的陌生人，以及你可以回赠他们的增益。右键点击图标可将某人从列表中移除。"
+L["BUFF_WINDOW_FAVOR_SECONDS_DESCRIPTION"] =
+	"设置陌生人在最后一次施放增益后保留在列表中的时间。"
+L["BUFF_WINDOW_TARGET_ENABLE"] = "你的目标"
+L["BUFF_WINDOW_TARGET_ENABLE_DESCRIPTION"] =
+	"当你的目标是缺少你可施放增益的队伍外玩家时，将其列出。"
+L["BUFF_WINDOW_REFRESH"] = "剩余低于此值时补充"
+L["BUFF_WINDOW_REFRESH_DESCRIPTION"] =
+	"设置增益剩余时间低于多少时视为缺失，方便你在增益消失前及时补上。持续时间不超过此值的增益，只有在消失后才会视为缺失。"
+-- Count as Tanks: one dropdown per class, then Pets, each with these three choices.
+L["BUFF_WINDOW_TANKS_HEADER"] = "视为坦克"
+L["BUFF_WINDOW_TANKS_DESCRIPTION"] =
+	"没有自身职责时，谁能获得你提供给坦克的增益，例如荆棘术。"
+L["BUFF_WINDOW_TANKS_CLASS_DESCRIPTION"] =
+	"设置此职业的玩家何时视为坦克。他们自己的坦克或治疗职责始终优先。"
+L["BUFF_WINDOW_TANKS_PETS"] = "宠物"
+L["BUFF_WINDOW_TANKS_PETS_DESCRIPTION"] =
+	"设置宠物何时视为坦克。宠物也会获得你提供给所有人的增益。"
+L["BUFF_WINDOW_TANKS_NEVER"] = "从不"
+L["BUFF_WINDOW_TANKS_SOLO"] = "不在队伍中时"
+L["BUFF_WINDOW_TANKS_ALWAYS"] = "总是"
+-- Who each buff is offered to: one dropdown per buff, these four choices.
+L["BUFF_WINDOW_AUDIENCE_OFF"] = "关闭"
+L["BUFF_WINDOW_AUDIENCE_TANK"] = "坦克"
+L["BUFF_WINDOW_AUDIENCE_HEALER"] = "治疗"
+L["BUFF_WINDOW_AUDIENCE_ALL"] = "所有人"
+-- Each buff's dropdown tooltip; hovering the buff's name shows the spell itself.
+L["BUFF_WINDOW_AUDIENCE_DESCRIPTION"] = "设置 %s 提供给谁。"
+L["BUFF_WINDOW_BUFFS_DESCRIPTION"] =
+	"选择每个增益提供给谁。坦克和治疗按队伍职责判定；没有职责的人视为伤害输出，除非下方的视为坦克另有设置。"
+
+L["BUFF_WINDOW_SELF_DESCRIPTION"] = "你自己的增益，固定在窗口顶部。"
+--[[
+    Muted note after a class name on the Self-Buffs panel, for a family of self
+    buffs only one of which can be up at a time. Keyed by the family.
+]]
+L["BUFF_WINDOW_SELF_NOTE_ASPECT"] = "任意一种守护即可"
+L["BUFF_WINDOW_SELF_NOTE_MAGE_ARMOR"] = "任意一种护甲即可"
+L["BUFF_WINDOW_SELF_NOTE_PALADIN_AURA"] = "任意一种光环即可"
+L["BUFF_WINDOW_SELF_NOTE_SHAMAN_SHIELD"] = "任意一种护盾即可"
+L["BUFF_WINDOW_SELF_NOTE_WARLOCK_ARMOR"] = "任意一种护甲即可"
+L["BUFF_WINDOW_SELF_NOTE_WARLOCK_DEMON"] = "两种恶魔增益任意一种即可"
+L["BUFF_WINDOW_SELF_REFRESH_OFF"] = "关闭"
+L["BUFF_WINDOW_SELF_REFRESH_MISSING"] = "缺失时"
+-- %s is a duration from the client, like "5 Minutes".
+L["BUFF_WINDOW_SELF_REFRESH_UNDER"] = "剩余不足%s"
+L["BUFF_WINDOW_SELF_REFRESH_DESCRIPTION"] =
+	"设置 %s 何时显示：从不、消失后，或剩余时间少于此值时。"
+-- The Weapon Buffs panel, under Buff Duty after Self-Buffs.
+L["BUFF_WINDOW_WEAPON_PANEL_HEADER"] = "武器增益"
+L["BUFF_WINDOW_WEAPON_DESCRIPTION"] =
+	"勾选每把武器应保持的效果。当效果缺失或即将结束，且物品在你的背包中并适用于该武器时，窗口会提供它。"
+-- The one timing for every weapon buff, at the top of the panel.
+L["BUFF_WINDOW_WEAPON_REFRESH"] = "重新施加"
+L["BUFF_WINDOW_WEAPON_REFRESH_DESCRIPTION"] =
+	"设置武器增益何时再次提供：消失后，或剩余时间少于此值时。"
+-- The boxes for the weapon items any class can use, after the rogue and shaman boxes.
+L["BUFF_WINDOW_WEAPON_KIND_OIL"] = "油"
+L["BUFF_WINDOW_WEAPON_KIND_STONE"] = "磨刀石"
+L["BUFF_WINDOW_WEAPON_KIND_LURE"] = "鱼饵"
+--[[
+    One choice's checkbox under one hand. The first %s is the poison, imbue,
+    oil, stone or lure, the second the client's "Main Hand" or "Off Hand".
+]]
+L["BUFF_WINDOW_WEAPON_PICK_DESCRIPTION"] =
+	"提供%s，用于你的%s武器。当武器上没有任何已勾选的选项时，会提供你拥有的每一种。"
+L["BUFF_WINDOW_SELF_ENABLE"] = "你的自身增益"
+L["BUFF_WINDOW_SELF_ENABLE_DESCRIPTION"] =
+	"当只能对自己施放的增益（例如护甲类法术或心灵之火）缺失或即将结束时，将其显示在窗口顶部。可在自身增益中选择要显示哪些。"
+L["BUFF_WINDOW_WEAPON_ENABLE"] = "你的武器增益"
+L["BUFF_WINDOW_WEAPON_ENABLE_DESCRIPTION"] =
+	"将武器上缺失或即将结束的毒药、武器强化、油、磨刀石和鱼饵，与你的自身增益一起显示在窗口顶部。点击即可施加。可在武器增益中选择要显示哪些。"
+
+-- The window itself
+L["BUFF_WINDOW_SELF_HEADER"] = "自身增益"
+L["BUFF_WINDOW_FAVOR_HEADER"] = "礼尚往来"
+L["BUFF_WINDOW_TARGET_HEADER"] = "目标"
+L["BUFF_WINDOW_TOOLTIP_CAST"] = "点击对 %s 施放。"
+-- %s is the client's "Main Hand" or "Off Hand".
+L["BUFF_WINDOW_TOOLTIP_WEAPON"] = "点击施加到你的%s武器。"
+L["BUFF_WINDOW_TOOLTIP_USE"] = "你的队伍中没有人有灵魂石。点击对 %s 使用一块。"
+L["BUFF_WINDOW_TOOLTIP_CREATE"] = "你的队伍中没有人有灵魂石。点击制造一块。"
+L["BUFF_WINDOW_TOOLTIP_GROUP"] = "点击对 %s 及其小队施放。"
+L["BUFF_WINDOW_TOOLTIP_FAVOR"] = "点击选中 %s 为目标并施放。"
+L["BUFF_WINDOW_TOOLTIP_DISMISS"] = "右键点击将 %s 从列表中移除。"
+-- The window's close button: the class name in its color, then the options command.
+L["BUFF_WINDOW_CLOSED"] =
+	"已为%s职业关闭增益值班。要重新开启，请 Shift + 右键点击小地图按钮，或输入 %s。"
+
+-- The Buff Key (Key Bindings, and the Keybinds section of Buff Duty)
+L["BUFF_KEYS_HEADER"] = "按键绑定"
+L["BUFF_KEYS_DESCRIPTION"] =
+	"脱离战斗时，用一个按键或宏施放列表中的下一个增益。武器增益仍需在窗口中点击施加。"
+L["BUFF_KEY"] = "增益按钮"
+L["BUFF_KEY_DESCRIPTION"] =
+	"每按一次施放下一个缺少的增益：先复活死亡的目标，再复活小队中死亡的成员（牧师、圣骑士和萨满祭司），然后是自身增益、礼尚往来、你的目标和你的小队。当小队增益比逐个为范围内所有人施放单体增益消耗更少法力时，就施放小队增益。"
+L["BUFF_KEY_SKIP_COOLDOWNS"] = "跳过有冷却时间的增益"
+L["BUFF_KEY_SKIP_COOLDOWNS_DESCRIPTION"] =
+	"跳过有冷却时间的增益（例如防护恐惧结界），继续施放下一个。"
+-- %s is a player's name.
+L["BUFF_KEY_WAITING"] = "正在等待 %s 进入范围。"
+L["BUFF_KEY_DONE"] = "没有需要施放的增益了。"
+-- The caption beside the read-only box that holds a Buff Key's macro line.
+L["BUFF_KEY_MACRO_CAPTION"] = "宏"
+
+--------------------------------------------------------------------------------
+-- Options: Thank You Button
+--------------------------------------------------------------------------------
+
+L["TAB_THANK_YOU_BUTTON"] = "感谢按钮"
+L["BUTTON_DESCRIPTION"] = "一次按键即可对目标发送密语和表情。让礼貌自动完成。"
+-- One heading per button, numbered; %d is the button's position in the list.
+L["BUTTON_SECTION"] = "感谢按钮 %d"
+L["BUTTON_EMOTE"] = "表情"
+L["BUTTON_EMOTE_DESCRIPTION"] = "设置此按钮对你的目标使用的表情，选择'无'则不使用表情。"
+L["BUTTON_EMOTE_NONE"] = "无"
+L["BUTTON_ICON"] = "图标"
+L["BUTTON_ICON_DESCRIPTION"] = "设置此按钮的宏在宏列表和动作条上显示的图标。"
+-- The Icon dropdown's first choice, the macros' own icon; every other choice is a picture alone.
+L["BUTTON_ICON_DEFAULT"] = "默认"
+--[[
+    The toggle owns the macro in both directions, so the label is ENABLE rather
+    than CREATE. Both strings carry the macro's name: with five buttons stacked,
+    "which macro is this one?" should not need a hover.
+]]
+L["BUTTON_MACRO_ENABLE"] = '启用宏 "%s"'
+L["BUTTON_MACRO_ENABLE_DESCRIPTION"] = "创建一个名为 %s 的宏，关闭此项时会将其删除。"
+L["BUTTON_WHISPER_DESCRIPTION"] = "设置此按钮向你的目标发送的密语。留空则不发送密语。"
+
+--------------------------------------------------------------------------------
+-- Defaults
+--------------------------------------------------------------------------------
+
+L["DEFAULT_WHISPER"] = "谢谢，你最棒了！(="
+--[[
+    The star marker (left off on WoW Forever) and " // TFTB" sign-off are added
+    by the builder, which also drops the closing punctuation; neither is part of
+    the editable text.
+]]
+L["DEFAULT_GOOD_NEWS"] = "你获得了 %a"
+
+--------------------------------------------------------------------------------
+-- Emotes
+--------------------------------------------------------------------------------
+
+L["EMOTE_CHEER_DESCRIPTION"] = "你向<Target>欢呼。"
+L["EMOTE_DRINK_DESCRIPTION"] = "你向<Target>举杯致意。"
+L["EMOTE_FLEX_DESCRIPTION"] = "你向<Target>展示肌肉。"
+L["EMOTE_GRIN_DESCRIPTION"] = "你对着<Target>坏笑。"
+L["EMOTE_HIGHFIVE_DESCRIPTION"] = "你与<Target>击掌。"
+L["EMOTE_PRAISE_DESCRIPTION"] = "你赞美了<Target>。"
+L["EMOTE_SALUTE_DESCRIPTION"] = "你恭敬地向<Target>致敬。"
+L["EMOTE_SMILE_DESCRIPTION"] = "你对<Target>微笑。"
+L["EMOTE_THANK_DESCRIPTION"] = "你向<Target>表示感谢。"
+L["EMOTE_WHOA_DESCRIPTION"] = "你对<Target>惊叹道'哇！'。"
+L["EMOTE_WINK_DESCRIPTION"] = "你向<Target>眨眼。"
+L["EMOTE_YES_DESCRIPTION"] = "你向<Target>点头。"
+
+--------------------------------------------------------------------------------
+-- Spellbook
+--------------------------------------------------------------------------------
+
+-- Every string from here to the end is the Spellbook's.
+
+-- Page: Sections
+L["SECTION_UNLEARNED"] = "未学会"
+
+-- Page: Macro Menu
+L["MENU_GROUP_COMBAT_CHECK"] = "战斗条件"
+L["MENU_GROUP_SPELL_RANK"] = "法术等级"
+L["MENU_GROUP_BEFORE_CAST"] = "施法前"
+L["MENU_GROUP_ADD_ATTACK"] = "添加攻击"
+L["MENU_GROUP_CASTING_RULES"] = "施法规则"
+L["MENU_GROUP_ERRORS"] = "错误信息"
+L["MENU_GROUP_USE_ITEMS_FIRST"] = "先使用物品"
+L["MACRO_TEXT"] = "宏文本"
+L["MENU_MACRO_LENGTH"] = "%d / %d"
+L["MENU_OPTIONS_COUNT"] = "%d 个选项"
+L["MENU_RANK_LEARN_LEVEL"] = "%s (%d级可学)"
+L["MENU_MAX_RANK"] = "最高等级"
+L["MENU_DYNAMIC_RANK"] = "动态等级"
+L["MENU_DYNAMIC_RANK_NOTE"] = "动态等级根据友方玩家的等级决定，只在非战斗状态下更新。"
+L["MENU_CAST_AT_CURSOR"] = "在光标处施放"
+L["MENU_TARGET_NEAREST_ENEMY"] = "选择最近的敌人"
+L["MENU_TARGET_NEAREST_FRIEND"] = "选择最近的友方"
+L["MENU_CAST_IF_SUMMONED"] = "宠物已召唤时施放%s"
+L["MENU_NEVER_TURN_OFF"] = "永不关闭"
+L["MENU_LEAVE_FORM_BEFORE"] = "施法前取消形态"
+L["MENU_RIGHT_CLICK_FOR"] = "右键点击：%s"
+L["MENU_ONLY_IN_COMBAT"] = "仅在战斗中"
+L["MENU_NEVER_IN_COMBAT"] = "从不在战斗中"
+L["MENU_COMBAT_CHECK_NONE"] = "无"
+L["MENU_ONCE_PER_COMBAT"] = "每场战斗施放一次"
+L["MENU_ONCE_PER_TARGET"] = "每个目标施放一次"
+L["MENU_HIDE_ERRORS"] = "隐藏错误信息"
+L["MENU_MUTE_ERRORS"] = "关闭错误音效"
+L["MENU_SWITCH_TO"] = "切换为%s"
+L["MENU_CAST_ON_FOCUS"] = "对焦点施放"
+L["MENU_START_AUTO_ATTACK"] = "开始自动攻击"
+L["MENU_STOP_ATTACK"] = "停止攻击"
+L["MENU_START_AUTO_SHOT"] = "开始自动射击"
+L["MENU_START_PET_ATTACK"] = "开始宠物攻击"
+L["MENU_START_WAND"] = "开始魔杖射击"
+L["MENU_STOP_CASTING"] = "停止施法"
+L["MENU_STOP_CASTING_NOTE"] = "对打断、驱散这类不能等待的法术使用停止施法。"
+L["MENU_STOP_IF_CHANNELING"] = "引导时停止宏"
+L["MENU_STOP_IF_STEALTHED"] = "潜行时停止宏"
+L["MENU_SAFE_TO_SPAM_NOTE"] =
+	"想让宏可以放心连按，引导法术请开启引导时停止宏，潜行请开启潜行时停止宏。这样再次按下就不会打断引导，也不会让你脱离潜行。"
+L["MENU_USE_FOR_KIND"] = "对所有%s使用这些选项"
+L["MENU_DUPLICATE"] = "复制"
+L["MENU_USE_FOR_KIND_DESCRIPTION"] =
+	"%s中你没有亲自设置过的每个宏，都会以这个宏的选项为初始选项。会打开宏默认设置给你查看。"
+
+-- Page: Settings Menu
+L["SETTINGS_SHOW_UNLEARNED"] = "显示未学会的法术"
+L["SETTINGS_MARK_ALL_PLACED"] = "将所有法术标记为已放置"
+L["SETTINGS_MARK_ALL_PLACED_DESCRIPTION"] =
+	"本页的所有宏不再发光，无论是否在你的动作条上。之后学会的法术在放置前仍会发光。"
+
+-- Page: Macro Buttons
+-- TRANSLATORS: each note fills the small slot under a macro button, so keep it short.
+L["SUBTEXT_FOCUS"] = "焦点"
+L["SUBTEXT_PET"] = "宠物"
+L["SUBTEXT_CURSOR"] = "光标"
+L["SUBTEXT_STANCE"] = "姿态"
+L["SUBTEXT_USE_ITEMS"] = "使用物品"
+L["SUBTEXT_PET_ATTACK"] = "宠物攻击"
+L["SUBTEXT_DYNAMIC_RANK"] = "动态等级"
+L["SUBTEXT_MAX_RANK"] = "最高等级"
+L["SUBTEXT_TARGET_ENEMY"] = "最近敌人"
+L["SUBTEXT_TARGET_FRIEND"] = "最近友方"
+L["SUBTEXT_ONCE_PER_COMBAT"] = "每战一次"
+L["SUBTEXT_ONCE_PER_TARGET"] = "每目标一次"
+L["SUBTEXT_COMBAT_ONLY"] = "仅战斗中"
+L["SUBTEXT_NO_COMBAT"] = "非战斗"
+L["SUBTEXT_LEAVE_FORM"] = "取消形态"
+L["SUBTEXT_NO_TOGGLE"] = "保持开启"
+L["SUBTEXT_WAND"] = "魔杖"
+L["SUBTEXT_START_ATTACK"] = "自动攻击"
+L["SUBTEXT_STOP_ATTACK"] = "停止攻击"
+L["SUBTEXT_STOP_CASTING"] = "停止施法"
+L["SUBTEXT_STOP_IF_CHANNELING"] = "引导时不施放"
+L["SUBTEXT_STOP_IF_STEALTHED"] = "潜行时不施放"
+L["SUBTEXT_HIDE_ERRORS"] = "隐藏错误"
+L["SUBTEXT_MUTE_ERRORS"] = "错误静音"
+L["SUBTEXT_OPTIONS_COUNT"] = "%d 个选项"
+L["SUBTEXT_TOO_LONG"] = "过长"
+L["SUBTEXT_LEARN_LEVEL"] = "%d级"
+L["SUBTEXT_TALENT"] = "天赋"
+
+-- Page: Macro Tooltip
+L["TOOLTIP_NOT_LEARNED"] = "尚未学会"
+L["TOOLTIP_LEARN_LEVEL"] = "你的职业训练师在%d级时教授。"
+L["TOOLTIP_LEARN_TALENT"] = "通过天赋学会。"
+L["TOOLTIP_NOT_ON_BARS"] = "不在你的动作条上"
+L["TOOLTIP_TOO_LONG"] = "过长：%d / %d 字节。关闭一个选项来缩短它。"
+L["TOOLTIP_OPTIONS_ON"] = "已开启选项：%s"
+L["TOOLTIP_KEY_CLICK_DRAG"] = "点击或拖动"
+L["TOOLTIP_ACTION_PLACE_ON_BAR"] = "放到你的动作条上"
+L["TOOLTIP_KEY_RIGHT_CLICK"] = "右键点击"
+L["TOOLTIP_ACTION_MACRO_OPTIONS"] = "宏选项"
+
+-- Spellbook Tab Tooltip
+L["SPELLBOOK_TAB_DESCRIPTION"] = "把你的职业法术做成一键宏。"
+L["TOOLTIP_KEY_CLICK"] = "点击"
+L["TOOLTIP_ACTION_OPEN_PAGE"] = "打开 BBB Spellbook"
+
+-- Page: Layout
+L["PAGE_EMPTY"] = "还没有宏。去找你的职业训练师学习第一批法术。"
+L["PAGE_MACRO_SLOTS"] = "宏栏位"
+L["TOOLTIP_MACRO_SLOTS"] =
+	"你放置的每个宏都会占用一个宏栏位。角色栏位专属于这个角色，并优先占用。通用栏位由你账号中的所有角色共享。"
+L["PAGE_MACRO_GENERAL"] = "通用"
+L["PAGE_MACRO_CHARACTER"] = "角色"
+
+L["OPTIONS_KEY_BINDINGS_HEADER"] = "按键设置"
+L["OPTIONS_KEY_SET"] = "设置按键"
+L["OPTIONS_KEY_SET_DESCRIPTION"] =
+	"打开游戏的按键设置列表，Bags Buffs & Buttons 在其中有自己的分类。"
+L["OPTIONS_KEY_BINDING_TOGGLE_DESCRIPTION"] =
+	"打开或关闭 BBB Spellbook。它在你的法术书中也有自己的标签页。"
+L["OPTIONS_DELETE_MACROS_HEADER"] = "删除宏"
+L["OPTIONS_DELETE_MACROS_DESCRIPTION"] =
+	"删除 BBB Spellbook 创建的宏，同时会将它们从动作条上移除。你自己的宏绝不会被改动，在页面上点击或拖动任意一个宏即可重新创建。"
+L["OPTIONS_DELETE_CHARACTER_MACROS"] = "删除角色宏"
+L["OPTIONS_DELETE_CHARACTER_MACROS_DESCRIPTION"] =
+	"从此角色的宏标签中删除 BBB Spellbook 的宏。你的其他角色会保留各自的宏，直到你在那些角色上也这样做。"
+L["OPTIONS_DELETE_CHARACTER_MACROS_CONFIRM"] =
+	"删除此角色上所有 BBB Spellbook 的宏？它们也会从你的动作条上移除。"
+L["OPTIONS_DELETE_GENERAL_MACROS"] = "删除通用宏"
+L["OPTIONS_DELETE_GENERAL_MACROS_DESCRIPTION"] =
+	"从通用宏标签中删除 BBB Spellbook 的宏。该标签由账号内所有角色共享，因此你的其他角色也会失去那里的宏。"
+L["OPTIONS_DELETE_GENERAL_MACROS_CONFIRM"] =
+	"删除 BBB Spellbook 的所有通用宏？账号内所有角色都会失去它们，并且它们也会从你的动作条上移除。"
+
+-- Options: Spellbook Page Panel
+L["OPTIONS_SHOW_UNLEARNED_DESCRIPTION"] =
+	"在未学会分类中列出你尚未学会的职业法术，方便提前放置它们的宏。"
+
+-- Macro Option Descriptions
+L["OPTIONS_DEFAULT_CURSOR_DESCRIPTION"] = "把法术放在光标所指的位置，不出现瞄准圈。"
+L["OPTIONS_DEFAULT_DYNAMIC_RANK_DESCRIPTION"] = "施放友方玩家等级所能接受的最高等级。"
+L["OPTIONS_DEFAULT_STOP_CASTING_DESCRIPTION"] = "先停止你正在施放的法术，让这个法术立刻施放。"
+L["OPTIONS_DEFAULT_STOP_ATTACK_DESCRIPTION"] = "先停止你的近战自动攻击。"
+L["OPTIONS_DEFAULT_STOP_IF_CHANNELING_DESCRIPTION"] =
+	"你在引导法术时不做任何事，因此按下也绝不会打断引导。"
+L["OPTIONS_DEFAULT_STOP_IF_STEALTHED_DESCRIPTION"] =
+	"你在潜行时不做任何事，因此按下也绝不会打破潜行。"
+L["OPTIONS_DEFAULT_LEAVE_FORM_DESCRIPTION"] = "先取消你当前的形态，以便施放法术。"
+L["OPTIONS_DEFAULT_TARGET_ENEMY_DESCRIPTION"] = "当你没有选中活着的敌人时，先选择最近的敌人。"
+L["OPTIONS_DEFAULT_TARGET_FRIEND_DESCRIPTION"] = "当你没有选中活着的友方时，先选择最近的友方。"
+L["OPTIONS_DEFAULT_PET_ATTACK_DESCRIPTION"] = "同时让你的宠物攻击你的目标。"
+L["OPTIONS_DEFAULT_START_ATTACK_DESCRIPTION"] = "施法后开始你的近战自动攻击。"
+L["OPTIONS_DEFAULT_AUTO_SHOT_DESCRIPTION"] = "施法后开始自动射击或魔杖射击。"
+L["OPTIONS_DEFAULT_ONCE_PER_TARGET_DESCRIPTION"] = "施放一次，直到你的目标改变前不再施放。"
+L["OPTIONS_DEFAULT_ONCE_PER_COMBAT_DESCRIPTION"] =
+	"施放一次，直到战斗结束或你的目标改变前不再施放。"
+L["OPTIONS_DEFAULT_NEVER_TURN_OFF_DESCRIPTION"] =
+	"再次按下宏时保持形态或守护开启，而不是将其关闭。"
+L["OPTIONS_DEFAULT_HIDE_ERRORS_DESCRIPTION"] = "清除宏在屏幕上留下的红色错误文字。"
+L["OPTIONS_DEFAULT_MUTE_ERRORS_DESCRIPTION"] = "宏运行期间关闭错误音效。"
+L["KIND_ENEMY"] = "敌对法术"
+L["KIND_ENEMY_DESCRIPTION"] = "对敌人施放的法术，例如攻击和减益效果。"
+L["KIND_FRIENDLY"] = "友方法术"
+L["KIND_FRIENDLY_DESCRIPTION"] = "对友方施放的法术，例如治疗。"
+L["KIND_BUFF"] = "增益法术"
+L["KIND_BUFF_DESCRIPTION"] = "为友方施加持久增益效果的法术。"
+L["KIND_ANYONE"] = "友方或敌方法术"
+L["KIND_ANYONE_DESCRIPTION"] = "既可以对友方也可以对敌人施放的法术。"
+L["KIND_GROUND"] = "地面目标法术"
+L["KIND_GROUND_DESCRIPTION"] = "放置在地面上的法术。"
+L["KIND_FORM"] = "形态、姿态和守护"
+L["KIND_FORM_DESCRIPTION"] = "在你关闭或切换之前一直保持的法术。"
+L["KIND_SELF"] = "自身和范围法术"
+L["KIND_SELF_DESCRIPTION"] = "没有目标，对自己或周围施放的法术。"
+
+-- Key Bindings
+L["BINDING_TOGGLE_PAGE"] = "打开/关闭 BBB Spellbook"
+
+L["CHAT_KEY_BINDINGS_IN_COMBAT"] = "出于安全考虑，战斗中无法打开按键设置列表。"
+L["KEY_BINDINGS_LOCATION"] = "打开游戏菜单，依次进入 %s 和 %s，找到 Bags Buffs & Buttons 分类。"
+L["ERROR_MACRO_SLOTS_FULL"] = "没有空余的宏栏位。请在 /macro 中删除一个宏来腾出位置。"
+L["CHAT_MACROS_DELETED"] = "已删除宏：%d"
+L["CHAT_MACRO_TOO_LONG"] =
+	'"%s"宏在开启选项后为 %d 字节，超过了宏能容纳的 %d 字节。关闭一个选项来缩短它。'

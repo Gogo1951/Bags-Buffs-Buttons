@@ -1,0 +1,18 @@
+# Starting copy for each add-on's .github/ISSUE_TEMPLATE/config.yml.
+# Unlike addon-files/, this file is different in every add-on: copy it once,
+# replace the three ADD-ON values below, and CI never checks it.
+# It controls the "New issue" page: the blank-issue link and the links shown
+# below the Defect and Request templates.
+
+# Keeps "Open a blank issue" for the rare issue that is neither a Defect nor a Request.
+blank_issues_enabled: true
+
+contact_links:
+  - name: Chat on Discord
+    url: https://discord.gg/eh8hKq992Q
+    about: Quick questions, help with setup, or just hanging out.
+
+  # PLACEHOLDER: add the CurseForge link once the listing exists.
+  # - name: Bags Buffs & Buttons on CurseForge
+  #   url: https://www.curseforge.com/wow/addons/{slug}
+  #   about: Downloads, changelog, and the latest version of Bags Buffs & Buttons.

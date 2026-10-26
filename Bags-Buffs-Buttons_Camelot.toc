@@ -1,0 +1,246 @@
+## Title: Bags Buffs & Buttons
+## Notes: Play at your best level. Stay buffed, use your best abilities, eat your best food, and keep your bags stocked so you can keep pushing those buttons. Quality of life, performance, and a side of kindness.
+## Author: Gogo1951
+
+## IconTexture: Interface/AddOns/Bags-Buffs-Buttons/Includes/Images/Connoisseur.tga
+## X-License: MIT
+
+## Category-enUS: Buffs & Debuffs
+## Category-deDE: Buffs & Debuffs
+## Category-esES: Beneficios y Perjuicios
+## Category-esMX: Beneficios y Perjuicios
+## Category-frFR: Améliorations et Affaiblissements
+## Category-itIT: Benefici e penalità
+## Category-koKR: 버프 및 디버프
+## Category-ptBR: Bônus e Penalidades
+## Category-ruRU: Баффы и дебаффы
+## Category-zhCN: 增益和减益
+## Category-zhTW: 增益與減益
+
+## Interface: 16001
+## X-Flavor: Camelot
+## Version: @project-version@
+## X-Curse-Project-ID: TBD
+## X-Wago-ID: TBD
+
+## SavedVariables: BagsBuffsButtonsDB, ConnoisseurDB, TFTBDB
+# MIGRATION (remove after 2026-11-25): ConnoisseurDB and TFTBDB are read once, to copy their settings in.
+
+# Includes
+Includes/Libraries/LibStub/LibStub.lua
+Includes/Libraries/CallbackHandler-1.0/CallbackHandler-1.0.lua
+Includes/Libraries/AceLocale-3.0/AceLocale-3.0.lua
+Includes/Libraries/AceDB-3.0/AceDB-3.0.lua
+Includes/Libraries/AceGUI-3.0/AceGUI-3.0.xml
+Includes/Libraries/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.lua
+Includes/Libraries/AceConfig-3.0/AceConfigCmd-3.0/AceConfigCmd-3.0.lua
+Includes/Libraries/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.lua
+Includes/Libraries/AceConfig-3.0/AceConfig-3.0.lua
+Includes/Libraries/AceDBOptions-3.0/AceDBOptions-3.0.lua
+Includes/Libraries/LibDataBroker-1.1/LibDataBroker-1.1.lua
+Includes/Libraries/LibDBIcon-1.0/LibDBIcon-1.0.lua
+
+# Localization
+Locales/enUS.lua
+Locales/deDE.lua
+Locales/esES.lua
+Locales/esMX.lua
+Locales/frFR.lua
+Locales/itIT.lua
+Locales/koKR.lua
+Locales/ptBR.lua
+Locales/ruRU.lua
+Locales/zhCN.lua
+Locales/zhTW.lua
+
+# Data
+Data/Flavor.lua
+Data/Data.lua
+Data/Camelot/Scrolls-Camelot.lua
+Data/Camelot/Bandages-Camelot.lua
+Data/Camelot/Food-and-Water-Camelot.lua
+Data/Camelot/Healthstones-Camelot.lua
+Data/Camelot/Soulstones-Camelot.lua
+Data/Camelot/Mana-Gems-Camelot.lua
+Data/Camelot/Conjured-Items-Camelot.lua
+Data/Camelot/Potions-Camelot.lua
+Data/Camelot/Pet-Foods-Camelot.lua
+Data/Camelot/Poisons-Camelot.lua
+Data/Camelot/Explosives-Camelot.lua
+Data/Camelot/Consumable-Upgrade-Paths-Camelot.lua
+Data/Camelot/Poison-Recipes-Camelot.lua
+Data/Camelot/Elixirs-Camelot.lua
+Data/Camelot/Questionable-Equipment-Camelot.lua
+Data/Camelot/Game-IDs-Camelot.lua
+Data/Camelot/Macro-Default-Items-Camelot.lua
+Data/Camelot/Conjure-Spells-Camelot.lua
+Data/Camelot/Well-Fed-Buffs-Camelot.lua
+Data/Camelot/Tracked-Abilities-Camelot.lua
+Data/Camelot/Buff-Window-Spells-Camelot.lua
+Data/Camelot/Class-Spell-Lists-Camelot.lua
+Data/Camelot/Trainer-Spells-Camelot.lua
+Data/Camelot/Group-Versions-Camelot.lua
+Data/Camelot/Shared-Page-Spells-Camelot.lua
+Data/Default-Settings.lua
+
+# Bags Buffs & Buttons
+Features/Core.lua
+Features/Utilities.lua
+Features/Announcements.lua
+
+# Connoisseur
+Features/Connoisseur/Connoisseur-Core.lua
+Features/Connoisseur/Connoisseur-Utilities.lua
+# MIGRATION (remove after 2026-10-30)
+Features/Connoisseur/Default-Profile-Migration.lua
+# MIGRATION (remove after 2026-10-30)
+Features/Connoisseur/Character-Key-Migration.lua
+Features/Connoisseur/Item-Cache.lua
+Features/Connoisseur/Scanner-Character.lua
+Features/Connoisseur/Scanner-Auras.lua
+Features/Connoisseur/Scanner-Inventory.lua
+Features/Connoisseur/Macros/Signatures.lua
+Features/Connoisseur/Macros/Smart-Spell.lua
+Features/Connoisseur/Macros/Writer.lua
+Features/Connoisseur/Macros/Body-Builder.lua
+Features/Connoisseur/Macros/Engine.lua
+Features/Connoisseur/Macros/Runtime.lua
+Features/Connoisseur/Macros/Tools-Mages.lua
+Features/Connoisseur/Macros/Tools-Warlocks.lua
+Features/Connoisseur/Macros/Tools-Rogues.lua
+Features/Connoisseur/Macros/Tools-Hunters.lua
+Features/Connoisseur/Macros/Tools-Hunters-Pet-Food.lua
+Features/Connoisseur/Macros/Tools-Forsaken.lua
+Features/Connoisseur/Macros/Bandage.lua
+Features/Connoisseur/Macros/Explosive.lua
+Features/Connoisseur/Macros/Food.lua
+Features/Connoisseur/Macros/Health-Potion.lua
+Features/Connoisseur/Macros/Healthstone.lua
+Features/Connoisseur/Macros/Mana-Gem.lua
+Features/Connoisseur/Macros/Mana-Potion.lua
+Features/Connoisseur/Macros/Soulstone.lua
+Features/Connoisseur/Macros/Water.lua
+Features/Connoisseur/Macros/Integration-Druid-Macro-Helper.lua
+Features/Connoisseur/Action-Button-Text.lua
+Features/Connoisseur/Readiness-Report-Probes.lua
+Features/Connoisseur/Readiness-Report.lua
+Features/Connoisseur/Ignore-List.lua
+Features/Connoisseur/Inventory-Report.lua
+
+# Restocker
+Features/Restocker/Restocker-List.lua
+Features/Restocker/Restocker-Saved-Lists.lua
+Features/Restocker/Restocker-Saved-Format.lua
+Features/Restocker/Restocker-Inventory-Model.lua
+Features/Restocker/Restocker-Bags.lua
+Features/Restocker/Restocker-Bank.lua
+Features/Restocker/Restocker-Merchant.lua
+Features/Restocker/Restocker-Crafting-Reagents.lua
+Features/Restocker/Restocker-Upgrade.lua
+Features/Restocker/Restocker-Window-Frame.lua
+Features/Restocker/Restocker-Window-Widgets.lua
+Features/Restocker/Restocker-Window.lua
+Features/Restocker/Restocker-Window-Columns.lua
+Features/Restocker/Restocker-Window-Filter.lua
+Features/Restocker/Restocker-Window-Rows.lua
+Features/Restocker/Restocker-Window-Categories.lua
+Features/Restocker/Restocker-Window-List-Bar.lua
+Features/Restocker/Restocker-Window-Bag-Menu.lua
+Features/Restocker/Restocker-Window-Footer.lua
+Features/Restocker/Restocker-Starter-List.lua
+Features/Restocker/Restocker-Starter-Window.lua
+Features/Restocker/Restocker-Reminders.lua
+Features/Restocker/Restocker-Events.lua
+Features/Restocker/Restocker-Slash-Command.lua
+
+# Thanks for the Buff
+Features/Thanks-for-the-Buff/Thanks-for-the-Buff-Core.lua
+Features/Thanks-for-the-Buff/Thanks-for-the-Buff-Utilities.lua
+Features/Thanks-for-the-Buff/Tracked-Lookups.lua
+Features/Thanks-for-the-Buff/Praise.lua
+Features/Thanks-for-the-Buff/Buff-Tracking.lua
+Features/Thanks-for-the-Buff/Good-News.lua
+Features/Thanks-for-the-Buff/Thank-You-Button.lua
+Features/Thanks-for-the-Buff/Buff-Window-Frame.lua
+Features/Thanks-for-the-Buff/Buff-Window-Castable.lua
+Features/Thanks-for-the-Buff/Buff-Window-Units.lua
+Features/Thanks-for-the-Buff/Buff-Window-Self.lua
+Features/Thanks-for-the-Buff/Buff-Window-Outsiders.lua
+Features/Thanks-for-the-Buff/Buff-Window.lua
+Features/Thanks-for-the-Buff/Buff-Window-Keys.lua
+
+# Spellbook
+Features/Spellbook/Spellbook-Core.lua
+Features/Spellbook/Spellbook-Utilities.lua
+Features/Spellbook/Macro-Options.lua
+Features/Spellbook/Macro-Copies.lua
+Features/Spellbook/Macro-Body.lua
+Features/Spellbook/Usable-Items.lua
+Features/Spellbook/Macro-Builder.lua
+Features/Spellbook/Unlearned-Spells.lua
+Features/Spellbook/Trainer-Recording.lua
+Features/Spellbook/Macro-Sync.lua
+Features/Spellbook/Consumable-Macros.lua
+Features/Spellbook/Dynamic-Rank.lua
+Features/Spellbook/Macro-Menu.lua
+Features/Spellbook/Spellbook-Paging.lua
+Features/Spellbook/Macro-Button.lua
+Features/Spellbook/Spellbook-Page.lua
+Features/Spellbook/Spellbook-Window.lua
+Features/Spellbook/Spellbook-Tabs.lua
+Features/Spellbook/Spellbook-Host-Modern.lua
+Features/Spellbook/Key-Bindings.lua
+
+# Mini-map Button
+Features/Minimap-Button.lua
+
+# Diagnostics
+Diagnostics/Diagnostics-Core.lua
+Diagnostics/Manifests.lua
+Diagnostics/Manifests-Connoisseur.lua
+Diagnostics/Manifests-Restocker.lua
+Diagnostics/Manifests-Thanks-for-the-Buff.lua
+Diagnostics/Manifests-Spellbook.lua
+Diagnostics/Event-Log.lua
+Diagnostics/Code-Reports.lua
+Diagnostics/Settings-Reports.lua
+Diagnostics/Validate-Data.lua
+Diagnostics/Localization-Reports.lua
+Diagnostics/Message-Length-Connoisseur.lua
+Diagnostics/Message-Length-Thanks-for-the-Buff.lua
+Diagnostics/Message-Length-Spellbook.lua
+Diagnostics/Report-Runner.lua
+
+# Options
+Options/Options-Utilities.lua
+Options/Connoisseur/Options-Connoisseur-Utilities.lua
+Options/Thanks-for-the-Buff/Options-Thanks-for-the-Buff-Utilities.lua
+Options/Connoisseur/Options-Connoisseur.lua
+Options/Connoisseur/Options-Macros.lua
+Options/Connoisseur/Options-Class-Race.lua
+Options/Connoisseur/Options-Ignore-List.lua
+Options/Connoisseur/Options-Readiness-Report.lua
+Options/Restocker/Options-Restocker.lua
+Options/Thanks-for-the-Buff/Options-Thanks-for-the-Buff.lua
+Options/Thanks-for-the-Buff/Options-Stranger-Buffs.lua
+Options/Thanks-for-the-Buff/Options-Teammate-Buffs.lua
+Options/Thanks-for-the-Buff/Options-Teammate-Buffs-Tracked.lua
+Options/Thanks-for-the-Buff/Options-Send-Good-News.lua
+Options/Thanks-for-the-Buff/Options-Send-Good-News-Tracked.lua
+Options/Thanks-for-the-Buff/Options-Service-Alerts.lua
+Options/Thanks-for-the-Buff/Options-Service-Alerts-Tracked.lua
+Options/Thanks-for-the-Buff/Options-Thank-You-Button.lua
+Options/Thanks-for-the-Buff/Options-Buff-Window.lua
+Options/Thanks-for-the-Buff/Options-Buff-Window-Buffs.lua
+Options/Thanks-for-the-Buff/Options-Buff-Window-Self-Buffs.lua
+Options/Thanks-for-the-Buff/Options-Buff-Window-Weapon-Buffs.lua
+Options/Spellbook/Options-Spellbook.lua
+Options/Options-General.lua
+Options/Options-Profiles.lua
+Options/Options-Feedback-Support.lua
+Diagnostics/Options-Diagnostics.lua
+Options/Options.lua
+
+# Feedback Welcome! (=
+# Bags Buffs & Buttons on GitHub // https://github.com/Gogo1951/Bags-Buffs-Buttons
+# Bags Buffs & Buttons on Discord // https://discord.gg/eh8hKq992Q
