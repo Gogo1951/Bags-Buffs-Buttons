@@ -280,9 +280,20 @@ local function CastBody(macro)
 	end
 	if ns.IsOptionOn(macro, "pet") then
 		-- [pet:X] matches the pet's creature family, so another demon being out still summons this one
-		return header .. "/cast " .. Condition("pet:" .. macro.petFamily) .. " " .. macro.petAbility .. "; " .. spell
+		clauses = { { "pet:" .. macro.petFamily, nil, macro.petAbility }, { "", nil, spell } }
+		reset = nil
 	end
-	return header .. CastLine(clauses, spellFor, reset)
+	--[[
+		the Conditionals rows (Features/Spellbook/Conditionals.lua) come first, in their order, each a plain cast
+		of its own spell, so the first that matches casts and the macro's own clauses are what is left:
+		"[mod:shift] Frost Nova; [spec:2,mod:alt] Blizzard; [@mouseover,harm,nodead][] Fireball". In a cast
+		sequence each row's spell casts once until the same reset, as the macro's own does.
+	]]
+	local rows = ns.ConditionalClauses(macro)
+	for _, clause in ipairs(clauses) do
+		rows[#rows + 1] = clause
+	end
+	return header .. CastLine(rows, spellFor, reset)
 end
 
 --[[

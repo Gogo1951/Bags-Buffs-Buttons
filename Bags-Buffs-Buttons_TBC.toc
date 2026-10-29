@@ -189,6 +189,7 @@ Features/Spellbook/Page-Settings.lua
 Features/Spellbook/Grouped-Spells.lua
 Features/Spellbook/Page-Categories.lua
 Features/Spellbook/Target-Priority.lua
+Features/Spellbook/Conditionals.lua
 Features/Spellbook/Macro-Copies.lua
 Features/Spellbook/Macro-Body.lua
 Features/Spellbook/Mute-Errors.lua
@@ -215,6 +216,7 @@ Features/Spellbook/Spellbook-Page.lua
 Features/Spellbook/Spellbook-Controls.lua
 Features/Spellbook/Spellbook-Events.lua
 Features/Spellbook/Spellbook-Window.lua
+Features/Spellbook/Conditionals-Panel.lua
 Features/Spellbook/Spellbook-Host-Classic.lua
 Features/Spellbook/Key-Bindings.lua
 

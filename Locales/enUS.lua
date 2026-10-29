@@ -1841,6 +1841,65 @@ L["MENU_MAKE_DEFAULT_DESCRIPTION"] =
 	"Every macro under %s that you haven't set yourself starts with this macro's options."
 L["MENU_DEFAULT_SET"] = "%s now start with these options."
 
+-- Page: Conditionals
+L["MENU_GROUP_CONDITIONALS"] = "Conditionals"
+L["MENU_CONDITIONALS_DESCRIPTION"] =
+	"Opens the Conditionals panel beside the Spell Book, where the macro can cast a different spell when a condition matches, like Shift held or Spec 2."
+L["MENU_RIGHT_CLICK_TAKEN"] = "A Conditional uses Right-Click. Remove it to turn this on."
+-- TRANSLATORS: the panel's title after the spell's name and "//" ("Fireball // Conditionals").
+L["CONDITIONALS_TITLE"] = "Conditionals"
+L["CONDITIONALS_HINT"] = "Checked top to bottom; the first that matches casts."
+L["CONDITIONALS_OTHERWISE"] = "Otherwise"
+-- TRANSLATORS: joins a row's two conditions ("Spec 2 and Alt Held").
+L["CONDITIONALS_AND"] = "and"
+L["CONDITIONALS_AND_MENU"] = "And"
+L["CONDITIONALS_AND_DESCRIPTION"] = "Adds a second condition. The row casts only when both match."
+L["CONDITIONALS_DROP_SECOND"] = "Remove This Condition"
+L["CONDITIONALS_DROP_SECOND_DESCRIPTION"] = "The row checks its first condition alone again."
+L["CONDITIONALS_ADD"] = "+ Add Condition"
+L["CONDITIONALS_ADD_DESCRIPTION"] = "Adds a row at the bottom. Pick its condition, then the spell it casts."
+L["CONDITIONALS_ADD_LIMIT"] = "Up to %d rows. Each one adds to the macro text, which holds 255 characters."
+L["CONDITIONALS_PICK_SPELL"] = "Pick A Spell"
+L["CONDITIONALS_PICKING"] = "Click A Spell On The Page"
+L["CONDITIONALS_SLOT_DESCRIPTION"] =
+	"Click here, then click a spell on the page to cast it in this row. Or drag a spell from the page onto this slot."
+L["CONDITIONALS_PICK_BANNER"] = "Click a spell to use it. Esc or right-click cancels."
+L["CONDITIONALS_CANNOT_PICK"] = "Only a learned spell can be cast by a conditional."
+L["CONDITIONALS_REMOVE"] = "Remove"
+L["CONDITIONALS_REMOVE_DESCRIPTION"] = "Removes this row."
+L["CONDITIONALS_REORDER"] = "Reorder"
+L["CONDITIONALS_REORDER_DESCRIPTION"] =
+	"Drag onto another row to move this one there. The first row that matches casts."
+-- TRANSLATORS: a row in short, for the macro menu's value and the spell's tooltip ("Shift: Frost Nova").
+L["CONDITIONALS_SUMMARY"] = "%s: %s"
+-- TRANSLATORS: a row's two conditions in short ("Spec 2 + Alt").
+L["CONDITIONALS_JOIN"] = "%s + %s"
+L["CONDITION_SHIFT"] = "Shift Held"
+L["CONDITION_SHIFT_SHORT"] = "Shift"
+L["CONDITION_SHIFT_DESCRIPTION"] = "Matches while you hold Shift as you press the macro."
+L["CONDITION_CTRL"] = "Ctrl Held"
+L["CONDITION_CTRL_SHORT"] = "Ctrl"
+L["CONDITION_CTRL_DESCRIPTION"] = "Matches while you hold Ctrl as you press the macro."
+L["CONDITION_ALT"] = "Alt Held"
+L["CONDITION_ALT_SHORT"] = "Alt"
+L["CONDITION_ALT_DESCRIPTION"] = "Matches while you hold Alt as you press the macro."
+L["CONDITION_RIGHT_CLICK"] = "Right-Click"
+L["CONDITION_RIGHT_CLICK_DESCRIPTION"] = "Matches when you right-click the macro on your action bar."
+L["CONDITION_IN_COMBAT"] = "In Combat"
+L["CONDITION_IN_COMBAT_DESCRIPTION"] = "Matches while you're in combat."
+L["CONDITION_OUT_OF_COMBAT"] = "Out Of Combat"
+L["CONDITION_OUT_OF_COMBAT_DESCRIPTION"] = "Matches while you're out of combat."
+L["CONDITION_SPEC_1"] = "Spec 1"
+L["CONDITION_SPEC_1_DESCRIPTION"] = "Matches while your first talent spec is active."
+L["CONDITION_SPEC_2"] = "Spec 2"
+L["CONDITION_SPEC_2_DESCRIPTION"] = "Matches while your second talent spec is active."
+L["CONDITION_COMBAT_BLOCKED"] =
+	"Not available while When is set to In Combat or Out Of Combat. The macro already does nothing on the other side, so this would always match, or never."
+L["CONDITION_RIGHT_CLICK_BLOCKED"] =
+	"Not available while Grouped Spells has Right-Click For %s on, which already takes the right-click. Turn that off to use Right-Click here."
+L["SUBTEXT_CONDITIONALS_ONE"] = "1 Conditional"
+L["SUBTEXT_CONDITIONALS"] = "%d Conditionals"
+
 -- Page: Settings Menu
 L["SETTINGS_SHOW_ALL_RANKS"] = "Show All Spell Ranks"
 L["SETTINGS_SHOW_GROUPED_SPELLS"] = "Show Grouped Spells"

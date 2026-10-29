@@ -450,6 +450,7 @@ local SPELLBOOK_DEFAULTS = {
 		groupVersion = {},
 		groupedSpells = {},
 		targetPriority = {}, -- each spell's own target priority, as a list of units (see ns.TargetPriority)
+		conditionals = {}, -- each spell's Conditionals rows, in order (see ns.Conditionals)
 		useItems = {},
 		macroCopies = {}, -- the Duplicate copies of each spell's macro, by spell name, as a list of copy numbers
 		trainerSpells = {}, -- by class token, then spell id -> required level (see Features/Spellbook/Trainer-Recording.lua)

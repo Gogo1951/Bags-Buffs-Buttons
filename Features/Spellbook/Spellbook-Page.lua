@@ -585,6 +585,16 @@ local function Layout(page)
 	end
 end
 
+local refreshListeners = {}
+
+--[[
+	Calls fn(page) after each refresh, so the Conditionals panel docked beside the window
+	(Features/Spellbook/Conditionals-Panel.lua) follows the macros the refresh rebuilt.
+]]
+function ns.OnSpellbookPageRefreshed(fn)
+	refreshListeners[#refreshListeners + 1] = fn
+end
+
 -- Rebuilds the list from the spellbook and the class lists, updates changed macros, then redraws.
 local function Refresh(page)
 	ns.CollectMacros()
@@ -598,6 +608,9 @@ local function Refresh(page)
 	end
 	page.UpdateFilterButton() -- the schools or categories on offer follow the new list
 	Layout(page)
+	for _, fn in ipairs(refreshListeners) do
+		fn(page)
+	end
 end
 
 local pages = {} -- every page built, so a settings change can redraw the open one

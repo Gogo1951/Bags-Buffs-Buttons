@@ -96,6 +96,7 @@ end
 	full labels. A row without keys builds its text from the macro.
 ]]
 local OPTION_SUBTEXTS = {
+	{ "conditionals" },
 	{ "pet", "SUBTEXT_PET", "MENU_CAST_IF_SUMMONED" },
 	{ "cursor", "SUBTEXT_CURSOR", "MENU_CAST_AT_CURSOR" },
 	{ "targetPriority", "SUBTEXT_TARGET_PRIORITY", "MENU_GROUP_TARGET" },
@@ -137,6 +138,8 @@ local function ForEachOnOption(macro, fn)
 			on = ns.IsGrouped(macro)
 		elseif key == "targetPriority" then
 			on = ns.HasTargetPriority(macro)
+		elseif key == "conditionals" then
+			on = ns.ConditionalCount(macro) > 0
 		else
 			on = ns.IsOptionOn(macro, key)
 		end
@@ -166,6 +169,12 @@ local function TargetPrioritySubText(macro)
 	return L["SUBTEXT_TARGET_PRIORITY"]
 end
 
+-- The Conditionals' note and full label: "1 Conditional", "4 Conditionals".
+local function ConditionalsSubText(macro)
+	local count = ns.ConditionalCount(macro)
+	return count == 1 and L["SUBTEXT_CONDITIONALS_ONE"] or L["SUBTEXT_CONDITIONALS"]:format(count)
+end
+
 -- MAX_NOTES names fit on a tile's note line ("Max Rank, Grouped, Hide Errors"); more are counted instead.
 local MAX_NOTES = 3
 
@@ -186,6 +195,8 @@ local function OptionSubText(macro, lead)
 			note = AutoShotSubText()
 		elseif entry[1] == "targetPriority" then
 			note = TargetPrioritySubText(macro)
+		elseif entry[1] == "conditionals" then
+			note = ConditionalsSubText(macro)
 		else
 			note = L[entry[2]]
 		end
@@ -232,6 +243,8 @@ local function OptionLabel(macro, entry)
 			end
 		end
 		return L[entry[3]] .. " (" .. table.concat(labels, ", ") .. ")"
+	elseif key == "conditionals" then
+		return ConditionalsSubText(macro) .. " (" .. table.concat(ns.ConditionalSummaries(macro), ", ") .. ")"
 	end
 	return L[entry[3]]
 end
@@ -321,6 +334,19 @@ local function CreateMacroButton(parent)
 	end)
 	button:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp")
 	button:SetScript("OnClick", function(self, mouseButton)
+		--[[
+			while the Conditionals panel waits for a spell (Features/Spellbook/Conditionals-Panel.lua), a click
+			gives it this one and any other button cancels; a drag still places the macro
+		]]
+		if ns.IsPickingConditionalSpell() then
+			HideTooltip(self)
+			if mouseButton == "LeftButton" then
+				ns.PickConditionalSpell(self.macro)
+			else
+				ns.CancelConditionalPick()
+			end
+			return
+		end
 		if mouseButton == "RightButton" then
 			HideTooltip(self)
 			ns.ShowMacroMenu(self)

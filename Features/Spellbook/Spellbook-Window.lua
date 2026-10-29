@@ -21,12 +21,16 @@ local SCREEN_MARGIN = 40 -- kept clear around the window when it is scaled down 
 
 local window
 local listeners = {} -- the hosts' tabs, told when the window shows or hides
+local dockWidth = 0 -- the panel docked at the window's right edge (ns.DockSpellbookPanel), or 0 for none
 
--- Shrinks the window, never grows it, so the whole spread fits on screen at any resolution or UI scale.
+--[[
+	Shrinks the window, never grows it, so the whole spread fits on screen at any resolution or UI scale, a docked
+	panel included.
+]]
 local function FitToScreen()
 	local scale = math.min(
 		1,
-		(UIParent:GetWidth() - 2 * SCREEN_MARGIN) / WINDOW_WIDTH,
+		(UIParent:GetWidth() - 2 * SCREEN_MARGIN) / (WINDOW_WIDTH + dockWidth),
 		(UIParent:GetHeight() - 2 * SCREEN_MARGIN) / WINDOW_HEIGHT
 	)
 	window:SetScale(scale)
@@ -119,6 +123,30 @@ function ns.HideSpellbookWindow()
 	if window then
 		window:Hide()
 	end
+end
+
+--[[
+	Docks a panel width wide against the window's right edge, the Conditionals panel
+	(Features/Spellbook/Conditionals-Panel.lua), or none with 0: the window shrinks to fit both, and keeps the
+	panel on screen as it is dragged, pulled back in at once if it hangs off the edge now.
+]]
+function ns.DockSpellbookPanel(width)
+	dockWidth = width
+	if not window then
+		return
+	end
+	window:SetClampRectInsets(0, width, 0, 0)
+	FitToScreen()
+	local point, relativeTo, relativePoint, x, y = window:GetPoint()
+	if point then
+		window:ClearAllPoints()
+		window:SetPoint(point, relativeTo, relativePoint, x, y)
+	end
+end
+
+-- The window, or nil before it is first opened, for the panel docked beside it.
+function ns.SpellbookWindow()
+	return window
 end
 
 -- The key binding's toggle (Features/Spellbook/Key-Bindings.lua), the same as a click on a host's tab.

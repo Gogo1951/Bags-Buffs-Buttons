@@ -11,7 +11,7 @@ local COMBAT, REPEAT, FIRST, ERRORS = ns.MENU_COMBAT, ns.MENU_REPEAT, ns.MENU_FI
 	A page macro's right-click options menu, opened from its button on the page (Features/Spellbook/Macro-Button.lua).
 	What the macro's kind is for comes first, as checkboxes: Cast At Cursor on Blizzard, the pet's ability on a
 	summon, the stance a spell needs, Never Turn Off on a form, the wand and the pet on a nuke. Then Target,
-	Grouped Spells, Rank and the four groups (When, First, Then, Error Messages), each a submenu button with what is on in it on the right, by
+	Grouped Spells, Rank, Conditionals (a button opening its panel) and the four groups (When, First, Then, Error Messages), each a submenu button with what is on in it on the right, by
 	its arrow; then the actions, and the macro text in a submenu of its own. Every option explains itself in its tooltip. The options themselves live in
 	Features/Spellbook/Macro-Options.lua. Its tooltips, submenu layout and option tables are shared with a category's
 	menu, in Features/Spellbook/Menu-Utilities.lua.
@@ -382,7 +382,17 @@ function ns.ShowMacroMenu(button)
 						ns.ToggleOption(macro, "groupVersion")
 					end)
 				end)
-				SetTip(element, label, L["MENU_GROUP_VERSION_DESCRIPTION"]:format(rightClick, macro.name))
+				-- off while a Conditionals row checks Right-Click, which has the right-click already (see ns.ConditionBlockReason)
+				local taken = not ns.IsOptionOn(macro, "groupVersion") and ns.ConditionalsUseRightClick(macro)
+				SetTip(
+					element,
+					label,
+					L["MENU_GROUP_VERSION_DESCRIPTION"]:format(rightClick, macro.name),
+					taken and L["MENU_RIGHT_CLICK_TAKEN"] or nil
+				)
+				if taken then
+					element:SetEnabled(false)
+				end
 			end
 			if ns.OffersGroupedSpells(macro) then
 				if offersRightClick then
@@ -464,6 +474,22 @@ function ns.ShowMacroMenu(button)
 					)
 				end
 			end
+		end
+
+		--[[
+			Conditionals: opens the panel docked beside the window (Features/Spellbook/Conditionals-Panel.lua), where
+			the rows are set; the value names the one set ("Shift: Frost Nova") or counts them
+		]]
+		if ns.OffersConditionals(macro) then
+			section()
+			local element = root:CreateButton(L["MENU_GROUP_CONDITIONALS"], function()
+				ns.ShowConditionalsPanel(macro, page)
+			end)
+			element:AddInitializer(function(frame)
+				local value = GroupValue(ns.ConditionalSummaries(macro))
+				return LabelAndValue(frame, L["MENU_GROUP_CONDITIONALS"], value and GetColor("INFO") .. value .. "|r")
+			end)
+			SetTip(element, L["MENU_GROUP_CONDITIONALS"], L["MENU_CONDITIONALS_DESCRIPTION"])
 		end
 		if above then
 			root:CreateDivider()

@@ -189,6 +189,19 @@ ns.AppendDiagnosticRows(ns.DIAGNOSTIC_API_CHECKS, {
 			return type(MenuResponse) == "table" and MenuResponse.Refresh ~= nil
 		end,
 	},
+	--[[
+		The Conditionals (Features/Spellbook/Conditionals.lua and Features/Spellbook/Conditionals-Panel.lua): the
+		Spec conditions are offered only where a talent group count says the character has two specs, the
+		Retail-engine count first, then the Classic-engine one; a spell dropped on a slot is read off the cursor;
+		the panel docks with its own close and Add Condition buttons.
+	]]
+	Method("C_SpecializationInfo", "GetNumSpecGroups", "C_SpecializationInfo.GetNumSpecGroups (guarded)"),
+	Global("GetNumTalentGroups"),
+	Global("GetCursorInfo"),
+	Global("ClearCursor"),
+	Global("GetMacroSpell"),
+	Template("UIPanelCloseButton"),
+	Template("UIPanelButtonTemplate"),
 
 	Method("Settings", "OpenToCategory"),
 	--[[
@@ -381,6 +394,7 @@ local PER_SPELL_OPTIONS = {
 	"useItems",
 	"groupedSpells",
 	"targetPriority",
+	"conditionals",
 }
 
 --------------------------------------------------------------------------------
@@ -782,6 +796,7 @@ function ns:BuildPageContextReport()
 		lines[#lines + 1] = "Per-spell settings saved: "
 			.. table.concat(counts, ", ")
 			.. string.format("; Duplicate copies %d, of %d spells", copies, CountKeys(profile.macroCopies))
+		lines[#lines + 1] = "Conditionals: Spec conditions offered (dual spec) " .. tostring(ns.HasDualSpec())
 		lines[#lines + 1] = string.format(
 			"Unlearned sources: bundled trainer rows %d (%d for your faction and race), recorded by this character %d, class list extra spells %d",
 			#((ns.TRAINER_SPELLS or {})[PlayerClass()] or {}),

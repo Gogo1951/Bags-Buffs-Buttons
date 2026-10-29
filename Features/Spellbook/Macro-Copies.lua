@@ -11,7 +11,7 @@ local NO_COPIES = {}
 	copy numbers, by spell name, in the order made; a number removed is never reused while a later one stands,
 	so a copy keeps its name. A copy offers every option its spell does except a focus copy of its own.
 ]]
-local COPIED_SETTINGS = { "pet", "stance", "fixedRank", "useItems", "groupedSpells", "targetPriority" }
+local COPIED_SETTINGS = { "pet", "stance", "fixedRank", "useItems", "groupedSpells", "targetPriority", "conditionals" }
 for _, key in ipairs(ns.DEFAULTABLE_OPTIONS) do
 	COPIED_SETTINGS[#COPIED_SETTINGS + 1] = key
 end
