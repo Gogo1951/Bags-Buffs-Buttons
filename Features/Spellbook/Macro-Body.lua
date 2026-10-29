@@ -1,6 +1,6 @@
 local _, ns = ...
 
--- Writes a page macro's text from its spell and the options the player turned on (Features/Macro-Options.lua).
+-- Writes a page macro's text from its spell and the options the player turned on (Features/Spellbook/Macro-Options.lua).
 
 --[[
 	A macro conditional joining the given conditions (nil or "" ones are skipped), e.g.
@@ -76,114 +76,10 @@ end
 
 --[[
 	The body MacroBody gives a spell macro with no options on, which does just what the plain spell does,
-	before its tag line (see ns.TaggedBody).
+	before its tag line (see ns.TaggedBody, in Features/Spellbook/Macro-Tags.lua).
 ]]
 function ns.BareBody(name)
 	return "#showtooltip\n/cast " .. name
-end
-
---[[
-	The tag line that ends every macro the add-on writes, "#4K", kept as short as it can be since it costs
-	the player macro text. WoW runs only the "#" lines it knows (#showtooltip, #show), so the line does
-	nothing; it names the page macro the WoW macro is for, whatever the macro is called, so the page finds its
-	macros by tag rather than by name. Only the body's last line is read as a tag, so a short "#" line
-	higher up in a macro is never taken for one. The tag is two of the 62 digits
-	and letters, handed out in turn from an account-wide register (ns.db.global.macroTags), so no two macros
-	ever share one, which a hash this short couldn't promise; past 3,843 tags they run to three. A page macro
-	gets its tag only when a WoW macro is written for it (ns.AssignMacroTag); until then its body carries "00",
-	which is never handed out, so its length is already right. The register is keyed by what the macro is
-	for: this character's key with the spell's full name, so a character finds only its own.
-]]
-local TAG_PREFIX = "#"
-local TAG_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-local TAG_WIDTH = 2
-local UNASSIGNED_TAG = "00"
-
-ns.MACRO_TAG_LENGTH = #"\n" + #TAG_PREFIX + TAG_WIDTH -- the bytes the tag line adds to a body
-
-local function MacroIdentity(macro)
-	local kind = macro.focus and "focus"
-		or macro.copy and "copy" .. macro.copy
-		or macro.rank and "rank " .. macro.rank
-		or "spell"
-	return ns.db.keys.char .. ":" .. kind .. ":" .. macro.name
-end
-
--- The register key of this character's own macro for a spell, by the spell's name.
-local function SpellIdentity(name)
-	return MacroIdentity({ name = name })
-end
-
--- Whether a WoW macro was ever written for this character's own macro for a spell.
-function ns.HasSpellMacroTag(name)
-	return ns.db.global.macroTags[SpellIdentity(name)] ~= nil
-end
-
---[[
-	Moves the tag of one spell's macro to another spell's, when that spell has no tag of its own yet, so the
-	WoW macro written for the first is found, rewritten and renamed as the second's (see ns.HandOverMacro).
-	Returns whether it moved.
-]]
-function ns.HandOverMacroTag(from, to)
-	local tags, fromIdentity, toIdentity = ns.db.global.macroTags, SpellIdentity(from), SpellIdentity(to)
-	if not tags[fromIdentity] or tags[toIdentity] then
-		return false
-	end
-	tags[toIdentity], tags[fromIdentity] = tags[fromIdentity], nil
-	return true
-end
-
--- The nth tag, n from 1: n in base 62, padded to TAG_WIDTH digits.
-local function TagNumber(n)
-	local base, digits = #TAG_DIGITS, ""
-	repeat
-		local digit = n % base
-		digits = TAG_DIGITS:sub(digit + 1, digit + 1) .. digits
-		n = math.floor(n / base)
-	until n == 0
-	return string.rep("0", TAG_WIDTH - #digits) .. digits
-end
-
-function ns.MacroTag(macro)
-	return ns.db.global.macroTags[MacroIdentity(macro)] or UNASSIGNED_TAG
-end
-
--- The tag a WoW macro's body carries, or nil for a macro the add-on didn't tag.
-function ns.BodyTag(body)
-	local tag = body and ("\n" .. body):match("\n" .. TAG_PREFIX .. "(%w%w%w?)\n*$")
-	return tag ~= UNASSIGNED_TAG and tag or nil
-end
-
--- body, less any trailing blank lines, with the macro's tag line added at its end.
-function ns.TaggedBody(macro, body)
-	return (body:gsub("\n+$", "")) .. "\n" .. TAG_PREFIX .. ns.MacroTag(macro)
-end
-
--- body without its tag line, as the page shows macro text.
-function ns.UntaggedBody(body)
-	return (("\n" .. body):gsub("\n" .. TAG_PREFIX .. "%w%w%w?\n*$", ""):sub(2))
-end
-
---[[
-	Hands the page macro the next tag, once, as a WoW macro is about to be written for it, and puts the tag in
-	its body. A macro that has one keeps it. A tag some WoW macro's body already carries is skipped, whoever
-	wrote it: Macro Spellbook's macros carry tags from the same sequence, and a lookup by tag would otherwise
-	find one of them and rewrite it.
-]]
-function ns.AssignMacroTag(macro)
-	local global = ns.db.global
-	local identity = MacroIdentity(macro)
-	if global.macroTags[identity] then
-		return
-	end
-	local inUse = ns.ReadMacroIndexes().tags
-	local tag
-	repeat
-		global.macroTagCount = global.macroTagCount + 1
-		tag = TagNumber(global.macroTagCount)
-	until not inUse[tag]
-	global.macroTags[identity] = tag
-	macro.body = ns.TaggedBody(macro, ns.UntaggedBody(macro.body))
 end
 
 --[[
@@ -344,8 +240,10 @@ local function CastBody(macro)
 		local worn = {}
 		for _, attack in ipairs(ns.RANGED_ATTACKS) do
 			local attackName = ns.SpellName(attack.id)
-			if attackName and macro.rangedAttacks[attackName] then
-				local condition = "worn:" .. ns.RangedWornName(attack)
+			local wornName = ns.RangedWornName(attack)
+			-- a weapon the client can't name gets no clause, rather than an English one that never matches
+			if attackName and wornName and macro.rangedAttacks[attackName] then
+				local condition = "worn:" .. wornName
 				for _, clause in ipairs(clauses) do
 					local unitCondition = clause[1] or ""
 					worn[#worn + 1] = {
@@ -404,45 +302,4 @@ function ns.MacroBody(macro)
 			.. (ns.IsOptionOn(macro, "hideErrors") and "\n/run UIErrorsFrame:Clear()" or "")
 			.. (ns.IsOptionOn(macro, "muteErrors") and "\n/run BBBMute()" or "")
 	)
-end
-
---[[
-	The muteErrors option's macro lines: BBBMute(1) first and BBBMute() last, the one
-	global a macro body reaches through /run. The game plays an error's sound (the "woosh", or the voice when
-	error speech is on) as it shows the error, which for a spell pressed while not ready, short of power or out
-	of range is while the macro's /cast line runs; muting sound effects and error speech around that line
-	silences it, and the spell's own sound still plays, since the cast starts after the macro ends. Each
-	setting is read first, written only when on, and put back to exactly what was read; a timer puts it back
-	within a second should the macro's last line never run.
-]]
-local MUTED_CVARS = { "Sound_EnableSFX", "Sound_EnableErrorSpeech" }
-local mutedValues -- cvar -> the value read before muting, while muted
-
-local function RestoreSounds()
-	if not mutedValues then
-		return
-	end
-	for cvar, value in pairs(mutedValues) do
-		C_CVar.SetCVar(cvar, value)
-	end
-	mutedValues = nil
-end
-
-function BBBMute(on)
-	if not on then
-		RestoreSounds()
-		return
-	end
-	if mutedValues then
-		return
-	end
-	mutedValues = {}
-	for _, cvar in ipairs(MUTED_CVARS) do
-		local value = C_CVar.GetCVar(cvar)
-		if value and value ~= "0" then
-			mutedValues[cvar] = value
-			C_CVar.SetCVar(cvar, "0")
-		end
-	end
-	C_Timer.After(1, RestoreSounds)
 end

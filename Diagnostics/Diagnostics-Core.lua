@@ -53,9 +53,9 @@ local TITLE = ns.ADDON_TITLE
 
 ns.DiagnosticsStrings = {
 	TAB = "Diagnostic Tools",
-	WARNING = "These tools help diagnose problems and are meant for developers. They won't change how the add-on works, though while they are on the Restock List prints a step-by-step trace to chat during bank restocks, and their output includes technical details about your client and installed add-ons. Leave this off unless you're troubleshooting with someone.",
+	WARNING = "These tools help diagnose problems and are meant for developers. They won't change how the add-on works, but their output includes technical details about your client and installed add-ons. Leave this off unless you're troubleshooting with someone.",
 	ENABLE = "Enable Diagnostic Tools",
-	ENABLE_DESCRIPTION = "Shows the tools below for this session only, and turns on the Restock List's chat trace during bank restocks. Turning it off stops the event log and the trace, and clears every report.",
+	ENABLE_DESCRIPTION = "Shows the tools below for this session only. Turning it off stops the event log and clears every report.",
 
 	TAB_RUN_TESTS = "Run Tests",
 	TAB_SETTINGS = "Settings",
@@ -197,7 +197,7 @@ ns.DiagnosticsStrings = {
 	REPORT_ERROR_NOTE = "threw an error, see below",
 	REPORT_STOPPED = "(stopped before finishing)",
 
-	-- The Restock List's bank trace (ns.RestockerDebug), printed while these tools are on.
+	-- The Restock List's bank trace (ns.RestockerDebug), written into the event log while it runs.
 	TRACE_PUT_CURSOR_ITEM = "PutCursorItem(%s) bag=%s slot=%s",
 	TRACE_PUT_CURSOR_NO_SLOT = "PutCursorItem(%s) bag=%s -- no empty slot",
 	TRACE_BANK_NO_ROOM = "PutItemInBank: no room to drop, clearing cursor",

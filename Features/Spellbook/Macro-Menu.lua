@@ -2,13 +2,19 @@ local _, ns = ...
 local L = ns.L
 local GetColor = ns.GetColor
 
+local SetTip, OptionTip = ns.MenuSetTip, ns.MenuOptionTip
+local LabelAndValue, AutoShotLabel = ns.MenuLabelAndValue, ns.MenuAutoShotLabel
+local DESCRIPTIONS, NOTES = ns.MENU_DESCRIPTIONS, ns.MENU_NOTES
+local COMBAT, REPEAT, FIRST, ERRORS = ns.MENU_COMBAT, ns.MENU_REPEAT, ns.MENU_FIRST, ns.MENU_ERRORS
+
 --[[
-	A page macro's right-click options menu, opened from its button on the page (Features/Macro-Button.lua).
-	What the macro's kind is for comes first, as checkboxes: Cast On Mouseover and Cast On Self on a heal, Cast
-	At Cursor on Blizzard, Never Turn Off on a form, the wand on a nuke. Then Grouped Spells, Rank and the four
-	groups (When, First, Then, Error Messages), each a submenu button with what is on in it on the right, by
+	A page macro's right-click options menu, opened from its button on the page (Features/Spellbook/Macro-Button.lua).
+	What the macro's kind is for comes first, as checkboxes: Cast At Cursor on Blizzard, the pet's ability on a
+	summon, the stance a spell needs, Never Turn Off on a form, the wand and the pet on a nuke. Then Target,
+	Grouped Spells, Rank and the four groups (When, First, Then, Error Messages), each a submenu button with what is on in it on the right, by
 	its arrow; then the actions, and the macro text in a submenu of its own. Every option explains itself in its tooltip. The options themselves live in
-	Features/Macro-Options.lua.
+	Features/Spellbook/Macro-Options.lua. Its tooltips, submenu layout and option tables are shared with a category's
+	menu, in Features/Spellbook/Menu-Utilities.lua.
 ]]
 
 -- "<label> // <macro name>", the heading of the macro's tooltip block
@@ -25,49 +31,6 @@ end
 
 -- the classes whose enemy spells offer Start Pet Attack at the top, since their pet is always out
 local PET_CLASSES = { HUNTER = true, WARLOCK = true }
-
--- Each option's explanation, and a note for the two that need one.
-local DESCRIPTIONS = {
-	cursor = "OPTIONS_DEFAULT_CURSOR_DESCRIPTION",
-	targetRank = "OPTIONS_DEFAULT_DYNAMIC_RANK_DESCRIPTION",
-	stopCast = "OPTIONS_DEFAULT_STOP_CASTING_DESCRIPTION",
-	stopAttack = "OPTIONS_DEFAULT_STOP_ATTACK_DESCRIPTION",
-	stopIfChanneling = "OPTIONS_DEFAULT_STOP_IF_CHANNELING_DESCRIPTION",
-	stopIfStealthed = "OPTIONS_DEFAULT_STOP_IF_STEALTHED_DESCRIPTION",
-	cancelForm = "OPTIONS_DEFAULT_LEAVE_FORM_DESCRIPTION",
-	targetEnemy = "OPTIONS_DEFAULT_TARGET_ENEMY_DESCRIPTION",
-	targetFriend = "OPTIONS_DEFAULT_TARGET_FRIEND_DESCRIPTION",
-	petAttack = "OPTIONS_DEFAULT_PET_ATTACK_DESCRIPTION",
-	startAttack = "OPTIONS_DEFAULT_START_ATTACK_DESCRIPTION",
-	autoShot = "OPTIONS_DEFAULT_AUTO_SHOT_DESCRIPTION",
-	oncePerTarget = "OPTIONS_DEFAULT_ONCE_PER_TARGET_DESCRIPTION",
-	oncePerCombat = "OPTIONS_DEFAULT_ONCE_PER_COMBAT_DESCRIPTION",
-	noToggle = "OPTIONS_DEFAULT_NEVER_TURN_OFF_DESCRIPTION",
-	hideErrors = "OPTIONS_DEFAULT_HIDE_ERRORS_DESCRIPTION",
-	muteErrors = "OPTIONS_DEFAULT_MUTE_ERRORS_DESCRIPTION",
-}
-local NOTES = { targetRank = "MENU_DYNAMIC_RANK_NOTE", stopCast = "MENU_STOP_CASTING_NOTE" }
-
---[[
-	Gives a menu element a tooltip: its label as a gold title, a white explanation and, where there is one, a
-	silver note. Builds whose menus can't take a tooltip show the element bare.
-]]
-local function SetTip(element, title, body, note)
-	if not element.SetTooltip or not body then
-		return
-	end
-	element:SetTooltip(function(tooltip)
-		tooltip:SetText(title, 1, 0.82, 0, 1, true)
-		tooltip:AddLine(body, 1, 1, 1, true)
-		if note then
-			tooltip:AddLine(note, 0.8, 0.8, 0.8, true)
-		end
-	end)
-end
-
-local function OptionTip(element, key, title)
-	SetTip(element, title, L[DESCRIPTIONS[key]], NOTES[key] and L[NOTES[key]])
-end
 
 --[[
 	Lays text out in a menu title's font string as a left-aligned block width wide, wrapping as it needs, and
@@ -100,40 +63,6 @@ local function GroupValue(on)
 	return #on == 1 and on[1] or L["MENU_OPTIONS_COUNT"]:format(#on)
 end
 
-local VALUE_GAP = 24 -- the least space between a submenu button's label and its value
-local ARROW_WIDTH = 16 -- the submenu arrow's, which the game draws at the button's right edge
-local ARROW_GAP = 16 -- the least space between a submenu button's label, or its value, and the arrow
-
---[[
-	Lays a submenu button out as its label on the left and its value (already coloured, or nil) on the right,
-	against the submenu arrow, so every value in the menu lines up; returns the width the button needs for
-	both, for the menu to take. Set each time the menu redraws, which releases the value's font string.
-]]
-local function LabelAndValue(frame, label, value)
-	local fontString = frame.fontString
-	fontString:SetTextToFit(label)
-	local width = fontString:GetUnboundedStringWidth() + ARROW_GAP + ARROW_WIDTH
-	if value then
-		local valueString = frame:AttachFontString()
-		local fontObject = fontString:GetFontObject()
-		if fontObject then
-			valueString:SetFontObject(fontObject)
-		else
-			valueString:SetFont(fontString:GetFont())
-		end
-		valueString:SetHeight(20)
-		valueString:SetJustifyH("RIGHT")
-		if frame.arrow then
-			valueString:SetPoint("RIGHT", frame.arrow, "LEFT")
-		else
-			valueString:SetPoint("RIGHT", -ARROW_WIDTH, 0)
-		end
-		valueString:SetText(value)
-		width = width + VALUE_GAP + valueString:GetUnboundedStringWidth()
-	end
-	return math.ceil(width), 20
-end
-
 --[[
 	The macro text's lines, for the Macro Text submenu, with pipes escaped so the text shows as written. The
 	tag line is left out, though the length counts it.
@@ -144,11 +73,6 @@ local function BodyLines(macro)
 		lines[#lines + 1] = line:gsub("|", "||")
 	end
 	return lines
-end
-
--- The ranged attack's label for the player's class: Start Wand, or Start Auto Shot.
-local function AutoShotLabel()
-	return L[ns.AutoShotLabelKey() or "MENU_START_AUTO_SHOT"]
 end
 
 --[[
@@ -182,7 +106,7 @@ local function FeaturedOptions(macro)
 	return featured
 end
 
--- The tooltip of a featured option that has no Macro Defaults explanation of its own.
+-- The tooltip of a featured option that has no explanation of its own in DESCRIPTIONS.
 local function FeaturedTip(element, macro, key, label)
 	if key == "pet" then
 		SetTip(element, label, L["MENU_PET_DESCRIPTION"]:format(macro.petFamily, macro.petAbility))
@@ -192,30 +116,6 @@ local function FeaturedTip(element, macro, key, label)
 		OptionTip(element, key, label)
 	end
 end
-
--- The When group's two choices of one, as { option key or nil for the default, label key, explanation key }.
-local COMBAT = {
-	{ nil, "MENU_ANY_TIME", "MENU_ANY_TIME_DESCRIPTION" },
-	{ "combatOnly", "MENU_IN_COMBAT", "MENU_IN_COMBAT_DESCRIPTION" },
-	{ "noCombat", "SUBTEXT_NO_COMBAT", "MENU_OUT_OF_COMBAT_DESCRIPTION" },
-}
-local REPEAT = {
-	{ nil, "MENU_EVERY_PRESS", "MENU_EVERY_PRESS_DESCRIPTION" },
-	{ "oncePerTarget", "MENU_ONCE_PER_TARGET", DESCRIPTIONS.oncePerTarget },
-	{ "oncePerCombat", "MENU_ONCE_PER_COMBAT", DESCRIPTIONS.oncePerCombat },
-}
--- The First group's checkboxes, before the items, and the Error Messages group's, as { option key, label key }.
-local FIRST = {
-	{ "stopCast", "MENU_STOP_CASTING" },
-	{ "stopAttack", "MENU_STOP_ATTACK" },
-	{ "cancelForm", "MENU_LEAVE_FORM_BEFORE" },
-	{ "targetEnemy", "MENU_TARGET_NEAREST_ENEMY" },
-	{ "targetFriend", "MENU_TARGET_NEAREST_FRIEND" },
-}
-local ERRORS = { { "hideErrors", "MENU_HIDE_ERRORS" }, { "muteErrors", "MENU_MUTE_ERRORS" } }
-
--- the old Cast On checkboxes, which the target priority replaced; Make Default sets that instead
-local LEGACY_TARGETING = { mouseover = true, castOnSelf = true, targetTarget = true }
 
 --[[
 	Makes this macro's options its kind's defaults, its target priority among them; read every value first,
@@ -227,7 +127,7 @@ local function MakeDefault(macro)
 	end
 	local values = {}
 	for _, key in ipairs(ns.DEFAULTABLE_OPTIONS) do
-		if ns.OffersOption(macro, key) and not LEGACY_TARGETING[key] then
+		if ns.OffersOption(macro, key) then
 			values[key] = ns.IsOptionOn(macro, key)
 		end
 	end
@@ -250,9 +150,9 @@ function ns.ShowMacroMenu(button)
 		return
 	end
 	local page = button.page
-	-- runs a setter on the macro, rewrites it and rebuilds the page, which also rewrites its focus copy
+	-- runs a setter on the macro and rebuilds the page, which rewrites the macro and its focus copy
 	local function change(set)
-		ns.ChangeMacro(macro, set)
+		set()
 		ns.RefreshSpellbookPage(page)
 	end
 
@@ -612,8 +512,11 @@ function ns.ShowMacroMenu(button)
 		checkbox(whenMenu, "stopIfChanneling", L["MENU_STOP_IF_CHANNELING"])
 		checkbox(whenMenu, "stopIfStealthed", L["MENU_STOP_IF_STEALTHED"])
 
-		-- First: what runs before the cast, the items last, each labelled with its place in the order
-		-- the equipped on-use items, plus any slot already ticked so it can be unticked after a gear swap
+		--[[
+			First: what runs before the cast, the items last, each labelled with its place in the order. The
+			slots are the equipped on-use items, plus any slot already ticked so it can be unticked after a gear
+			swap.
+		]]
 		local slots = {}
 		if ns.OffersUseItems(macro) then
 			local listed = {}
@@ -745,281 +648,8 @@ function ns.ShowMacroMenu(button)
 					ns.ToggleOption(macro, "focus")
 				end)
 			end)
-			SetTip(element, L["MENU_ADD_FOCUS"], L["MENU_FOCUS_DESCRIPTION"])
+			SetTip(element, L[on and "MENU_REMOVE_FOCUS" or "MENU_ADD_FOCUS"], L["MENU_FOCUS_DESCRIPTION"])
 		end
 		addDelete()
-	end)
-end
-
---[[
-	A category's menu, from the gear on its header (Features/Spellbook-Page.lua): the right-click menu's
-	options, each applied to every macro in the category that offers it, so Hide Errors can go on all of them at
-	once. A checkbox is ticked, or a choice picked, only when every one of those macros has it. The spells'
-	own choices (a fixed rank, the grouped spells, the pet ability, the stance, the focus copy) and the actions
-	stay on each macro's own menu. A macro not on the bars yet only has its settings stored; its WoW macro is
-	made with them when it is first placed. onChange runs after each change, to redraw the page.
-]]
-function ns.ShowCategoryMenu(owner, name, macros, onChange)
-	local list = {}
-	for _, macro in ipairs(macros) do
-		if not macro.focus and ns.HasOptions(macro) then
-			list[#list + 1] = macro
-		end
-	end
-	if #list == 0 then
-		return
-	end
-	-- the category's macros that pass test
-	local function offering(test)
-		local found = {}
-		for _, macro in ipairs(list) do
-			if test(macro) then
-				found[#found + 1] = macro
-			end
-		end
-		return found
-	end
-	local function offeringOption(key)
-		return offering(function(macro)
-			return ns.OffersOption(macro, key)
-		end)
-	end
-	local function all(targets, test)
-		for _, macro in ipairs(targets) do
-			if not test(macro) then
-				return false
-			end
-		end
-		return true
-	end
-	-- runs set on each macro and rewrites the ones already made, then redraws the page once
-	local function apply(targets, set)
-		for _, macro in ipairs(targets) do
-			ns.ChangeMacro(macro, function()
-				set(macro)
-			end)
-		end
-		onChange()
-	end
-
-	MenuUtil.CreateContextMenu(owner, function(_, root)
-		root:CreateTitle(GetColor("TITLE") .. L["MENU_CATEGORY_TITLE"]:format(name) .. "|r")
-		root:CreateDivider()
-
-		-- a submenu button, as wide as its label and the room the single-spell menu leaves before the arrow
-		local function submenu(parent, label)
-			local button = parent:CreateButton(label)
-			button:AddInitializer(function(frame)
-				return LabelAndValue(frame, label, nil)
-			end)
-			return button
-		end
-
-		-- an option on every macro offering it, or nothing when none does; returns whether it was added
-		local function checkbox(menu, key, label)
-			local targets = offeringOption(key)
-			if #targets == 0 then
-				return false
-			end
-			local function isOn()
-				return all(targets, function(macro)
-					return ns.IsOptionOn(macro, key)
-				end)
-			end
-			local element = menu:CreateCheckbox(label, isOn, function()
-				local on = not isOn()
-				apply(targets, function(macro)
-					ns.SetOption(macro, key, on)
-				end)
-			end)
-			OptionTip(element, key, label)
-			return true
-		end
-		-- a choice of one for targets: picked when each of them has it, and set on all of them
-		local function radio(menu, label, targets, isOn, set, tip, note)
-			local element = menu:CreateRadio(label, function()
-				return all(targets, isOn)
-			end, function()
-				apply(targets, set)
-				return MenuResponse.Refresh
-			end)
-			SetTip(element, label, tip, note)
-		end
-		-- whether any of these options is offered here, before a submenu for them is drawn
-		local function anyOffered(options)
-			for _, option in ipairs(options) do
-				if option[2] and #offeringOption(option[1]) > 0 then
-					return true
-				end
-			end
-			return false
-		end
-
-		local above = false
-		for _, option in ipairs({ { "cursor", L["MENU_CAST_AT_CURSOR"] }, { "noToggle", L["MENU_NEVER_TURN_OFF"] } }) do
-			above = checkbox(root, option[1], option[2]) or above
-		end
-		local function section()
-			if above then
-				root:CreateDivider()
-			end
-			above = true
-		end
-
-		-- Target: the unit at each place in the target priority, on every macro whose kind can pick it
-		local prioritized = offering(ns.OffersTargetPriority)
-		if #prioritized > 0 then
-			section()
-			local targetMenu = submenu(root, L["MENU_GROUP_TARGET"])
-			for place = 1, ns.TARGET_PRIORITY_SLOTS do
-				local placeKey = "MENU_PRIORITY_" .. place
-				local slotMenu = submenu(targetMenu, L[placeKey])
-				SetTip(slotMenu, L[placeKey], L["MENU_PRIORITY_DESCRIPTION"])
-				if place > 1 then
-					radio(slotMenu, L["MENU_UNIT_NONE"], prioritized, function(macro)
-						return ns.TargetPriority(macro)[place] == nil
-					end, function(macro)
-						ns.SetTargetPriorityUnit(macro, place, nil)
-					end, L["MENU_UNIT_NONE_DESCRIPTION"])
-				end
-				for _, row in ipairs(ns.TARGET_UNITS) do
-					local unit = row[1]
-					local targets = offering(function(macro)
-						return ns.OffersTargetPriority(macro) and ns.KindOffersUnit(macro.kind, unit)
-					end)
-					if #targets > 0 then
-						radio(slotMenu, L[row[2]], targets, function(macro)
-							return ns.TargetPriority(macro)[place] == unit
-						end, function(macro)
-							ns.SetTargetPriorityUnit(macro, place, unit)
-						end, L[row[2] .. "_DESCRIPTION"])
-					end
-				end
-			end
-		end
-
-		-- Grouped: the right-click for each spell's group or single version
-		local rightClick = offeringOption("groupVersion")
-		if #rightClick > 0 then
-			section()
-			local groupedMenu = submenu(root, L["MENU_GROUP_GROUPED"])
-			checkbox(groupedMenu, "groupVersion", L["MENU_RIGHT_CLICK_GROUP"])
-		end
-
-		-- Rank: the highest each spell knows, or Dynamic where the spell takes it
-		local ranked = offering(function(macro)
-			return ns.OffersFixedRank(macro) or ns.OffersTargetRank(macro)
-		end)
-		if #ranked > 0 then
-			section()
-			local rankMenu = submenu(root, L["MENU_GROUP_RANK"])
-			radio(rankMenu, L["MENU_HIGHEST"], ranked, function(macro)
-				return ns.AbilityRank(macro) == nil
-			end, function(macro)
-				ns.SetAbilityRank(macro, nil)
-			end, L["MENU_HIGHEST_DESCRIPTION"])
-			local dynamic = offering(ns.OffersTargetRank)
-			if #dynamic > 0 then
-				radio(rankMenu, L["MENU_RANK_DYNAMIC"], dynamic, function(macro)
-					return ns.AbilityRank(macro) == "targetRank"
-				end, function(macro)
-					ns.SetAbilityRank(macro, "targetRank")
-				end, L[DESCRIPTIONS.targetRank], L[NOTES.targetRank])
-			end
-		end
-		if above then
-			root:CreateDivider()
-		end
-
-		-- When: the combat check, how often it casts, and when it does nothing
-		local whenMenu = submenu(root, L["MENU_GROUP_WHEN"])
-		local checked = offeringOption("combatOnly")
-		for _, choice in ipairs(COMBAT) do
-			local check = choice[1]
-			radio(whenMenu, L[choice[2]], checked, function(macro)
-				return ns.CombatCheck(macro) == check
-			end, function(macro)
-				ns.SetCombatCheck(macro, check)
-			end, L[choice[3]])
-		end
-		local repeating = offeringOption("oncePerTarget")
-		if #repeating > 0 then
-			whenMenu:CreateDivider()
-			for _, choice in ipairs(REPEAT) do
-				local rule = choice[1]
-				radio(whenMenu, L[choice[2]], repeating, function(macro)
-					return ns.RepeatRule(macro) == rule
-				end, function(macro)
-					ns.SetRepeatRule(macro, rule)
-				end, L[choice[3]])
-			end
-		end
-		whenMenu:CreateDivider()
-		checkbox(whenMenu, "stopIfChanneling", L["MENU_STOP_IF_CHANNELING"])
-		checkbox(whenMenu, "stopIfStealthed", L["MENU_STOP_IF_STEALTHED"])
-
-		-- First: what runs before the cast, then the equipped on-use items
-		local itemUsers = offering(ns.OffersUseItems)
-		local slots = #itemUsers > 0 and ns.UsableSlots() or {}
-		if anyOffered(FIRST) or #slots > 0 then
-			local firstMenu = submenu(root, L["MENU_GROUP_FIRST"])
-			local offered = false
-			for _, option in ipairs(FIRST) do
-				offered = checkbox(firstMenu, option[1], L[option[2]]) or offered
-			end
-			if offered and #slots > 0 then
-				firstMenu:CreateDivider()
-			end
-			for _, usable in ipairs(slots) do
-				local slot = usable.slot
-				local function isOn()
-					return all(itemUsers, function(macro)
-						return ns.IsUsingSlot(macro, slot) ~= nil
-					end)
-				end
-				local icon = GetInventoryItemTexture("player", slot)
-				local label = (icon and "|T" .. icon .. ":16|t " or "") .. ns.SlotLabel(slot)
-				local element = firstMenu:CreateCheckbox(label, isOn, function()
-					local on = not isOn()
-					apply(itemUsers, function(macro)
-						if (ns.IsUsingSlot(macro, slot) ~= nil) ~= on then
-							ns.ToggleUseSlot(macro, slot)
-						end
-					end)
-				end)
-				SetTip(element, ns.SlotLabel(slot), L["MENU_USE_ITEM_DESCRIPTION"])
-			end
-		end
-
-		-- Then: what runs after the cast
-		local THEN = {
-			{ "startAttack", L["MENU_START_AUTO_ATTACK"] },
-			{ "autoShot", ns.AutoShotLabelKey() and AutoShotLabel() },
-			{ "petAttack", L["MENU_START_PET_ATTACK"] },
-		}
-		if anyOffered(THEN) then
-			local thenMenu = submenu(root, L["MENU_GROUP_THEN"])
-			for _, option in ipairs(THEN) do
-				if option[2] then
-					checkbox(thenMenu, option[1], option[2])
-				end
-			end
-		end
-
-		local errorsMenu = submenu(root, L["MENU_GROUP_ERRORS"])
-		for _, option in ipairs(ERRORS) do
-			checkbox(errorsMenu, option[1], L[option[2]])
-		end
-
-		-- last, apart from the options: every macro here back to its kind's defaults, as a tile's middle-click
-		root:CreateDivider()
-		local reset = root:CreateButton(L["TOOLTIP_ACTION_RESET_CATEGORY"]:format(name), function()
-			for _, macro in ipairs(list) do
-				ns.ResetMacroSettings(macro)
-			end
-			onChange()
-			ns:PrintMessage(L["CHAT_CATEGORY_OPTIONS_RESET"]:format(name))
-		end)
-		SetTip(reset, L["TOOLTIP_ACTION_RESET_CATEGORY"]:format(name), L["MENU_RESET_CATEGORY_DESCRIPTION"])
 	end)
 end

@@ -908,7 +908,7 @@ L["OPTIONS_READINESS_NONCOMBAT_GEAR_DESCRIPTION"] =
 -- Restocker Window & Chat
 --------------------------------------------------------------------------------
 
--- Chat messages printed by the Restocker feature (Features/Restocker/).
+-- Chat messages printed by the Restocker feature (Features/Inventory-Restocker/).
 L["RESTOCKER_PROFILE_EXISTS"] = '"%s" 이름의 목록이 이미 있습니다.'
 --[[
     %d is the item ID the player typed. Written into the add box itself while
@@ -942,7 +942,7 @@ L["RESTOCKER_STOPPED_ERROR"] = "오류로 보충이 중단되었습니다: %s"
     Printed during a merchant restock when the crafting-reagent buyer stands
     down: this merchant stocks some of the reagents the Restock List needs but
     not all of them, and reagents buy all-or-nothing (VendorStocksAllReagents in
-    Features/Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
+    Features/Inventory-Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
 ]]
 L["RESTOCKER_REAGENTS_SKIPPED"] =
 	"이 상인은 독에 필요한 재료를 전부 취급하지는 않습니다. 재료 구매를 모두 건너뜁니다."
@@ -1046,13 +1046,13 @@ L["RESTOCKER_HELP_PROFILE_USE"] = "이 캐릭터가 해당 이름의 목록을 �
     Starter List pop-up, the staples window: offers staples at login when the
     Restock List is empty, and on demand from the Restock List window's Pick
     Staples button. The staples logic is in
-    Features/Restocker/Restocker-Starter-List.lua, the window in
+    Features/Inventory-Restocker/Restocker-Starter-List.lua, the window in
     Options/Options-Starter-List-Popup.lua. The six
     food staples reuse the DIET_ keys above, so each food row carries the
     client's own pet diet name.
 
-    The title is its own, and the call site puts the add-on's full name in
-    front of it (ADDON_TITLE // STARTER_POPUP_TITLE): at login this window
+    The title is its own, and the call site puts the add-on's full name
+    after it (STARTER_POPUP_TITLE // ADDON_TITLE): at login this window
     opens with nothing else of the add-on's on screen, so its title bar is
     all that says whose it is.
 
@@ -1125,8 +1125,8 @@ L["STARTER_POPUP_COUNT_DESCRIPTION"] =
 	"계속 채워 둘 개수를 정하며, 이 아이템은 겹쳐지지 않으므로 하나당 가방 한 칸을 차지합니다."
 
 --[[
-    Restock List window UI. The title names what the window holds, after the
-    add-on's full name (ADDON_TITLE // RESTOCKER_WINDOW_TITLE); the feature
+    Restock List window UI. The title names what the window holds, before the
+    add-on's full name (RESTOCKER_WINDOW_TITLE // ADDON_TITLE); the feature
     that acts on it stays "Restocker".
 ]]
 L["RESTOCKER_WINDOW_TITLE"] = "보충 목록"
@@ -1635,8 +1635,9 @@ L["BUFF_WINDOW_AUDIENCE_HEALER"] = "치유 전담"
 L["BUFF_WINDOW_AUDIENCE_ALL"] = "모두"
 -- Each buff's dropdown tooltip; hovering the buff's name shows the spell itself.
 L["BUFF_WINDOW_AUDIENCE_DESCRIPTION"] = "%s을(를) 제공할 대상을 설정합니다."
+-- %s is the game's own Main Tank label.
 L["BUFF_WINDOW_BUFFS_DESCRIPTION"] =
-	"각 버프를 누구에게 제공할지 선택합니다. 방어 전담과 치유 전담은 그룹 역할을 따르며, 역할이 없으면 공격 전담으로 간주합니다. 단, 아래 방어 전담으로 간주에서 다르게 설정했다면 그 설정을 따릅니다."
+	"각 버프를 누구에게 제공할지 선택합니다. 방어 전담과 치유 전담은 그룹 역할을 따르지만, 공격대에서는 %s(으)로 지정된 플레이어만 방어 전담으로 간주합니다. 역할이 없으면 공격 전담으로 간주합니다. 단, 아래 방어 전담으로 간주에서 다르게 설정했다면 그 설정을 따릅니다."
 
 L["BUFF_WINDOW_SELF_DESCRIPTION"] = "자신의 버프로, 창 맨 위에 고정됩니다."
 --[[
@@ -1704,10 +1705,7 @@ L["BUFF_KEYS_DESCRIPTION"] =
 	"전투 중이 아닐 때 키나 매크로 하나로 목록의 다음 버프를 시전합니다. 무기 버프는 계속 창에서 클릭하여 적용합니다."
 L["BUFF_KEY"] = "버프 버튼"
 L["BUFF_KEY_DESCRIPTION"] =
-	"누를 때마다 빠진 버프를 하나씩 시전합니다: 죽은 대상 부활, 그다음 파티의 죽은 사람 부활(사제, 성기사, 주술사), 자기 버프, 보답하기, 대상, 파티 순서입니다. 사거리 안의 모두에게 하나씩 거는 것보다 마나가 적게 들면 파티 버프를 시전합니다."
-L["BUFF_KEY_SKIP_COOLDOWNS"] = "재사용 대기시간이 있는 버프 건너뛰기"
-L["BUFF_KEY_SKIP_COOLDOWNS_DESCRIPTION"] =
-	"공포의 수호물처럼 재사용 대기시간이 있는 버프는 건너뛰고 다음 버프로 넘어갑니다."
+	"누를 때마다 빠진 버프를 하나씩 시전합니다: 죽은 대상 부활, 그다음 파티의 죽은 사람 부활(사제, 성기사, 주술사), 보답하기, 대상, 자기 버프, 파티 순서입니다. 파티원 모두가 가까이 오면, 한 명씩 거는 것보다 마나가 적게 들 때 파티 버프를 시전합니다. 공포의 수호물처럼 재사용 대기시간이 있는 버프는 건너뛰고 다음 버프로 넘어갑니다."
 -- %s is a player's name.
 L["BUFF_KEY_WAITING"] = "%s님이 사거리 안에 들어오기를 기다리는 중입니다."
 L["BUFF_KEY_DONE"] = "더 걸 버프가 없습니다."
@@ -1845,6 +1843,8 @@ L["SUBTEXT_STANCE"] = "태세"
 L["SUBTEXT_USE_ITEMS"] = "아이템 사용"
 L["SUBTEXT_PET_ATTACK"] = "소환수 공격"
 L["SUBTEXT_DYNAMIC_RANK"] = "동적 레벨"
+L["SUBTEXT_DYNAMIC_ITEM"] = "동적 아이템"
+L["SUBTEXT_DYNAMIC_RANK_ITEM"] = "동적 레벨, 동적 아이템"
 L["SUBTEXT_MAX_RANK"] = "최고 레벨"
 L["SUBTEXT_TARGET_ENEMY"] = "가까운 적"
 L["SUBTEXT_TARGET_FRIEND"] = "가까운 아군"

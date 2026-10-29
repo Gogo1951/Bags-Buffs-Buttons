@@ -17,6 +17,7 @@ local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 	name for good: a renamed one comes back unbound for everyone who had set it.
 ]]
 
+BINDING_HEADER_BAGSBUFFSBUTTONS = L["ADDON_TITLE"] -- heads every binding Bindings.xml declares
 BINDING_NAME_MACROSPELLBOOK_TOGGLE = L["BINDING_TOGGLE_PAGE"]
 
 -- Opens or closes the page through whichever host this client loaded.

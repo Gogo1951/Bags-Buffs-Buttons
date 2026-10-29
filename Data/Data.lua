@@ -19,8 +19,8 @@ ns.SAVED_VARIABLES_NAME = "BagsBuffsButtonsDB"
     MIGRATION (remove after 2026-11-25): the add-ons Bags Buffs & Buttons
     replaces, by installed folder. Features/Core.lua copies the settings of the
     ones with a saved-variables table here from their own table, which the
-    client loads only while that add-on is enabled, and asks the player to
-    turn every one of them off once it has.
+    client loads only while that add-on is enabled, then turns every one of
+    them off itself and offers a reload.
 ]]
 ns.LEGACY_ADDONS = {
 	{ folder = "Consumable-Connoisseur", savedVariables = "ConnoisseurDB" },
@@ -69,6 +69,23 @@ ns.CLASS_COLORS = {
 
 -- Thanks for the Buff reads the same table through ns.Data.
 Data.CLASS_COLORS = ns.CLASS_COLORS
+
+--------------------------------------------------------------------------------
+-- Sample Names
+--------------------------------------------------------------------------------
+
+-- The house roster the Example lines name, by class; proper names, the same in every locale.
+ns.SAMPLE_NAMES = {
+	DRUID = "Aero",
+	HUNTER = "Spek",
+	MAGE = "Portalrico",
+	PALADIN = "Aiek",
+	PRIEST = "Katz",
+	ROGUE = "Fathom",
+	SHAMAN = "Moondragon",
+	WARLOCK = "Greasy",
+	WARRIOR = "Prima",
+}
 
 --------------------------------------------------------------------------------
 -- URLs
@@ -236,14 +253,13 @@ ns.LINK_WIDGET_TYPE = ADDON_NAME .. "_Link"
 ns.QUESTION_MARK_ICON = 134400
 
 --[[
-    The Spellbook's own textures, from tools/gen_textures.py: the gold book on
-    the window portrait and spellbook tab, and the category and settings
-    buttons. The glyphs are white, tinted where they're used.
+    The Spellbook's own textures: the gold book on the window portrait and
+    spellbook tab, and the category and settings buttons. The glyphs are white, tinted where they're used.
 ]]
 ns.ICON_ADDON = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Includes\\Images\\Spellbook"
 ns.TEXTURE_GEAR = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Includes\\Images\\Gear"
 
--- The gold bag the Restock List and Staples windows wear in their portrait, from tools/gen_bag_texture.py.
+-- The gold bag the Restock List and Staples windows wear in their portrait.
 ns.ICON_RESTOCKER = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Includes\\Images\\Restocker"
 
 --------------------------------------------------------------------------------
@@ -289,7 +305,7 @@ ns.RESTOCKER_WINDOW_COLORS = {
     but one is an AceDB profile name (a character's, or one the player typed),
     so the Global list needs a key that no profile can collide with -- hence
     the asterisks, which no character's name can hold and nobody types as a
-    profile name. Read by ns.GetIgnoreListForScope in Features/Ignore-List.lua.
+    profile name. Read by ns.GetIgnoreListForScope in Features/Macros-for-Consumables/Ignore-List.lua.
 ]]
 ns.IGNORE_SCOPE_GLOBAL = "**global**"
 
@@ -367,7 +383,7 @@ ns.DRUID_MACRO_HELPER_GUARDS = {
 
 --[[
     Canned chat messages the macro bodies can fire via `/run BBBTip("key")`.
-    BBBTip (in Features/Macros/Runtime.lua) consults two tables:
+    BBBTip (in Features/Macros-for-Consumables/Macros/Runtime.lua) consults two tables:
       ns.TIP_MESSAGES        → static message text
       ns.MISSING_SPELL_MESSAGE_IDS → spell IDs (the flavor folder's Conjure-Spells file) that
                                    BBBTip resolves at print time
@@ -417,7 +433,7 @@ ns.RESTOCK_ALERT_SOUND = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Includes\\Sou
     The amounts, in whole gold, the Restocker panel's Gold Reserve dropdown
     offers: the Fibonacci run, so the steps widen as a purse does, from the
     1 gold the setting ships on to 55. The merchant restock never spends below
-    the one chosen (Features/Restocker/Restocker-Merchant.lua).
+    the one chosen (Features/Inventory-Restocker/Restocker-Merchant.lua).
 ]]
 ns.GOLD_RESERVE_AMOUNTS = { 1, 2, 3, 5, 8, 13, 21, 34, 55 }
 
@@ -517,7 +533,7 @@ ns.SCROLL_CHECK_ORDER = {
 
 --[[
     What the staples pop-up can offer, one row per checkbox.
-    Features/Restocker/Restocker-Starter-List.lua owns every decision made about
+    Features/Inventory-Restocker/Restocker-Starter-List.lua owns every decision made about
     these rows -- which ladder each resolves to, who is offered it, what a tick
     adds. This table only says what exists.
 
@@ -533,7 +549,7 @@ ns.SCROLL_CHECK_ORDER = {
     so no row below carries a size: the staples do not share one, and some
     differ by client. A Symbol of Divinity stacks to 5, a Symbol of Kings to
     100, and an Ankh to 5 on Classic Era but 10 on TBC.
-    Features/Restocker/Restocker-Starter-List.lua reads the size off the item.
+    Features/Inventory-Restocker/Restocker-Starter-List.lua reads the size off the item.
 
     A tick defaults to one stack -- or to defaultStacks, where one is the
     wrong opening offer -- and the dropdown beside it runs to a per-category
@@ -606,11 +622,11 @@ local MANA_CLASSES =
 
     The order HERE is for the maintainer's eye -- grouped by section, then
     by class. Display order is the popup's to compute (SectionCategories in
-    Features/Restocker/Restocker-Starter-Window.lua): dropdown staples first, fixed-amount
+    Features/Inventory-Restocker/Restocker-Starter-Window.lua): dropdown staples first, fixed-amount
     singles after, each run alphabetical by the name it shows.
 
     A category whose ladder went missing is dropped by
-    Features/Restocker/Restocker-Starter-List.lua rather than crashing the popup
+    Features/Inventory-Restocker/Restocker-Starter-List.lua rather than crashing the popup
     open.
 ]]
 ns.STARTER_LIST_CATEGORIES = {
@@ -987,17 +1003,6 @@ ns.MACRO_NAME_PREFIX = "-" -- starts every WoW macro's name, so the add-on's mac
 ns.MACRO_NAME_MAX_LENGTH = 16 - #ns.MACRO_NAME_PREFIX
 
 --------------------------------------------------------------------------------
--- Spellbook Page
---------------------------------------------------------------------------------
-
---[[
-	The page's sections follow the spellbook's own tabs (General, then the class or each tree or spec),
-	ranked by tab. The Custom section takes ranks from this one up, after the tabs, and the spells
-	not learned yet come last.
-]]
-ns.TAB_SECTION_BASE = 100
-
---------------------------------------------------------------------------------
 -- Parchment Colors
 --------------------------------------------------------------------------------
 
@@ -1071,13 +1076,13 @@ Data.THANK_YOU_BUTTONS = {
 	    random emote from its checklist.
 	]]
 	{ profileKey = "slash", macroName = "- Thank", command = "/thankyou" },
-	{ profileKey = "slash2", macroName = "- TFTB 2", command = "/thankyou2", singleEmote = true },
-	{ profileKey = "slash3", macroName = "- TFTB 3", command = "/thankyou3", singleEmote = true },
-	{ profileKey = "slash4", macroName = "- TFTB 4", command = "/thankyou4", singleEmote = true },
-	{ profileKey = "slash5", macroName = "- TFTB 5", command = "/thankyou5", singleEmote = true },
+	{ profileKey = "slash2", macroName = "- BBB 2", command = "/thankyou2", singleEmote = true },
+	{ profileKey = "slash3", macroName = "- BBB 3", command = "/thankyou3", singleEmote = true },
+	{ profileKey = "slash4", macroName = "- BBB 4", command = "/thankyou4", singleEmote = true },
+	{ profileKey = "slash5", macroName = "- BBB 5", command = "/thankyou5", singleEmote = true },
 }
 
--- The account-wide macro cap; TFTB stops creating Thank You macros once the list holds this many.
+-- The account-wide macro cap; the add-on stops creating Thank You macros once the list holds this many.
 Data.MAX_GLOBAL_MACROS = 120
 
 --[[

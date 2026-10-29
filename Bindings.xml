@@ -5,7 +5,7 @@
 
     Toggle BBB Spellbook (Features/Spellbook/Key-Bindings.lua) calls
     a global, since Bindings.xml can call nothing else. Buff Duty's Buff Key
-    (Features/Thanks-for-the-Buff/Buff-Window-Keys.lua) clicks a hidden secure
+    (Features/Automated-Appreciation/Buff-Window-Keys.lua) clicks a hidden secure
     button, which picks the next buff on the list and casts it; a macro clicks
     the same button: /click TFTBBuffIndividual.
 -->

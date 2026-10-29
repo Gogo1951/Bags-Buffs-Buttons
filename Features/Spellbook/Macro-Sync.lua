@@ -78,20 +78,24 @@ local function OwnedList(index)
 	return IsGeneral(index) and ns.db.global.ownedMacros or ns.db.char.ownedMacros
 end
 
+ns.MaxAccountMacros = MaxAccountMacros
+ns.OwnedMacroList = OwnedList
+
 -- The record a macro the add-on creates at index takes in its OwnedList.
 local function OwnerRecord(index)
 	if IsGeneral(index) then
-		return ns.db.keys.char
+		return ns.MacroOwnerKey()
 	end
 	return true
 end
 
 --[[
 	How a page macro stands to the untagged WoW macro of its name at index: "owned" (recorded as the add-on's,
-	for this character), "claim" (MIGRATION, remove after 2026-11-23: a general macro recorded true before
-	owners were, which the first character to find it claims), "adopt" (MIGRATION, remove after 2026-11-23:
-	unrecorded, from before ownership tracking, but its text is the page's own), or nil (the player's own, or
-	another character's). Reads only; ns.SyncMacro records a claim or adoption.
+	for this character), "claim" (MIGRATION (remove after 2026-11-23): a general macro recorded true
+	before owners were, which the first character to find it claims),
+	"adopt" (MIGRATION (remove after 2026-11-23): unrecorded, from before ownership tracking, but its text
+	is the page's own), or nil (the player's own, or another character's). Reads only; ns.SyncMacro records a
+	claim or adoption.
 ]]
 function ns.LegacyOwnership(macro, index)
 	local name, _, body = GetMacroInfo(index)
@@ -201,15 +205,17 @@ function ns.MacroBlockReason(macro)
 end
 
 --[[
-	Whether name is one the add-on gave the WoW macro of a spell this macro replaced in its group, which it
-	took over (see ns.HandOverMacro in Features/Macro-Builder.lua).
+	Whether name is one the add-on gave the same kind of WoW macro (the spell's own, its focus copy or a
+	Duplicate) of a spell this macro replaced in its group, which it took over (see ns.HandOverMacro in
+	Features/Spellbook/Group-Handover.lua).
 ]]
 local function IsReplacedSpellsName(macro, name)
-	if macro.focus or macro.copy then
+	if macro.rank then
 		return false
 	end
+	local suffix = macro.copy and " " .. macro.copy or macro.focus and ns.FOCUS_SUFFIX or ""
 	for _, replaced in ipairs(macro.replaces or NO_INDEXES) do
-		local trimmed = ns.TrimMacroName(replaced)
+		local trimmed = ns.TrimMacroName(replaced, ns.MACRO_NAME_MAX_LENGTH - #suffix) .. suffix
 		-- MIGRATION (remove after 2026-11-26): OLD_PREFIX
 		if name == ns.MACRO_NAME_PREFIX .. trimmed or name == OLD_PREFIX .. trimmed then
 			return true
@@ -220,11 +226,11 @@ end
 
 --[[
 	Rewrites the WoW macro at index if its body differs from the page's and fits. One still under its name
-	from before the prefix (MIGRATION, remove after 2026-11-23), under the old "~" prefix (MIGRATION, remove
-	after 2026-11-26), or under the name of a replaced spell whose macro it took over ("-Bear Form", now Dire
-	Bear Form's), is renamed, its ownership record moving with
-	it; a name the player gave it is kept. A new name sorts the macro elsewhere in its list, so this returns
-	the index it ends up at.
+	from before the prefix (MIGRATION (remove after 2026-11-23)), under the old "~" prefix
+	(MIGRATION (remove after 2026-11-26)), or under the name of a replaced spell whose macro it took
+	over ("-Bear Form", now Dire Bear Form's), is renamed, its ownership record moving with it; a name the
+	player gave it is kept. A new name sorts the macro elsewhere in its list, so this returns the index it
+	ends up at.
 ]]
 local function SyncAt(macro, index)
 	if index == 0 then
@@ -346,181 +352,4 @@ function ns.SyncAllMacros()
 	for _, macro in ipairs(ns.macros) do
 		ns.SyncMacro(macro, indexes)
 	end
-end
-
---[[
-	The index range of one macro list and its ownership records: the General one (general true), which every
-	character on the account shares, or this character's. Another character's own list can't be read from here.
-]]
-local function MacroList(general)
-	local numAccount, numCharacter = GetNumMacros()
-	if general then
-		return 1, numAccount, ns.db.global.ownedMacros
-	end
-	local first = MaxAccountMacros() + 1
-	return first, first + numCharacter - 1, ns.db.char.ownedMacros
-end
-
---[[
-	The add-on's WoW macros in one list, highest index first: those carrying a tag the register handed out,
-	under a name the add-on recorded creating. Both are asked, so a player's own macro whose last line happens
-	to read like a tag ("#end") is never taken for one.
-]]
-local function AddonMacroIndexes(general)
-	local first, last, owned = MacroList(general)
-	local handedOut = {}
-	for _, tag in pairs(ns.db.global.macroTags) do
-		handedOut[tag] = true
-	end
-	local found = {}
-	for index = last, first, -1 do
-		local name, _, body = GetMacroInfo(index)
-		local tag = ns.BodyTag(body)
-		if tag and handedOut[tag] and owned[name] ~= nil then
-			found[#found + 1] = index
-		end
-	end
-	return found, owned
-end
-
--- How many of the add-on's WoW macros one list holds.
-function ns.CountAddonMacros(general)
-	return #AddonMacroIndexes(general)
-end
-
---[[
-	Deletes the add-on's WoW macros from one list, which takes them off the action bars too; a player's own
-	macro is never touched. A sync first tags the page's macros from before the tags, so they go as well.
-	Indexes shift down as macros go, so they are deleted highest first. The deleted names' ownership records
-	go too, so a player's own macro later given one of those names is never taken for the add-on's. The page
-	macros keep their tags, so one placed again gets its old tag back. Macros can't be deleted in combat.
-]]
-function ns.DeleteAddonMacros(general)
-	if InCombatLockdown() then
-		UIErrorsFrame:AddMessage(ERR_NOT_IN_COMBAT, 1, 0.1, 0.1)
-		return
-	end
-	ns:RefreshMacros()
-	local indexes, owned = AddonMacroIndexes(general)
-	for _, index in ipairs(indexes) do
-		owned[GetMacroInfo(index)] = nil
-		DeleteMacro(index)
-	end
-	ns:PrintMessage(L["CHAT_MACROS_DELETED"]:format(#indexes))
-	ns:RefreshOpenPages()
-end
-
-local MAX_ACTION_SLOTS = 180 -- Classic has 120; empty or missing slots return nil
-
---[[
-	What is on the action bars: {macros = {[macro name] = true}, spells = {[spell name] = true}}. For a
-	macro that shows a spell, GetActionInfo gives the spell's id (subtype "spell") rather than the macro's
-	index, so macros are matched by the name GetActionText gives.
-]]
-function ns.ScanActionBars()
-	local bars = { macros = {}, spells = {} }
-	for slot = 1, MAX_ACTION_SLOTS do
-		local actionType, id, subType = GetActionInfo(slot)
-		if actionType == "macro" then
-			local name = GetActionText(slot) or (subType ~= "spell" and GetMacroInfo(id))
-			if name then
-				bars.macros[name] = true
-			end
-		elseif actionType == "spell" and id then
-			-- by name, not ID: the bar can hold any rank of a spell, and every rank has its own ID
-			local name = C_Spell.GetSpellName(id)
-			if name then
-				bars.spells[name] = true
-			end
-		end
-	end
-	return bars
-end
-
---[[
-	How many action slots hold the WoW macro at index: matched by the name GetActionText gives, as
-	ns.ScanActionBars matches, or by the index where the slot gives one rather than the spell's.
-]]
-function ns.MacroBarCount(index)
-	local name, count = GetMacroInfo(index), 0
-	for slot = 1, MAX_ACTION_SLOTS do
-		local actionType, id, subType = GetActionInfo(slot)
-		if actionType == "macro" and (GetActionText(slot) == name or (subType ~= "spell" and id == index)) then
-			count = count + 1
-		end
-	end
-	return count
-end
-
---[[
-	The menu's Delete: deletes the page macro's WoW macro, which takes it off the action bars, with its
-	ownership record, and puts the macro back as it started: a spell's or slot's options all reset, its focus
-	copy's WoW macro deleted too, and a Duplicate copy taken off the page. A spell's macro keeps its tag, so one
-	placed again gets it back. Macros can't be deleted in combat.
-]]
-function ns.DeletePageMacro(macro)
-	if InCombatLockdown() then
-		UIErrorsFrame:AddMessage(ERR_NOT_IN_COMBAT, 1, 0.1, 0.1)
-		return
-	end
-	local function delete(page)
-		local index = ns.FindMacroIndex(page)
-		if index ~= 0 then
-			OwnedList(index)[GetMacroInfo(index)] = nil
-			DeleteMacro(index)
-		end
-	end
-	delete(macro)
-	-- the focus copy goes with the options, so its WoW macro does too
-	for _, other in ipairs(ns.macros) do
-		if other.focus and other.name == macro.name and not macro.copy then
-			delete(other)
-		end
-	end
-	if macro.copy then
-		ns.RemoveMacroCopy(macro)
-	else
-		ns.ResetMacroOptions(macro)
-	end
-end
-
-StaticPopupDialogs.BAGSBUFFSBUTTONS_DELETE_MACRO = {
-	text = L["MENU_DELETE_CONFIRM"],
-	button1 = YES,
-	button2 = NO,
-	OnAccept = function(_, data)
-		data()
-	end,
-	timeout = 0,
-	whileDead = true,
-	hideOnEscape = true,
-	preferredIndex = 3,
-}
-
--- Asks before deleting a macro that is on the bars, by name; delete runs on Yes.
-function ns.ConfirmDelete(name, delete)
-	StaticPopup_Show("BAGSBUFFSBUTTONS_DELETE_MACRO", name, nil, delete)
-end
-
---[[
-	Whether a page macro is on the action bars, scanned by ns.ScanActionBars. A spell macro with no
-	options on also counts when its plain spell is on a bar, and with ns.CountsSpellsOnBars() any spell
-	macro does. The Shoot macro's plain spell is any of the ranged attacks it stands for.
-]]
-function ns.IsOnActionBars(macro, bars)
-	if bars.macros[ns.WowMacroName(macro)] then
-		return true
-	end
-	-- a consumable is placed only as its macro: Feed Pet the spell on a bar is not the Feed Pet macro
-	if macro.consumable then
-		return false
-	end
-	local spell = bars.spells[macro.name] and macro.name
-	for name in pairs(macro.rangedAttacks or NO_INDEXES) do
-		spell = spell or bars.spells[name] and name
-	end
-	if macro.focus or macro.copy or not spell then
-		return false
-	end
-	return ns.CountsSpellsOnBars() or macro.body == ns.TaggedBody(macro, ns.BareBody(spell))
 end

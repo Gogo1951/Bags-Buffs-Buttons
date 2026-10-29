@@ -6,7 +6,7 @@ local HasTemplate = ns.HasTemplate
 --[[
 	The page's window, BagsBuffsButtonsSpellbookFrame, which every host opens from its tab on the game's spellbook: the
 	Blizzard portrait frame (the gold book in its portrait, the title, the close button) holding the page
-	Features/Spellbook-Page.lua builds. It stays clear of the book, so UI skins that restyle the book leave it
+	Features/Spellbook/Spellbook-Page.lua builds. It stays clear of the book, so UI skins that restyle the book leave it
 	alone, and it is parented to UIParent, so nothing Blizzard owns is written to.
 ]]
 
@@ -52,14 +52,14 @@ local function CreateWindow()
 	window:RegisterForDrag("LeftButton")
 	window:SetScript("OnDragStart", window.StartMoving)
 	window:SetScript("OnDragStop", window.StopMovingOrSizing)
-	-- "Bags Buffs & Buttons // Spell Book" in the add-ons' shared colours: the name blue, the slashes grey, the page white
-	local title = GetColor("INFO")
-		.. L["ADDON_TITLE"]
+	-- "Spell Book // Bags Buffs & Buttons" in the add-ons' shared colours: the page white, the slashes grey, the name blue
+	local title = GetColor("TEXT")
+		.. L["WINDOW_TITLE"]
 		.. "|r "
 		.. GetColor("SEPARATOR")
 		.. "//|r "
-		.. GetColor("TEXT")
-		.. L["WINDOW_TITLE"]
+		.. GetColor("INFO")
+		.. L["ADDON_TITLE"]
 		.. "|r"
 	if window.SetTitle then
 		window:SetTitle(title)
@@ -113,8 +113,7 @@ function ns.OnSpellbookWindowToggled(fn)
 end
 
 --[[
-	Closes the window, so it isn't left covering the Options Interface that the page's menus open (Use These
-	Options For All).
+	Closes the window, for the Spellbook's switch turning off (ns.SetSpellbookEnabled).
 ]]
 function ns.HideSpellbookWindow()
 	if window then
@@ -122,5 +121,5 @@ function ns.HideSpellbookWindow()
 	end
 end
 
--- The key binding's toggle (Features/Key-Bindings.lua), the same as a click on a host's tab.
+-- The key binding's toggle (Features/Spellbook/Key-Bindings.lua), the same as a click on a host's tab.
 ns.ToggleSpellbookPage = ns.ToggleSpellbookWindow

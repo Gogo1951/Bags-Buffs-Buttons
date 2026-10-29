@@ -906,7 +906,7 @@ L["OPTIONS_READINESS_NONCOMBAT_GEAR_DESCRIPTION"] =
 -- Restocker Window & Chat
 --------------------------------------------------------------------------------
 
--- Chat messages printed by the Restocker feature (Features/Restocker/).
+-- Chat messages printed by the Restocker feature (Features/Inventory-Restocker/).
 L["RESTOCKER_PROFILE_EXISTS"] = 'Eine Liste namens "%s" existiert bereits.'
 --[[
     %d is the item ID the player typed. Written into the add box itself while
@@ -939,7 +939,7 @@ L["RESTOCKER_STOPPED_ERROR"] = "Auffüllen wegen eines Fehlers gestoppt: %s"
     Printed during a merchant restock when the crafting-reagent buyer stands
     down: this merchant stocks some of the reagents the Restock List needs but
     not all of them, and reagents buy all-or-nothing (VendorStocksAllReagents in
-    Features/Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
+    Features/Inventory-Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
 ]]
 L["RESTOCKER_REAGENTS_SKIPPED"] =
 	"Dieser Händler führt nicht alle Zutaten, die deine Gifte benötigen. Es wird keine davon gekauft."
@@ -1043,13 +1043,13 @@ L["RESTOCKER_HELP_PROFILE_USE"] = "Weist diesem Charakter die Liste mit diesem N
     Starter List pop-up, the staples window: offers staples at login when the
     Restock List is empty, and on demand from the Restock List window's Pick
     Staples button. The staples logic is in
-    Features/Restocker/Restocker-Starter-List.lua, the window in
+    Features/Inventory-Restocker/Restocker-Starter-List.lua, the window in
     Options/Options-Starter-List-Popup.lua. The six
     food staples reuse the DIET_ keys above, so each food row carries the
     client's own pet diet name.
 
-    The title is its own, and the call site puts the add-on's full name in
-    front of it (ADDON_TITLE // STARTER_POPUP_TITLE): at login this window
+    The title is its own, and the call site puts the add-on's full name
+    after it (STARTER_POPUP_TITLE // ADDON_TITLE): at login this window
     opens with nothing else of the add-on's on screen, so its title bar is
     all that says whose it is.
 
@@ -1122,8 +1122,8 @@ L["STARTER_POPUP_COUNT_DESCRIPTION"] =
 	"Wie viele vorrätig bleiben sollen, jeweils auf einem eigenen Taschenplatz, da sie sich nicht stapeln lassen."
 
 --[[
-    Restock List window UI. The title names what the window holds, after the
-    add-on's full name (ADDON_TITLE // RESTOCKER_WINDOW_TITLE); the feature
+    Restock List window UI. The title names what the window holds, before the
+    add-on's full name (RESTOCKER_WINDOW_TITLE // ADDON_TITLE); the feature
     that acts on it stays "Restocker".
 ]]
 L["RESTOCKER_WINDOW_TITLE"] = "Nachschubliste"
@@ -1626,8 +1626,9 @@ L["BUFF_WINDOW_AUDIENCE_HEALER"] = "Heiler"
 L["BUFF_WINDOW_AUDIENCE_ALL"] = "Alle"
 -- Each buff's dropdown tooltip; hovering the buff's name shows the spell itself.
 L["BUFF_WINDOW_AUDIENCE_DESCRIPTION"] = "Legt fest, wem %s angeboten wird."
+-- %s is the game's own Main Tank label.
 L["BUFF_WINDOW_BUFFS_DESCRIPTION"] =
-	"Wählt für jeden Buff, wem er angeboten wird. Tanks und Heiler richten sich nach der Gruppenrolle; wer keine hat, zählt als Schaden, sofern Als Tanks zählen weiter unten nichts anderes festlegt."
+	"Wählt für jeden Buff, wem er angeboten wird. Tanks und Heiler richten sich nach der Gruppenrolle, im Schlachtzug zählen aber nur Spieler, die als %s eingeteilt sind, als Tanks. Wer keine Rolle hat, zählt als Schaden, sofern Als Tanks zählen weiter unten nichts anderes festlegt."
 
 L["BUFF_WINDOW_SELF_DESCRIPTION"] = "Eure eigenen Buffs, oben im Fenster angeheftet."
 --[[
@@ -1693,10 +1694,7 @@ L["BUFF_KEYS_DESCRIPTION"] =
 	"Wirkt den nächsten Buff Eurer Liste mit einer Taste oder einem Makro, außerhalb des Kampfes. Waffenbuffs bleiben ein Klick im Fenster."
 L["BUFF_KEY"] = "Buff-Knopf"
 L["BUFF_KEY_DESCRIPTION"] =
-	"Wirkt Euren nächsten fehlenden Buff, einen pro Tastendruck: eine Wiederbelebung auf Euer totes Ziel, dann auf die Toten Eurer Gruppe (Priester, Paladine und Schamanen), dann Eure Selbstbuffs, Gefallen erwidern, Euer Ziel und Eure Gruppe. Eine Gruppe erhält den Gruppenbuff, wenn er weniger Mana kostet, als alle in Reichweite einzeln zu buffen."
-L["BUFF_KEY_SKIP_COOLDOWNS"] = "Buffs mit Abklingzeit überspringen"
-L["BUFF_KEY_SKIP_COOLDOWNS_DESCRIPTION"] =
-	"Übergeht Buffs mit Abklingzeit, etwa Furchtzauberschutz, und macht mit dem nächsten Buff weiter."
+	"Wirkt Euren nächsten fehlenden Buff, einen pro Tastendruck: eine Wiederbelebung auf Euer totes Ziel, dann auf die Toten Eurer Gruppe (Priester, Paladine und Schamanen), dann Gefallen erwidern, Euer Ziel, Eure Selbstbuffs und Eure Gruppe. Eine Gruppe erhält den Gruppenbuff, wenn er weniger Mana kostet, als ihre Mitglieder einzeln zu buffen, sobald alle in der Nähe sind. Übergeht Buffs mit Abklingzeit, etwa Furchtzauberschutz, und macht mit dem nächsten Buff weiter."
 -- %s is a player's name.
 L["BUFF_KEY_WAITING"] = "Warte darauf, dass %s in Reichweite kommt."
 L["BUFF_KEY_DONE"] = "Nichts mehr zu buffen."
@@ -1834,6 +1832,8 @@ L["SUBTEXT_STANCE"] = "Haltung"
 L["SUBTEXT_USE_ITEMS"] = "Gegenstände"
 L["SUBTEXT_PET_ATTACK"] = "Begleiterangriff"
 L["SUBTEXT_DYNAMIC_RANK"] = "Dyn. Rang"
+L["SUBTEXT_DYNAMIC_ITEM"] = "Dyn. Gegenstand"
+L["SUBTEXT_DYNAMIC_RANK_ITEM"] = "Dyn. Rang, Dyn. Gegenstand"
 L["SUBTEXT_MAX_RANK"] = "Höchster Rang"
 L["SUBTEXT_TARGET_ENEMY"] = "Nächster Feind"
 L["SUBTEXT_TARGET_FRIEND"] = "Nächster Verbündeter"

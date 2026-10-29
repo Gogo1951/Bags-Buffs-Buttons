@@ -40,6 +40,31 @@ ns.GLOBAL_COOLDOWN_SPELL_ID = 61304
 -- Shoot, read for the one label the page gives its folded ranged-attack macro.
 ns.SHOOT_SPELL_ID = 5019
 
+-- Auto Attacks
+-- Attack, Auto Shot, Shoot (a wand), Shoot Bow, Shoot Gun, Shoot Crossbow and Throw: the page's Basic Attacks.
+ns.BASIC_ATTACK_SPELL_IDS = { 6603, 75, 5019, 2480, 7918, 7919, 2764 }
+
+-- Ranged Weapon Attacks
+-- { id = spellId, subclass = the weapon's Enum.ItemWeaponSubclass }, in the order the Shoot macro tries them.
+ns.RANGED_ATTACKS = {
+	{ id = 2764, subclass = 16 }, -- Throw
+	{ id = 2480, subclass = 2 }, -- Shoot Bow
+	{ id = 7918, subclass = 3 }, -- Shoot Gun
+	{ id = 7919, subclass = 18 }, -- Shoot Crossbow
+}
+
+-- Call Pet Flyout
+-- MoP Classic's spellbook holds Call Pet as this flyout; a book without one never matches it.
+ns.CALL_PET_FLYOUT_ID = 9
+
+-- Season of Discovery Spells
+-- Season of Discovery's spell IDs start here, the same cut the Vanilla data tables make.
+ns.SOD_FIRST_SPELL_ID = 300000
+
+-- Restocker Example
+-- Refreshing Spring Water, the staple the Restocker page's Example lines show short.
+ns.SAMPLE_RESTOCK_ITEM_ID = 159
+
 -- Mana Runes
 -- The two runes the Mana Gem panel names, read for their names.
 ns.DEMONIC_RUNE_ITEM_ID = 12662

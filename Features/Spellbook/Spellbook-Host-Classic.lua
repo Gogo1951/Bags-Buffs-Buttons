@@ -1,11 +1,12 @@
 local _, ns = ...
+local BODY = ns.COLORS_RGB.BODY
 local L = ns.L
 local GetColor = ns.GetColor
 local HideTooltip = ns.HideTooltip
 
 --[[
 	Hosts the page on the Classic engine (Classic Era, TBC, MoP Classic): a tab under the class's skill line
-	tabs down the book's right edge toggles the page's window (Features/Spellbook-Window.lua). The tab is
+	tabs down the book's right edge toggles the page's window (Features/Spellbook/Spellbook-Window.lua). The tab is
 	parented to UIParent and only anchored to the book, so nothing Blizzard owns is written to and the book's
 	own buttons stay untainted; native tab clicks are watched with hooksecurefunc.
 ]]
@@ -84,8 +85,8 @@ local function CreateTab()
 	tab:SetScript("OnClick", ns.ToggleSpellbookWindow)
 	tab:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetText(L["ADDON_TITLE"])
-		GameTooltip:AddLine(L["SPELLBOOK_TAB_DESCRIPTION"], 1, 1, 1, true)
+		GameTooltip:SetText(ns.SpellbookTabTitle())
+		GameTooltip:AddLine(L["SPELLBOOK_TAB_DESCRIPTION"], BODY.r, BODY.g, BODY.b, true)
 		GameTooltip:AddDoubleLine(
 			GetColor("INFO") .. L["TOOLTIP_KEY_CLICK"] .. "|r",
 			GetColor("INFO") .. L["TOOLTIP_ACTION_OPEN_PAGE"] .. "|r"
@@ -97,7 +98,7 @@ local function CreateTab()
 end
 
 --[[
-	Closes the game's book when the window opens (Features/Spellbook-Window.lua), the way the game closes one of
+	Closes the game's book when the window opens (Features/Spellbook/Spellbook-Window.lua), the way the game closes one of
 	its panels for another. Not in combat, where the book's spell buttons are protected and hiding it is blocked;
 	there the book just stays open behind the window.
 ]]

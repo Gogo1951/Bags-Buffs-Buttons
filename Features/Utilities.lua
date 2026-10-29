@@ -67,6 +67,13 @@ function ns.GetClassColor(classToken)
 	return hex and (COLOR_PREFIX .. hex) or nil
 end
 
+-- A class's name in the client's language, in its class color, white for a class the table does not hold.
+function ns.ClassName(classToken)
+	return (ns.GetClassColor(classToken) or ns.GetColor("TEXT"))
+		.. (LOCALIZED_CLASS_NAMES_MALE[classToken] or classToken)
+		.. "|r"
+end
+
 --------------------------------------------------------------------------------
 -- Spell Knowledge
 --------------------------------------------------------------------------------
@@ -106,6 +113,19 @@ end
       ns.GetPlayerFullName()         This character's name: the first name and
                                      surname on Forever, the one name on Era
                                      and TBC.
+      ns.GetNumQuestLogEntries(),    The quest log: a quest ID, nil for a
+      ns.GetQuestLogQuestID(index)   header line.
+      ns.GetNumSkillLines(),         The skill list, in the legacy return order.
+      ns.GetSkillLineInfo(index)
+      ns.GetPetFoodTypes()           The pet's diets, as a list.
+      ns.GetMerchantItemInfo(index)  A merchant slot, in the legacy return
+                                     order as far as the eighth value, whether
+                                     the slot costs something besides gold.
+
+    Forever runs on the Retail client, which has dropped the legacy quest,
+    skill, pet and merchant readers for namespaced ones that return a table;
+    Era and TBC have only the legacy globals. Spell names need no shim: every
+    call site reads C_Spell.GetSpellName, which all three clients ship.
 ]]
 if C_Bank and C_Bank.FetchPurchasedBankTabIDs then
 	function ns.FetchPurchasedBankTabIDs()
@@ -178,6 +198,71 @@ else
 	function ns.GetPlayerFullName()
 		return (UnitName("player"))
 	end
+end
+
+-- Whether this client ships a frame template, asked before CreateFrame names one it may lack.
+function ns.HasTemplate(template)
+	return C_XMLUtil.GetTemplateInfo(template) ~= nil
+end
+
+if C_QuestLog and C_QuestLog.GetInfo then
+	ns.GetNumQuestLogEntries = C_QuestLog.GetNumQuestLogEntries
+
+	function ns.GetQuestLogQuestID(questIndex)
+		local info = C_QuestLog.GetInfo(questIndex)
+		if info and not info.isHeader then
+			return info.questID
+		end
+	end
+else
+	ns.GetNumQuestLogEntries = GetNumQuestLogEntries
+
+	function ns.GetQuestLogQuestID(questIndex)
+		local _, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(questIndex)
+		if not isHeader then
+			return questID
+		end
+	end
+end
+
+if C_SkillInfo and C_SkillInfo.GetSkillLineInfo then
+	ns.GetNumSkillLines = C_SkillInfo.GetNumSkillLines
+
+	function ns.GetSkillLineInfo(skillIndex)
+		local info = C_SkillInfo.GetSkillLineInfo(skillIndex)
+		if info then
+			return info.name, info.isHeader, not info.isCollapsed, info.rank
+		end
+	end
+else
+	ns.GetNumSkillLines = GetNumSkillLines
+	ns.GetSkillLineInfo = GetSkillLineInfo
+end
+
+if C_PetInfo and C_PetInfo.GetPetFoodTypes then
+	ns.GetPetFoodTypes = C_PetInfo.GetPetFoodTypes
+else
+	function ns.GetPetFoodTypes()
+		return { GetPetFoodTypes() }
+	end
+end
+
+if C_MerchantFrame and C_MerchantFrame.GetItemInfo then
+	function ns.GetMerchantItemInfo(index)
+		local info = C_MerchantFrame.GetItemInfo(index)
+		if info then
+			return info.name,
+				info.texture,
+				info.price,
+				info.stackCount,
+				info.numAvailable,
+				info.isPurchasable,
+				info.isUsable,
+				info.hasExtendedCost
+		end
+	end
+else
+	ns.GetMerchantItemInfo = GetMerchantItemInfo
 end
 
 --------------------------------------------------------------------------------
@@ -258,13 +343,23 @@ local function ReadTooltipData(kind, id)
 	return lines
 end
 
-local function ReadScanTooltip(kind, id)
+--[[
+    The add-on's one hidden tooltip, made on first use, and its global name, which its line font strings are
+    named from. Every read through it is synchronous, so readers share it.
+]]
+function ns.GetScanTooltip()
 	if not scanTooltip then
 		scanTooltip = CreateFrame("GameTooltip", SCAN_TOOLTIP_NAME, nil, "GameTooltipTemplate")
 	end
+	return scanTooltip, SCAN_TOOLTIP_NAME
+end
+
+-- The hidden tooltip's lines once setter (a GameTooltip method) has filled it with the rest.
+local function ReadScanTooltipWith(setter, ...)
+	ns.GetScanTooltip()
 	scanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 	scanTooltip:ClearLines()
-	scanTooltip:SetHyperlink(kind .. ":" .. id)
+	scanTooltip[setter](scanTooltip, ...)
 	local lines = {}
 	for index = 1, scanTooltip:NumLines() do
 		local left = _G[SCAN_TOOLTIP_NAME .. "TextLeft" .. index]
@@ -275,7 +370,28 @@ local function ReadScanTooltip(kind, id)
 	return lines
 end
 
+local function ReadScanTooltip(kind, id)
+	return ReadScanTooltipWith("SetHyperlink", kind .. ":" .. id)
+end
+
 ns.GetTooltipLines = TOOLTIP_DATA_GETTERS and ReadTooltipData or ReadScanTooltip
+
+--[[
+	The same lines for any tooltip: getter is the C_TooltipInfo function and setter the GameTooltip method that
+	fill it (e.g. "GetInventoryItem" and "SetInventoryItem"), both called with the rest. The getter is used
+	where the client ships it, the hidden tooltip elsewhere.
+]]
+function ns.ReadTooltipLines(getter, setter, ...)
+	if not (C_TooltipInfo and C_TooltipInfo[getter]) then
+		return ReadScanTooltipWith(setter, ...)
+	end
+	local lines = {}
+	local data = C_TooltipInfo[getter](...)
+	for _, line in ipairs(data and data.lines or {}) do
+		lines[#lines + 1] = JoinTooltipLine(line.leftText, line.rightText)
+	end
+	return lines
+end
 
 --------------------------------------------------------------------------------
 -- Character Profile Names
@@ -321,7 +437,7 @@ end
     Every recorded character's class token, by the name AceDB keys the
     character under (ns.ProfileNameForCharacter). Read off the records the
     Inventory Report keeps (ns.db.global.inventory, refreshed at every login
-    by Features/Inventory-Report.lua), so a character's class is known from its
+    by Features/Inventory-Restocker/Inventory-Report-Recording.lua), so a character's class is known from its
     first login on a build that keeps that record. The Restock List and the
     Ignore List color their character names by it.
 ]]
@@ -357,4 +473,27 @@ function ns.SplitCharacterProfileName(profileKey)
 		return nil
 	end
 	return name, realm
+end
+
+--------------------------------------------------------------------------------
+-- Character Keys
+--------------------------------------------------------------------------------
+
+-- "-Realm" as it ends a character's key, the realm's spaces closed up; empty where the client names no realm.
+local function RealmSuffix()
+	local realm = ((GetRealmName() or ""):gsub("%s+", ""))
+	if realm == "" then
+		return ""
+	end
+	return "-" .. realm
+end
+
+--[[
+    Stable per-character identity, which the Inventory Report's records, the
+    Diagnostics reports and the two Connoisseur key migrations key on. The
+    character's whole name, which on Forever is its first name and surname
+    (ns.GetPlayerFullName above), then its realm.
+]]
+function ns.GetCharacterKey()
+	return (ns.GetPlayerFullName() or "Unknown") .. RealmSuffix()
 end

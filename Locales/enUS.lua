@@ -93,7 +93,7 @@ L["MESSAGE_BUG_REPORT"] =
 	"Looks like you found a bug! %s (%s) can't be used in %s > %s (%s). Please report this so we can get it fixed. Thanks! %s"
 L["MESSAGE_NO_ITEM"] = "No suitable %s found in your bags."
 L["MESSAGE_MACRO_SLOTS_FULL"] =
-	"Some Connoisseur & Restocker macros couldn't be created because your macro slots are full. Free up a slot by deleting macros you no longer use, or turn off any Connoisseur & Restocker macros you don't need under Options > AddOns > Connoisseur & Restocker > Macros."
+	"Some Bags Buffs & Buttons macros couldn't be created because your macro slots are full. Free up a slot by deleting macros you no longer use, or turn off any Bags Buffs & Buttons macros you don't need under Options > AddOns > Bags Buffs & Buttons > Connoisseur > Macros."
 --[[
     Printed once after the add-on creates one or more of its macros, so a new
     player learns they exist. %s is "/m", the game's own macro command, colored
@@ -181,7 +181,7 @@ L["READINESS_UNSPENT_TALENTS_MANY"] = "%d Unspent Talent Points"
 -- BBBTip Messages
 --------------------------------------------------------------------------------
 
--- Printed in chat by macro bodies via /run BBBTip("key") or BBBTipIf, and TIP_EMPTY_* via BBBNoItem. See Features/Macros/Runtime.lua.
+-- Printed in chat by macro bodies via /run BBBTip("key") or BBBTipIf, and TIP_EMPTY_* via BBBNoItem. See Features/Macros-for-Consumables/Macros/Runtime.lua.
 
 L["TIP_PET_NO_FOOD"] = "You don't currently have any food that is useful for your pet."
 -- The four %s are the client's names for Call Pet, Dismiss Pet, Feed Pet and Revive Pet, in that order.
@@ -381,9 +381,9 @@ L["MINIMAP_SHIFT_LEFT"] = "Shift + Left-Click"
     Food, Enable Scroll Buffs, Use Pet Food Buffs, and Use Conjured Food &
     Water First. %s in OPTIONS_MODE_DESCRIPTION is the feature's name,
     FEATURE_BUFF_FOOD, FEATURE_SCROLL_BUFFS or OPTIONS_PET_HEADER; the
-    conjured dropdown has hover text of its own. The dropdowns have no
-    caption, so each value carries its own "when". Leveling means below the
-    client's max level.
+    conjured dropdown has hover text of its own. Each value carries its own
+    "when", since most dropdowns sit beside their toggle with no caption.
+    Leveling means below the client's max level.
 
     In the mini-map tooltip, the Buff Food & Scrolls block, while a switch is
     on but no choice applies, shows that choice's label in place of
@@ -391,6 +391,7 @@ L["MINIMAP_SHIFT_LEFT"] = "Shift + Left-Click"
 ]]
 L["OPTIONS_MODE_DESCRIPTION"] =
 	"Chooses when your Food macro offers %s: always, or only while you're solo, in a party or raid, in a raid, still leveling, or at max level."
+L["OPTIONS_MODE_CAPTION"] = "When to Use"
 L["MODE_ALWAYS"] = "Always"
 L["MODE_SOLO"] = "When Solo"
 L["MODE_PARTY"] = "When in a Party or Raid"
@@ -403,8 +404,8 @@ L["MODE_MAX_LEVEL"] = "When at Max Level"
 --------------------------------------------------------------------------------
 
 --[[
-    The block Features/Inventory-Report.lua adds under an item's own tooltip
-    lines. Its header is "C & R // Inventory Report": ADDON_SHORT_NAME, then the
+    The block Features/Inventory-Restocker/Inventory-Report.lua adds under an item's own tooltip
+    lines. Its header is "BBB // Inventory Report": ADDON_SHORT_NAME, then the
     title, in the chat prints' branded colors, with the total at its right
     edge. Under it, one line per character, this one first: the name on the
     left (the client's own character names, so no keys here), its counts at
@@ -435,7 +436,7 @@ L["TAB_THANKS_FOR_THE_BUFF"] = "Thanks for the Buff"
 L["TAB_SPELLBOOK"] = "Spellbook"
 L["OPTIONS_CONNOISSEUR_DESCRIPTION"] =
 	"Macros that automatically use your best food, water, potions, healthstones, bandages, poisons, and pet food, plus a report of anything you're missing when a ready check starts."
-L["OPTIONS_TFTB_DESCRIPTION"] =
+L["OPTIONS_THANKS_FOR_THE_BUFF_DESCRIPTION"] =
 	"Auto thank every player who buffs you with a whisper or emote, and keep your raid, yourself, and your weapons buffed with a click-to-cast reminder for missing buffs. Plus alerts for feasts, portals, summons, and soulwells. Manners, automated."
 L["OPTIONS_SPELLBOOK_DESCRIPTION"] =
 	"Mouseover, cursor and self-cast macros for every class spell, built in one click from a new spellbook tab with no macro syntax. They update as you level, train and swap specs. Right-click to add focus, stopcasting, auto attack, pet attack or trinkets."
@@ -455,7 +456,7 @@ L["OPTIONS_MINIMAP_BUTTON_DESCRIPTION"] = "Shows the mini-map button."
 -- Features: each feature's master switch, also on the panel that configures it.
 L["OPTIONS_MACROS_ENABLE"] = "Enable Macro Updates"
 L["OPTIONS_MACROS_ENABLE_DESCRIPTION"] =
-	"Keeps your Connoisseur & Restocker macros pointed at your best items as your bags change. Off leaves every macro as it last was."
+	"Keeps your Bags Buffs & Buttons macros pointed at your best items as your bags change. Off leaves every macro as it last was."
 L["OPTIONS_RESTOCKER_ENABLE"] = "Enable Restocker"
 L["OPTIONS_RESTOCKER_ENABLE_DESCRIPTION"] =
 	"Buys and banks from your Restock List and reminds you when you run low. Off turns all of it off, the Restock List window included."
@@ -505,12 +506,12 @@ L["OPTIONS_VERSION"] = "Version %s"
 ]]
 L["TAB_MACROS"] = "Macros"
 L["OPTIONS_MACROS_DESCRIPTION"] =
-	"Connoisseur & Restocker builds one macro per consumable and keeps it current as your bags change, so the button on your bar always reaches for the best item you're carrying. Choose which macros to create below, then set how each one picks its item."
+	"Bags Buffs & Buttons builds one macro per consumable and keeps it current as your bags change, so the button on your bar always reaches for the best item you're carrying. Choose which macros to create below, then set how each one picks its item."
 
 -- Macro Names on Buttons
 L["OPTIONS_MACRO_NAMES"] = "Enable Macro Names on Buttons"
 L["OPTIONS_MACRO_NAMES_DESCRIPTION"] =
-	"Shows the macro name text on your action bar buttons, which Connoisseur & Restocker hides by default."
+	"Shows the macro name text on your action bar buttons, which Bags Buffs & Buttons hides by default."
 
 --[[
     Which Macros to Create. "General" in the description is the Macros
@@ -519,7 +520,7 @@ L["OPTIONS_MACRO_NAMES_DESCRIPTION"] =
 ]]
 L["OPTIONS_MACROS_TO_CREATE_HEADER"] = "Which Macros to Create"
 L["OPTIONS_ENABLE_MACROS_DESCRIPTION"] =
-	"Choose which macros Connoisseur & Restocker creates and maintains. Turning one off also removes it. They're in the General tab of the Macros window, ready to drag onto your action bars."
+	"Choose which macros Bags Buffs & Buttons creates and maintains. Turning one off also removes it. They're in the General tab of the Macros window, ready to drag onto your action bars."
 L["OPTIONS_OPEN_MACRO_WINDOW"] = "Open Macros Window"
 L["OPTIONS_OPEN_MACRO_WINDOW_DESCRIPTION"] =
 	"Opens the game's Macros window on its General tab, where these macros live."
@@ -766,6 +767,7 @@ L["OPTIONS_RESTOCKER_GOLD_RESERVE_AMOUNT_DESCRIPTION"] = "Sets how much gold res
 ]]
 L["OPTIONS_RESTOCKER_REMIND_MODE_DESCRIPTION"] =
 	"Chooses whether the reminder is a single line or adds a line for each item you're short on."
+L["OPTIONS_RESTOCKER_REMIND_MODE_CAPTION"] = "How Much to Say"
 L["OPTIONS_RESTOCKER_MODE_SIMPLE"] = "Simple"
 L["OPTIONS_RESTOCKER_MODE_VERBOSE"] = "Verbose"
 
@@ -785,14 +787,6 @@ L["OPTIONS_INVENTORY_REPORT_SECTION_DESCRIPTION"] =
 L["OPTIONS_INVENTORY_REPORT"] = "Enable Inventory Report in Item Tooltips"
 L["OPTIONS_INVENTORY_REPORT_DESCRIPTION"] =
 	"Adds how many of an item you have in your bags, in your bank, and on your other characters to its tooltip. Turn it off if another add-on already shows these counts."
-
---[[
-    Praise for the adopted Restocker code. The three names are proper nouns and
-    stay as written in every locale; the sentences around them translate.
-]]
-L["OPTIONS_RESTOCKER_PRAISE_HEADER"] = "Praise"
-L["OPTIONS_RESTOCKER_PRAISE"] =
-	"I've always loved Restocker, and I'm grateful for the opportunity to have it live on inside Connoisseur & Restocker. Huge thanks to ChiliFajita, who wrote the original Auto Restocker, and to kvakvs and guardycmw, who kept it going through Classic and Mists of Pandaria."
 
 -- Readiness Report
 L["TAB_READINESS_REPORT"] = "Readiness Report"
@@ -863,7 +857,7 @@ L["OPTIONS_READINESS_OFF_HAND_DESCRIPTION"] =
 ]]
 L["OPTIONS_READINESS_EXPIRING"] = "Buffs Expiring Within"
 L["OPTIONS_READINESS_EXPIRING_DESCRIPTION"] =
-	"Names every buff on you that is about to expire, not just the ones Connoisseur & Restocker applies, and is separate from Buff Re-Application under Macros."
+	"Names every buff on you that is about to expire, not just the ones Bags Buffs & Buttons applies, and is separate from Buff Re-Application under Macros."
 -- %s is a whole or half number of minutes.
 L["OPTIONS_READINESS_EXPIRING_MINUTES"] = "%s Minutes"
 -- The one-minute entry alone; one plural template cannot render it grammatically.
@@ -903,7 +897,7 @@ L["OPTIONS_READINESS_NONCOMBAT_GEAR_DESCRIPTION"] =
 -- Restocker Window & Chat
 --------------------------------------------------------------------------------
 
--- Chat messages printed by the Restocker feature (Features/Restocker/).
+-- Chat messages printed by the Restocker feature (Features/Inventory-Restocker/).
 L["RESTOCKER_PROFILE_EXISTS"] = 'A list named "%s" already exists.'
 --[[
     %d is the item ID the player typed. Written into the add box itself while
@@ -913,7 +907,7 @@ L["RESTOCKER_PROFILE_EXISTS"] = 'A list named "%s" already exists.'
 ]]
 L["RESTOCKER_UNKNOWN_ITEM"] = "No item has ID %d."
 L["RESTOCKER_BANK_NOT_OPEN"] = "The bank is not open."
-L["RESTOCKER_DISABLED"] = "The Restocker is off. Turn it on under Options > AddOns > Connoisseur & Restocker."
+L["RESTOCKER_DISABLED"] = "The Restocker is off. Turn it on under Options > AddOns > Bags Buffs & Buttons > Restocker."
 --[[
     %s is the /restock slash command, colored at the call site. Only the bank flow
     prints this, so the Shift hint names the bank; Shift is read as the window
@@ -934,7 +928,7 @@ L["RESTOCKER_STOPPED_ERROR"] = "Restocking stopped due to an error: %s"
     Printed during a merchant restock when the crafting-reagent buyer stands
     down: this merchant stocks some of the reagents the Restock List needs but
     not all of them, and reagents buy all-or-nothing (VendorStocksAllReagents in
-    Features/Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
+    Features/Inventory-Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
 ]]
 L["RESTOCKER_REAGENTS_SKIPPED"] = "This merchant doesn't stock every ingredient your poisons need. Skipping them all."
 -- Printed on reaching an inn or a city while the Restock List is short of something.
@@ -1037,13 +1031,13 @@ L["RESTOCKER_HELP_PROFILE_USE"] = "Switches this character to the list with that
     Starter List pop-up, the staples window: offers staples at login when the
     Restock List is empty, and on demand from the Restock List window's Pick
     Staples button. The staples logic is in
-    Features/Restocker/Restocker-Starter-List.lua, the window in
-    Options/Options-Starter-List-Popup.lua. The six
+    Features/Inventory-Restocker/Restocker-Starter-List.lua, the window in
+    Features/Inventory-Restocker/Restocker-Starter-Window.lua. The six
     food staples reuse the DIET_ keys above, so each food row carries the
     client's own pet diet name.
 
-    The title is its own, and the call site puts the add-on's full name in
-    front of it (ADDON_TITLE // STARTER_POPUP_TITLE): at login this window
+    The title is its own, and the call site puts the add-on's full name
+    after it (STARTER_POPUP_TITLE // ADDON_TITLE): at login this window
     opens with nothing else of the add-on's on screen, so its title bar is
     all that says whose it is.
 
@@ -1088,7 +1082,7 @@ L["STARTER_POPUP_REAGENTS_HEADER"] = "Reagents & Tools"
 L["STARTER_POPUP_POISONS_HEADER"] = "Poisons"
 -- %s is the client's name for the Rogue class, rogue-colored; the spaced colon is deliberate.
 L["STARTER_POPUP_POISONS_NOTE"] =
-	"%s : Add the finished poison to your list, and Connoisseur & Restocker buys the ingredients automatically at any merchant that stocks them all."
+	"%s : Add the finished poison to your list, and Bags Buffs & Buttons buys the ingredients automatically at any merchant that stocks them all."
 --[[
     Checkbox tooltips: { item name, amount }. The first is for ladder items;
     the second for single-tier reagents, which never upgrade.
@@ -1111,8 +1105,8 @@ L["STARTER_POPUP_STACKS_DESCRIPTION"] = "How many stacks to keep stocked, where 
 L["STARTER_POPUP_COUNT_DESCRIPTION"] = "How many to keep stocked, each in its own bag slot since these do not stack."
 
 --[[
-    Restock List window UI. The title names what the window holds, after the
-    add-on's full name (ADDON_TITLE // RESTOCKER_WINDOW_TITLE); the feature
+    Restock List window UI. The title names what the window holds, before the
+    add-on's full name (RESTOCKER_WINDOW_TITLE // ADDON_TITLE); the feature
     that acts on it stays "Restocker".
 ]]
 L["RESTOCKER_WINDOW_TITLE"] = "Restock List"
@@ -1219,7 +1213,7 @@ L["RESTOCKER_DELETE_LIST_FINAL"] = "This can't be undone."
 ]]
 L["RESTOCKER_UPGRADE_TOOLTIP_TITLE"] = "Upgrade as You Level"
 L["RESTOCKER_UPGRADE_TOOLTIP_BODY"] =
-	"Lets Connoisseur & Restocker upgrade food, water, ammo, poisons, potions, and class reagents to better items as you level."
+	"Lets Bags Buffs & Buttons upgrade food, water, ammo, poisons, potions, and class reagents to better items as you level."
 
 --[[
     The band labels drawn over the Bank and Merchant column groups, and the
@@ -1370,7 +1364,7 @@ L["RESTOCKER_REPUTATION_TOOLTIP_TITLE"] = "Required Merchant Reputation"
     last sentence names the dash; "Any" is still the menu's first entry.
 ]]
 L["RESTOCKER_REPUTATION_TOOLTIP_DISCOUNTS"] =
-	"Click to set the standing a merchant needs before Connoisseur & Restocker buys from it, which also cuts the price: %s 5%%, %s 10%%, %s 15%%, %s 20%%. A dash buys from any merchant."
+	"Click to set the standing a merchant needs before Bags Buffs & Buttons buys from it, which also cuts the price: %s 5%%, %s 10%%, %s 15%%, %s 20%%. A dash buys from any merchant."
 
 --[[
     Why a cell cannot be set on its row: the tooltip a dimmed cell shows under
@@ -1382,14 +1376,19 @@ L["RESTOCKER_EXTRA_NOT_APPLICABLE"] = "Buy is off for this item, so there is not
 L["RESTOCKER_REPUTATION_NOT_APPLICABLE"] = "Buy is off for this item, so no standing applies."
 L["RESTOCKER_UPGRADE_NOT_APPLICABLE"] = "This item has no better version to upgrade to."
 
+-- MIGRATION (remove after 2026-11-25): the import from the add-ons this one replaces.
 L["CHAT_LEGACY_IMPORTED"] = "Copied your %s settings."
 
-L["POPUP_LEGACY_RELOAD"] =
-	"Bags Buffs & Buttons copied your settings and turned off %s, which it replaces. Reload now so the old copy stops running?"
+L["POPUP_LEGACY_RELOAD_COPIED"] =
+	"Bags Buffs & Buttons copied your settings from %s and turned off %s, which it replaces. Reload now so the old copy stops running?"
+L["POPUP_LEGACY_RELOAD_TURNED_OFF"] =
+	"Bags Buffs & Buttons turned off %s, which it replaces. Reload now so the old copy stops running?"
 L["POPUP_LEGACY_RELOAD_ACCEPT"] = "Reload Now"
 L["POPUP_LEGACY_LATER"] = "Later"
-L["POPUP_LEGACY_IMPORT"] =
-	"Bags Buffs & Buttons found %s installed. Bring its settings and Restock Lists over? This turns it on and reloads your UI once, then turns it off again."
+L["POPUP_LEGACY_IMPORT_SETTINGS"] =
+	"Bags Buffs & Buttons found %s installed but turned off. Bring the settings over? This turns the old add-ons back on and reloads your UI, then offers one more reload to turn them off again."
+L["POPUP_LEGACY_IMPORT_LISTS"] =
+	"Bags Buffs & Buttons found %s installed but turned off. Bring the settings and Restock Lists over? This turns the old add-ons back on and reloads your UI, then offers one more reload to turn them off again."
 L["POPUP_LEGACY_IMPORT_ACCEPT"] = "Bring Them Over"
 L["POPUP_LEGACY_IMPORT_DECLINE"] = "No Thanks"
 
@@ -1422,12 +1421,6 @@ L["MESSAGE_CANT_THANK_SELF"] = "You can't thank yourself!"
 --------------------------------------------------------------------------------
 
 L["UNKNOWN_SPELL"] = "Unknown Spell"
-
---------------------------------------------------------------------------------
--- Options: Main Panel
---------------------------------------------------------------------------------
-
-L["OPTIONS_EXAMPLE"] = "Example: %s"
 
 --------------------------------------------------------------------------------
 -- Options: Buff Panels
@@ -1606,8 +1599,9 @@ L["BUFF_WINDOW_AUDIENCE_HEALER"] = "Healers"
 L["BUFF_WINDOW_AUDIENCE_ALL"] = "Everyone"
 -- Each buff's dropdown tooltip; hovering the buff's name shows the spell itself.
 L["BUFF_WINDOW_AUDIENCE_DESCRIPTION"] = "Sets who %s is offered to."
+-- %s is the game's own Main Tank label.
 L["BUFF_WINDOW_BUFFS_DESCRIPTION"] =
-	"Choose who's offered each buff. Tanks and Healers go by group role; anyone without one counts as Damage, unless Count as Tanks below says otherwise."
+	"Choose who's offered each buff. Tanks and Healers go by group role, but in a raid only players marked %s count as tanks. Anyone without a role counts as Damage, unless Count as Tanks below says otherwise."
 
 L["BUFF_WINDOW_SELF_DESCRIPTION"] = "Your own buffs, pinned to the top of the window."
 --[[
@@ -1665,7 +1659,7 @@ L["BUFF_WINDOW_TOOLTIP_FAVOR"] = "Click to target %s and cast."
 L["BUFF_WINDOW_TOOLTIP_DISMISS"] = "Right-Click to take %s off the list."
 -- The window's close button: the class name in its color, then the options command.
 L["BUFF_WINDOW_CLOSED"] =
-	"Buff Duty is off for the %s class. To turn it back on, Shift + Right-Click the mini-map button or type %s."
+	"Buff Duty is off for the %s class. To turn it back on, Shift + Left-Click the mini-map button or type %s."
 
 -- The Buff Key (Key Bindings, and the Keybinds section of Buff Duty)
 L["BUFF_KEYS_HEADER"] = "Keybinds"
@@ -1673,10 +1667,7 @@ L["BUFF_KEYS_DESCRIPTION"] =
 	"Cast the next buff on your list with one key or macro, out of combat. Weapon buffs stay a click on the window."
 L["BUFF_KEY"] = "Buff Button"
 L["BUFF_KEY_DESCRIPTION"] =
-	"Casts your next missing buff, one per press: a resurrection on your dead target, then your group's dead (priests, paladins, and shamans), then your Self-Buffs, Return the Favor, your target, and your group. A party gets the group buff when it costs less mana than buffing everyone in range one at a time."
-L["BUFF_KEY_SKIP_COOLDOWNS"] = "Skip Buffs with Cooldowns"
-L["BUFF_KEY_SKIP_COOLDOWNS_DESCRIPTION"] =
-	"Passes over buffs with a cooldown, like Fear Ward, and moves on to the next buff."
+	"Casts your next missing buff, one per press: a resurrection on your dead target, then your group's dead (priests, paladins, and shamans), then Return the Favor, your target, your Self-Buffs, and your group. A party gets the group buff when it costs less mana than buffing its members one at a time, once all of them are nearby. Passes over buffs with a cooldown, like Fear Ward, and moves on to the next buff."
 -- %s is a player's name.
 L["BUFF_KEY_WAITING"] = "Waiting on %s to get in range."
 L["BUFF_KEY_DONE"] = "Nothing left to buff."
@@ -1713,7 +1704,7 @@ L["BUTTON_WHISPER_DESCRIPTION"] = "Sets what this button whispers to your target
 
 L["DEFAULT_WHISPER"] = "Thanks, you're the best! (="
 --[[
-    The star marker (left off on WoW Forever) and " // TFTB" sign-off are added
+    The star marker (left off on WoW Forever) and " // BBB" sign-off are added
     by the builder, which also drops the closing punctuation; neither is part of
     the editable text.
 ]]
@@ -1742,7 +1733,7 @@ L["EMOTE_YES_DESCRIPTION"] = "You nod at <Target>."
 
 -- Every string from here to the end is the Spellbook's.
 
--- the window's title after "Bags Buffs & Buttons //", the family of add-ons this is one of
+-- the window's title after "Bags Buffs & Buttons //"
 L["WINDOW_TITLE"] = "Spell Book"
 
 -- Page: Sections
@@ -1901,6 +1892,8 @@ L["SUBTEXT_STANCE"] = "Stance"
 L["SUBTEXT_USE_ITEMS"] = "Use Items"
 L["SUBTEXT_PET_ATTACK"] = "Pet Attack"
 L["SUBTEXT_DYNAMIC_RANK"] = "Dynamic Rank"
+L["SUBTEXT_DYNAMIC_ITEM"] = "Dynamic Item"
+L["SUBTEXT_DYNAMIC_RANK_ITEM"] = "Dynamic Rank, Dynamic Item"
 L["SUBTEXT_MAX_RANK"] = "Max Rank"
 L["SUBTEXT_TARGET_ENEMY"] = "Nearest Enemy"
 L["SUBTEXT_TARGET_FRIEND"] = "Nearest Friend"
@@ -1943,6 +1936,8 @@ L["CHAT_MACRO_OPTIONS_RESET"] = "%s is back to its default options."
 L["CHAT_CATEGORY_OPTIONS_RESET"] = "Every macro in %s is back to its default options."
 L["MENU_RESET_CATEGORY_DESCRIPTION"] =
 	"Drops the options you set on each spell here, so every one follows its defaults again. Focus copies and Duplicates stay."
+L["MENU_RESET_CATEGORY_CONFIRM"] =
+	"Reset the options you set on every spell in %s? Each one follows its defaults again."
 
 -- Spellbook Tab Tooltip
 L["SPELLBOOK_TAB_DESCRIPTION"] = "Your class's spells as one-click macros."

@@ -2,7 +2,7 @@ local ADDON_NAME, ns = ...
 
 --[[
 	Adds the page's tab to the Retail-engine spellbook (Blizzard_PlayerSpells): a launcher that toggles the
-	page's window (Features/Spellbook-Window.lua), lit while the window is open. Features/Spellbook-Tabs.lua
+	page's window (Features/Spellbook/Spellbook-Window.lua), lit while the window is open. Features/Spellbook/Spellbook-Tabs.lua
 	owns the tab and its placement.
 ]]
 
@@ -11,7 +11,7 @@ local ICON_ADDON = ns.ICON_ADDON
 local SpellbookTabs = ns.SpellbookTabs
 
 SpellbookTabs:RegisterTab(ADDON_NAME, {
-	name = ns.L["ADDON_TITLE"],
+	name = ns.SpellbookTabTitle(),
 	description = ns.L["SPELLBOOK_TAB_DESCRIPTION"],
 	hint = { ns.L["TOOLTIP_KEY_CLICK"], ns.L["TOOLTIP_ACTION_OPEN_PAGE"] },
 	icon = ICON_ADDON,
@@ -24,7 +24,7 @@ ns.OnSpellbookWindowToggled(function()
 end)
 
 --[[
-	Closes the game's book when the window opens (Features/Spellbook-Window.lua), the way the game closes one of
+	Closes the game's book when the window opens (Features/Spellbook/Spellbook-Window.lua), the way the game closes one of
 	its panels for another. Not in combat, where hiding the protected book is blocked.
 ]]
 function ns.CloseGameSpellbook()

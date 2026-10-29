@@ -1,4 +1,5 @@
 local _, ns = ...
+local BODY = ns.COLORS_RGB.BODY
 local L = ns.L
 local GetColor = ns.GetColor
 local HideTooltip = ns.HideTooltip
@@ -7,7 +8,7 @@ local SizedFontString = ns.SizedFontString
 --[[
 	One macro's tile on the spellbook page: its icon, its name with its note under it (the rank and the options
 	that are on), the glow while it isn't on the bars, its tooltip, and the click, drag and right-click that
-	place it or open its menu (Features/Macro-Menu.lua). Features/Spellbook-Page.lua lays the tiles out.
+	place it or open its menu (Features/Spellbook/Macro-Menu.lua). Features/Spellbook/Spellbook-Page.lua lays the tiles out.
 ]]
 
 local TILE_WIDTH, TILE_HEIGHT, ICON_SIZE = 218, 32, 30
@@ -235,7 +236,7 @@ local function OptionLabel(macro, entry)
 	return L[entry[3]]
 end
 
--- "Options On: Cast On Mouseover, Stop Casting", every option that is on by its menu label, or nil for none.
+-- "Options On: Cast At Cursor, Stop Casting", every option that is on by its menu label, or nil for none.
 local function OptionsOnLine(macro)
 	local labels = {}
 	ForEachOnOption(macro, function(entry)
@@ -368,8 +369,12 @@ local function CreateMacroButton(parent)
 		end
 		-- the macro text always has a blank line above it, notes or none
 		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(ns.UntaggedBody(self.macro.body), 1, 1, 1, true)
+		GameTooltip:AddLine(ns.UntaggedBody(self.macro.body), BODY.r, BODY.g, BODY.b, true)
 		GameTooltip:AddLine(" ")
+		-- a consumable's class notes, as the mini-map button's tooltip shows them ("Mage", Food & Water Macros)
+		if self.macro.consumable and ns.AddConsumableMacroNotes(GameTooltip, self.macro.type) then
+			GameTooltip:AddLine(" ")
+		end
 		if self.blockReason == "long" then
 			local line = L["TOOLTIP_TOO_LONG"]:format(self.blockLength, ns.MACRO_BODY_MAX_LENGTH)
 			GameTooltip:AddLine(GetColor("OFF") .. line .. "|r", nil, nil, nil, true)
@@ -421,14 +426,14 @@ end
 
 --[[
 	The note under the name, or nil for none: why the page can't place the macro, in red; else a consumable's
-	item, Focus,
+	Dynamic Item (and Dynamic Rank, when the class also casts it), Focus,
 	the rank and the options that are on (OptionSubText), when an unlearned spell can be learned, or the spell's own subtext as the game's spellbook shows it ("Racial").
 ]]
 local function NoteText(button, macro)
 	if button.blockReason then
 		return GetColor("OFF") .. L["SUBTEXT_TOO_LONG"] .. "|r"
 	elseif macro.consumable then
-		return macro.itemName -- the item it uses now, or nothing while the bags hold none
+		return L[macro.dynamicRank and "SUBTEXT_DYNAMIC_RANK_ITEM" or "SUBTEXT_DYNAMIC_ITEM"]
 	elseif macro.focus then
 		return L["SUBTEXT_FOCUS"]
 	end

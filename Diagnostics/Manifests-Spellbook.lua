@@ -39,9 +39,9 @@ end
 	guards. Every pair the add-on picks between at load is listed as both halves, and a FAIL on one half is
 	the report working: it says which branch this client took. The spellbook read (C_SpellBook's skill lines,
 	or the spell tab globals) picks ns.ForEachClassSpell; the tooltip reads (C_TooltipInfo's getters, or the
-	hidden scan tooltip's Set methods) pick ns.ScanTooltipLines and ns.GetTrainerServiceSpellId; the macro
+	hidden scan tooltip's Set methods) pick ns.ReadTooltipLines and ns.GetTrainerServiceSpellId; the macro
 	slot limits come from Constants.MacroConsts or the MAX_*_MACROS globals; the spellbook itself is
-	Blizzard_PlayerSpells with Features/Spellbook-Tabs.lua on the Retail engine, SpellBookFrame on the Classic engine;
+	Blizzard_PlayerSpells with Features/Spellbook/Spellbook-Tabs.lua on the Retail engine, SpellBookFrame on the Classic engine;
 	the page's header, settings cog and paging arrows each fall back without their template.
 ]]
 ns.AppendDiagnosticRows(ns.DIAGNOSTIC_API_CHECKS, {
@@ -155,7 +155,7 @@ ns.AppendDiagnosticRows(ns.DIAGNOSTIC_API_CHECKS, {
 		end,
 	},
 
-	-- The Retail-engine spellbook and Features/Spellbook-Tabs.lua, whose tab hides under the gamepad UI.
+	-- The Retail-engine spellbook and Features/Spellbook/Spellbook-Tabs.lua, whose tab hides under the gamepad UI.
 	Global("PlayerSpellsFrame"),
 	Method("EventUtil", "ContinueOnAddOnLoaded"),
 	Method("EventRegistry", "RegisterCallback"),
@@ -292,7 +292,7 @@ local function ListLine(label, entries)
 	return line
 end
 
--- The class lists of spell IDs Features/Macro-Builder.lua resolves to names.
+-- The class lists of spell IDs Features/Spellbook/Class-Config.lua resolves to names.
 local LIST_KEYS = {
 	"mouseoverEnemy",
 	"mouseoverFriend",
@@ -354,7 +354,6 @@ local DATA_LIST_KEYS = {
 	"extraSpells",
 }
 local PER_SPELL_OPTIONS = {
-	"mouseover",
 	"cursor",
 	"focus",
 	"pet",
@@ -363,10 +362,8 @@ local PER_SPELL_OPTIONS = {
 	"stopCast",
 	"startAttack",
 	"noToggle",
-	"castOnSelf",
 	"targetRank",
 	"fixedRank",
-	"targetTarget",
 	"targetEnemy",
 	"targetFriend",
 	"combatOnly",
@@ -429,7 +426,7 @@ end
 --[[
 	The Retail-engine page shuts itself whenever the book hides, the gamepad UI is on, the spell search takes
 	focus or shows its preview, or the book's selected native tab is no longer the one the page opened over;
-	another add-on's tab or page opening shuts it too, through the ones Features/Spellbook-Tabs.lua watches.
+	another add-on's tab or page opening shuts it too, through the ones Features/Spellbook/Spellbook-Tabs.lua watches.
 ]]
 local function RetailBookLine(lines, spellbookTabs)
 	local book = spellbookTabs.book
@@ -530,7 +527,7 @@ local function StanceFormLines(lines)
 		string.format("Stance bar forms: %d%s", #forms, #forms > 0 and (" (" .. table.concat(forms, ", ") .. ")") or "")
 end
 
--- How many of the bundled trainer rows apply to this character, as Features/Unlearned-Spells.lua filters them.
+-- How many of the bundled trainer rows apply to this character, as Features/Spellbook/Unlearned-Spells.lua filters them.
 local function TrainerRowsForPlayer()
 	local faction, race = UnitFactionGroup("player"), select(3, UnitRace("player"))
 	local count = 0
@@ -598,7 +595,6 @@ end
 	one macro under its book name, cast as the first of its spells the player knows, and leaves its spells
 	out; with none known, the flyout is left out too. MoP Classic's book holds it; Era and TBC have none.
 ]]
-local CALL_PET_FLYOUT = 9
 
 local function CallPetFlyoutLines(lines)
 	if ns.SpellbookTabs or type(GetFlyoutInfo) ~= "function" then
@@ -609,7 +605,7 @@ local function CallPetFlyoutLines(lines)
 		local _, _, offset, numSlots = GetSpellTabInfo(line)
 		for slot = offset + 1, offset + numSlots do
 			local itemType, id = GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
-			if itemType == "FLYOUT" and id == CALL_PET_FLYOUT then
+			if itemType == "FLYOUT" and id == ns.CALL_PET_FLYOUT_ID then
 				found = true
 			end
 		end
@@ -618,10 +614,10 @@ local function CallPetFlyoutLines(lines)
 		lines[#lines + 1] = "Call Pet flyout: not in the book"
 		return
 	end
-	local _, _, numSlots, isKnown = GetFlyoutInfo(CALL_PET_FLYOUT)
+	local _, _, numSlots, isKnown = GetFlyoutInfo(ns.CALL_PET_FLYOUT_ID)
 	local members, memberIds = {}, {}
 	for flyoutSlot = 1, numSlots or 0 do
-		local spellId, _, slotKnown = GetFlyoutSlotInfo(CALL_PET_FLYOUT, flyoutSlot)
+		local spellId, _, slotKnown = GetFlyoutSlotInfo(ns.CALL_PET_FLYOUT_ID, flyoutSlot)
 		if spellId then
 			memberIds[spellId] = true
 		end
@@ -867,7 +863,7 @@ function ns:BuildMacroContextReport()
 	end
 	local thisCharacter, otherCharacters, shared = 0, 0, 0
 	for _, record in pairs(ns.db.global.ownedMacros) do
-		if record == ns.db.keys.char then
+		if record == ns.MacroOwnerKey() then
 			thisCharacter = thisCharacter + 1
 		elseif type(record) == "string" then
 			otherCharacters = otherCharacters + 1
@@ -1183,8 +1179,33 @@ local function CollectTrainerSpells(spellsByClass)
 	return entries
 end
 
+-- A plain list of spell IDs (BASIC_ATTACK_SPELL_IDS).
+local function CollectSpellIds(ids)
+	local entries = {}
+	for _, id in ipairs(ids) do
+		entries[#entries + 1] = { id = id }
+	end
+	return entries
+end
+
+-- RANGED_ATTACKS rows carry their spell as id.
+local function CollectRangedAttacks(rows)
+	local entries = {}
+	for _, row in ipairs(rows) do
+		entries[#entries + 1] = { id = row.id, row = row }
+	end
+	return entries
+end
+
 ns.AppendDiagnosticRows(ns.DIAGNOSTIC_DATA_SOURCES, {
 	-- { label, sources = { { table, kind, rowId or collect, dataColumns } } }
+	{
+		label = "Game-IDs",
+		sources = {
+			{ table = "BASIC_ATTACK_SPELL_IDS", kind = "spell", collect = CollectSpellIds },
+			{ table = "RANGED_ATTACKS", kind = "spell", collect = CollectRangedAttacks },
+		},
+	},
 	{
 		label = "Class-Spell-Lists",
 		sources = {

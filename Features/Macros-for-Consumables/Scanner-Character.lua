@@ -1,0 +1,148 @@
+local _, ns = ...
+
+--[[
+    Scanner-Character -- reads the character's own facts: profession skills and
+    the session constants (race and class, spell-name caches, the conjure-spell
+    cache). Which buffs the character still needs is Scanner-Auras.lua's job.
+]]
+
+--------------------------------------------------------------------------------
+-- State
+--------------------------------------------------------------------------------
+
+ns.currentFirstAidSkill = 0
+ns.currentAlchemySkill = 0
+ns.currentEngineeringSkill = 0
+
+--------------------------------------------------------------------------------
+-- Profession Skills
+--------------------------------------------------------------------------------
+
+--[[
+    A profession's rank by its skill line ID (Game-IDs). 0 while unlearned.
+
+    Forever answers by ID (C_SkillInfo.GetSkillLineInfoByID), so no name is
+    read and a collapsed header changes nothing. Era and TBC have no such call
+    and search the skill list by the name the client gives that skill line, so
+    it matches in every locale. Never a spell's name: a profession's spell can
+    be named apart from its skill line (French First Aid is "Premiers soins" as
+    a spell but "Secourisme" as a skill line).
+
+    That list leaves out the lines under a collapsed header, so a skill not
+    found while a header is collapsed answers nil, and the caller keeps the last
+    rank read rather than reading the profession as unlearned.
+]]
+local GetSkillLineInfoByID = C_SkillInfo and C_SkillInfo.GetSkillLineInfoByID
+
+local function ReadSkillRank(skillLineID)
+	if GetSkillLineInfoByID then
+		local info = GetSkillLineInfoByID(skillLineID)
+		return info and info.rank or 0
+	end
+
+	local skillLineName = C_TradeSkillUI.GetTradeSkillDisplayName(skillLineID)
+	if not skillLineName or skillLineName == "" then
+		return 0
+	end
+
+	local headerCollapsed = false
+	for i = 1, ns.GetNumSkillLines() do
+		local skillName, isHeader, isExpanded, skillRank = ns.GetSkillLineInfo(i)
+		if isHeader then
+			if not isExpanded then
+				headerCollapsed = true
+			end
+		elseif skillName == skillLineName then
+			return skillRank
+		end
+	end
+
+	if headerCollapsed then
+		return nil
+	end
+	return 0
+end
+
+-- Each Update reads one profession's rank and returns whether it changed.
+function ns.UpdateFirstAidSkill()
+	local before = ns.currentFirstAidSkill
+	ns.currentFirstAidSkill = ReadSkillRank(ns.FIRST_AID_SKILL_LINE_ID) or ns.currentFirstAidSkill
+	return ns.currentFirstAidSkill ~= before
+end
+
+function ns.UpdateAlchemySkill()
+	local before = ns.currentAlchemySkill
+	ns.currentAlchemySkill = ReadSkillRank(ns.ALCHEMY_SKILL_LINE_ID) or ns.currentAlchemySkill
+	return ns.currentAlchemySkill ~= before
+end
+
+function ns.UpdateEngineeringSkill()
+	local before = ns.currentEngineeringSkill
+	ns.currentEngineeringSkill = ReadSkillRank(ns.ENGINEERING_SKILL_LINE_ID) or ns.currentEngineeringSkill
+	return ns.currentEngineeringSkill ~= before
+end
+
+--------------------------------------------------------------------------------
+-- Session Constants
+--------------------------------------------------------------------------------
+
+--[[
+    One-time, session-constant character setup: race/class detection,
+    spell-name caches, the conjure-spell existence cache, and profession skills.
+    None of these change during a session, so they resolve once and the event
+    handlers (PLAYER_LEVEL_UP, SPELLS_CHANGED, SKILL_LINES_CHANGED) keep the
+    level-dependent pieces fresh afterward. Called once at login, after ns.db
+    exists.
+]]
+function ns.InitializeCharacterConstants()
+	local _, raceToken = UnitRace("player")
+	ns.isNightElf = (raceToken == "NightElf")
+
+	-- Resolve the Shadowmeld spell name once for macro building
+	if ns.isNightElf then
+		ns.shadowmeldSpellName = C_Spell.GetSpellName(ns.SHADOWMELD_SPELL_ID)
+	end
+
+	-- The Forsaken race token is "Scourge"; resolve Cannibalize the same way.
+	ns.isForsaken = (raceToken == "Scourge")
+	if ns.isForsaken then
+		ns.cannibalizeSpellName = C_Spell.GetSpellName(ns.CANNIBALIZE_SPELL_ID)
+	end
+
+	--[[
+	    Class detection. Used by macro builders to decide which conjure
+	    branches the player could *eventually* know — so a low-level mage
+	    gets "You don't currently know Conjure Food." while a hunter sees no
+	    message at all (they'll never learn that spell).
+	]]
+	local _, classToken = UnitClass("player")
+	ns.isHunter = (classToken == "HUNTER")
+	ns.isDruid = (classToken == "DRUID")
+	ns.isMage = (classToken == "MAGE")
+	ns.isWarlock = (classToken == "WARLOCK")
+	ns.isRogue = (classToken == "ROGUE")
+
+	-- Resolve the Stealth spell name once for macro building (Stealth Eating)
+	if ns.isRogue then
+		ns.stealthSpellName = C_Spell.GetSpellName(ns.STEALTH_SPELL_ID)
+	end
+
+	if ns.isHunter then
+		ns.ResolveHunterSpells()
+		ns.petDeadDismissed = false
+	end
+
+	ns.spellCache = {}
+	for _, spellList in pairs(ns.CONJURE_SPELLS) do
+		for _, data in ipairs(spellList) do
+			local spellID = data[1]
+			if C_Spell.GetSpellName(spellID) then
+				ns.spellCache[spellID] = true
+			end
+		end
+	end
+
+	ns.UpdateFirstAidSkill()
+	ns.UpdateAlchemySkill()
+	ns.UpdateEngineeringSkill()
+end
