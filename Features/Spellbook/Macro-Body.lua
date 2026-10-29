@@ -158,7 +158,7 @@ local function CastBody(macro)
 		channel or stealth, and on the wrong side of the combat check does nothing at all, not even its item
 		or attack lines, ahead of the mute so a stopped press never leaves the sounds muted; muteErrors' mute; stopAttack's /stopattack; stopCast's
 		/stopcasting; cancelForm's /cancelform; targetEnemy's /targetenemy, for when there is no living hostile
-		target, and targetFriend's /targetfriend, for when there is no living friendly one; the useItems slots, in the order ticked; the stance switch; then the cast. oncePerCombat makes the
+		target, and targetFriend's /targetfriend, for when there is no living friendly one; the useItems slots, in the order ticked; the stance switch; then the cast, its Conditionals rows first. oncePerCombat makes the
 		cast a /castsequence that casts once until combat ends or the target changes, oncePerTarget one that
 		casts once until the target changes. With items, a stance switch or a cast sequence, #showtooltip
 		names the spell so the button shows the spell.

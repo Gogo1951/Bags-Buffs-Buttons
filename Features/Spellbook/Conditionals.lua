@@ -203,12 +203,53 @@ local function KnownConditions(row)
 	return known
 end
 
--- Why a row writes nothing, as its first condition's ns.ConditionBlockReason, or nil when it can.
-function ns.ConditionalRowBlockReason(macro, row)
+-- A row's first condition the macro can't use, as its ns.ConditionBlockReason, or nil.
+local function RowBlockReason(macro, row)
 	for _, key in ipairs(KnownConditions(row)) do
 		local reason = ns.ConditionBlockReason(macro, key)
 		if reason then
 			return reason
+		end
+	end
+	return nil
+end
+
+-- Whether every condition of one row is among another's, so whenever the second matches the first does too.
+local function Within(row, other)
+	local checks = {}
+	for _, key in ipairs(KnownConditions(other)) do
+		checks[key] = true
+	end
+	for _, key in ipairs(KnownConditions(row)) do
+		if not checks[key] then
+			return false
+		end
+	end
+	return true
+end
+
+--[[
+	Why the row at index writes nothing, or nil when it casts: a condition blocked on the macro
+	(ns.ConditionBlockReason), or an earlier row with a spell that matches whenever this one does (Shift above
+	Shift and Alt), which always casts first, so this one never would. The panel draws such a row faded with
+	this reason, and the macro text leaves it out, which saves its bytes.
+]]
+function ns.ConditionalSkipReason(macro, index)
+	local rows = ns.Conditionals(macro)
+	local row = rows[index]
+	if not row then
+		return nil
+	end
+	local blocked = RowBlockReason(macro, row)
+	if blocked then
+		return blocked
+	end
+	for i = 1, index - 1 do
+		local earlier = rows[i]
+		if earlier.spell and #KnownConditions(earlier) > 0 and not RowBlockReason(macro, earlier) then
+			if Within(earlier, row) then
+				return L["CONDITIONALS_SHADOWED"]:format(i)
+			end
 		end
 	end
 	return nil
@@ -268,13 +309,13 @@ end
 	The rows as /cast clauses for the macro text, { condition, nil, spell }, in order: "spec:2,mod:alt" and the
 	row's spell. Each casts on a plain target, never the macro's Target priority, since every clause would
 	repeat the row's whole condition and fill the 255 bytes fast. A row with no spell, no condition this client
-	knows, or a condition blocked on this macro (ns.ConditionBlockReason) is left out.
+	knows, or a reason it never casts (ns.ConditionalSkipReason) is left out.
 ]]
 function ns.ConditionalClauses(macro)
 	local clauses = {}
-	for _, row in ipairs(ns.Conditionals(macro)) do
+	for index, row in ipairs(ns.Conditionals(macro)) do
 		local known = KnownConditions(row)
-		if row.spell and #known > 0 and not ns.ConditionalRowBlockReason(macro, row) then
+		if row.spell and #known > 0 and not ns.ConditionalSkipReason(macro, index) then
 			local parts = {}
 			for i, key in ipairs(known) do
 				parts[i] = BY_KEY[key].clause
@@ -290,16 +331,26 @@ end
 	(ns.RefreshSpellbookPage), as the menu does.
 ]]
 
--- Adds a row at the bottom, checking the first condition offered that the macro can use, with no spell yet.
+--[[
+	Adds a row at the bottom with no spell yet, checking the first condition offered that the macro can use and
+	no row checks alone already, since a second such row would never cast; Shift when every one is taken.
+]]
 function ns.AddConditional(macro)
 	local rows = CopyRows(macro)
 	if #rows >= ns.CONDITIONALS_MAX_ROWS then
 		return
 	end
+	local taken = {}
+	for _, row in ipairs(rows) do
+		if #row.when == 1 then
+			taken[row.when[1]] = true
+		end
+	end
 	local first = "shift"
 	for _, condition in ipairs(ns.CONDITIONS) do
-		if ns.OffersCondition(condition.key) and not ns.ConditionBlockReason(macro, condition.key) then
-			first = condition.key
+		local key = condition.key
+		if not taken[key] and ns.OffersCondition(key) and not ns.ConditionBlockReason(macro, key) then
+			first = key
 			break
 		end
 	end

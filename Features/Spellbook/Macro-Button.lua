@@ -16,6 +16,9 @@ ns.TILE_WIDTH, ns.TILE_HEIGHT = TILE_WIDTH, TILE_HEIGHT
 local NAME_SIZE, NOTE_SIZE = 14, 12
 
 local INK_COLOR = ns.INK_COLOR
+local INFO = ns.COLORS_RGB.INFO
+local EDITING_FILL_ALPHA = 0.12 -- the wash inside the outline on the tile the Conditionals panel is open for
+local PICK_DIMMED_ALPHA = 0.35 -- a tile pick mode can't take
 local FADED_INK_COLOR = ns.FADED_INK_COLOR
 
 --[[
@@ -290,6 +293,29 @@ local function CreateMacroButton(parent)
 		button.glow:SetVertexColor(1, 0.82, 0) -- the texture is white; Blizzard tints it per use
 	end
 	button.glow:Hide()
+	--[[
+		the outline and wash on the tile the Conditionals panel is open for (Features/Spellbook/Conditionals-Panel.lua),
+		as textures of the tile's own, so the wash sits under its icon and name
+	]]
+	button.editing = {}
+	local wash = button:CreateTexture(nil, "BACKGROUND", nil, -8)
+	wash:SetColorTexture(INFO.r, INFO.g, INFO.b, EDITING_FILL_ALPHA)
+	wash:SetPoint("TOPLEFT", -3, 3)
+	wash:SetPoint("BOTTOMRIGHT", 3, -3)
+	button.editing[1] = wash
+	for _, edge in ipairs({
+		{ "TOPLEFT", "TOPRIGHT", "SetHeight" },
+		{ "BOTTOMLEFT", "BOTTOMRIGHT", "SetHeight" },
+		{ "TOPLEFT", "BOTTOMLEFT", "SetWidth" },
+		{ "TOPRIGHT", "BOTTOMRIGHT", "SetWidth" },
+	}) do
+		local line = button:CreateTexture(nil, "OVERLAY", nil, 7)
+		line:SetColorTexture(INFO.r, INFO.g, INFO.b)
+		line:SetPoint(edge[1], wash, edge[1])
+		line:SetPoint(edge[2], wash, edge[2])
+		line[edge[3]](line, 2)
+		button.editing[#button.editing + 1] = line
+	end
 	-- fades in and out like the spellbook's glow on new spells; UpdateGlow starts it
 	button.pulse = button.glow:CreateAnimationGroup()
 	button.pulse:SetLooping("BOUNCE")
@@ -417,6 +443,18 @@ local function CreateMacroButton(parent)
 			GameTooltip:AddLine(GetColor("HELP") .. L["TOOLTIP_NOT_ON_BARS"] .. "|r", nil, nil, nil, true)
 			GameTooltip:AddLine(" ")
 		end
+		-- in the Conditionals panel's pick mode a click picks the spell, or can't, and a right-click cancels
+		if ns.IsPickingConditionalSpell() then
+			if ns.ConditionalSpellOf(self.macro) then
+				AddHint(L["TOOLTIP_KEY_CLICK"], L["CONDITIONALS_ACTION_USE"])
+			else
+				GameTooltip:AddLine(GetColor("OFF") .. L["CONDITIONALS_CANNOT_PICK"] .. "|r", nil, nil, nil, true)
+			end
+			GameTooltip:AddLine(" ")
+			AddHint(L["TOOLTIP_KEY_RIGHT_CLICK"], L["CONDITIONALS_ACTION_CANCEL"])
+			GameTooltip:Show()
+			return
+		end
 		-- each click on a line of its own, a blank line between
 		AddHint(L["TOOLTIP_KEY_CLICK_DRAG"], L["TOOLTIP_ACTION_PLACE_ON_BAR"])
 		if ns.HasOptions(self.macro) then
@@ -508,6 +546,11 @@ local function SetMacro(button, macro, bars)
 	button.name:SetTextColor(unpack(macro.unlearned and FADED_INK_COLOR or INK_COLOR))
 	button.subText:SetText(NoteText(button, macro))
 	button.subText:SetTextColor(unpack(FADED_INK_COLOR))
+	local editing = ns.IsConditionalsPanelFor(macro)
+	for _, texture in ipairs(button.editing) do
+		texture:SetShown(editing)
+	end
+	button:SetAlpha(ns.IsPickingConditionalSpell() and not ns.ConditionalSpellOf(macro) and PICK_DIMMED_ALPHA or 1)
 end
 
 ns.CreateMacroButton = CreateMacroButton

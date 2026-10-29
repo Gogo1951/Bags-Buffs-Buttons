@@ -2,7 +2,7 @@ local _, ns = ...
 local L = ns.L
 local GetColor = ns.GetColor
 local TITLE, BODY = ns.COLORS_RGB.TITLE, ns.COLORS_RGB.BODY
-local INFO, OFF = ns.COLORS_RGB.INFO, ns.COLORS_RGB.OFF
+local INFO, OFF, WARNING = ns.COLORS_RGB.INFO, ns.COLORS_RGB.OFF, ns.COLORS_RGB.TITLE
 local SetTip = ns.MenuSetTip
 local HideTooltip = ns.HideTooltip
 local SizedFontString = ns.SizedFontString
@@ -20,7 +20,9 @@ local SettingsKey = ns.SettingsKey
 	A row's spell slot takes a spell two ways: a click puts the page in pick mode, where the next spell clicked
 	on the page fills the slot and Escape or a right-click cancels; or a spell dragged from the page (or the
 	game's own spellbook, or an action bar) is dropped on it. A drag from the page still picks up the macro, so
-	it can go on an action bar as before.
+	it can go on an action bar as before. Add Condition starts pick mode for the new row straight away. The page
+	outlines the tile the panel is open for, and in pick mode dims the ones that can't be picked
+	(Features/Spellbook/Macro-Button.lua asks ns.IsConditionalsPanelFor and ns.IsPickingConditionalSpell).
 
 	Every change rebuilds the page, as the menu's do (ns.RefreshSpellbookPage), which rewrites the macro; the
 	rebuild makes the page's macros afresh, so the panel holds its macro's settings key and finds it again after
@@ -33,10 +35,14 @@ local PADDING = 16
 local HEADER_ICON = 24
 local HINT_TOP, ROWS_TOP = 46, 72
 local ROW_HEIGHT, ROW_GAP = 34, 6
-local DROPDOWN_WIDTH, DROPDOWN_HEIGHT = 96, 24
+local DROPDOWN_HEIGHT = 24
+local DROPDOWN_MIN_WIDTH = 56
+local DROPDOWN_TEXT_LEFT, CARET_SIZE, CARET_RIGHT = 8, 12, 5
+local OTHERWISE_LABEL_WIDTH = 96
 local SLOT_HEIGHT, SLOT_ICON = 28, 22
 local REMOVE_SIZE = 20
 local METER_WIDTH, METER_HEIGHT = 120, 6
+local METER_WARNING = 0.9 -- the share of what a macro holds past which the meter turns gold
 local INNER_WIDTH = PANEL_WIDTH - 2 * PADDING
 
 -- The panel's own dark leather, so it reads as part of the window rather than the parchment.
@@ -51,6 +57,8 @@ local MUTED_INK = { 0.722, 0.671, 0.557 }
 local ARROW_INK = { 0.541, 0.49, 0.392 }
 local METER_TRACK = { 0.165, 0.165, 0.18 }
 local HIGHLIGHT_ALPHA = 0.08
+local DROP_ALPHA = 0.18 -- the wash on the row a dragged row will land on
+local SKIPPED_ALPHA = 0.5 -- a row the macro text leaves out (ns.ConditionalSkipReason)
 
 local TEXTURE_CARET = "Interface\\Buttons\\Arrow-Down-Up"
 local TEXTURE_ARROW = "Interface\\ChatFrame\\ChatFrameExpandArrow"
@@ -83,17 +91,23 @@ local function AddHighlight(button)
 	PixelInset(highlight, button, 1)
 end
 
--- A tooltip on owner, its title gold and its lines white, a last line, if given, in silver.
-local function ShowTip(owner, title, body, note)
+-- A tooltip on owner, its title gold and its lines white, then, if given, why it does nothing, in red.
+local function ShowTip(owner, title, body, reason)
 	GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
 	GameTooltip:SetText(title, TITLE.r, TITLE.g, TITLE.b, 1, true)
 	if body then
 		GameTooltip:AddLine(body, BODY.r, BODY.g, BODY.b, true)
 	end
-	if note then
-		GameTooltip:AddLine(GetColor("HELP") .. note .. "|r", nil, nil, nil, true)
+	if reason then
+		GameTooltip:AddLine(" ")
+		GameTooltip:AddLine(GetColor("OFF") .. reason .. "|r", nil, nil, nil, true)
 	end
 	GameTooltip:Show()
+end
+
+-- A keybind and what it does, both in the interaction blue, as a pair across the tooltip, as a tile's are.
+local function AddHint(keybind, action)
+	GameTooltip:AddDoubleLine(GetColor("INFO") .. keybind .. "|r", GetColor("INFO") .. action .. "|r")
 end
 
 -- A condition's label, or a question mark for a key this client doesn't know.
@@ -132,6 +146,27 @@ local function Change(set)
 	ns.RefreshSpellbookPage(panel.page)
 end
 
+-- The macro and the row at index, or nil for either once they are gone.
+local function RowAt(index)
+	local macro = CurrentMacro()
+	return macro, macro and ns.Conditionals(macro)[index]
+end
+
+--[[
+	Whether the panel is open for a page macro, so its tile is outlined on the page. A focus copy shares its
+	spell's settings key but has no Conditionals, so it is never the one.
+]]
+function ns.IsConditionalsPanelFor(macro)
+	return panel ~= nil and panel:IsShown() and ns.OffersConditionals(macro) and SettingsKey(macro) == panel.key
+end
+
+-- Redraws the page's tiles, for their outline and pick-mode dimming, without rebuilding its macros.
+local function RedrawPage()
+	if panel.page:IsVisible() then
+		ns.LayoutSpellbookPage(panel.page)
+	end
+end
+
 local Update -- set below; the pick mode redraws the panel
 
 --------------------------------------------------------------------------------
@@ -151,19 +186,18 @@ local function PickOverlay()
 	overlay:SetAllPoints()
 	overlay:SetFrameLevel(parchment:GetFrameLevel() + 50)
 	overlay:EnableMouse(false)
-	for _, side in ipairs({ { "TOPLEFT", "TOPRIGHT" }, { "BOTTOMLEFT", "BOTTOMRIGHT" } }) do
+	-- each edge as { one corner, the other, the setter for its thickness }
+	for _, edge in ipairs({
+		{ "TOPLEFT", "TOPRIGHT", "SetHeight" },
+		{ "BOTTOMLEFT", "BOTTOMRIGHT", "SetHeight" },
+		{ "TOPLEFT", "BOTTOMLEFT", "SetWidth" },
+		{ "TOPRIGHT", "BOTTOMRIGHT", "SetWidth" },
+	}) do
 		local line = overlay:CreateTexture(nil, "OVERLAY")
 		line:SetColorTexture(INFO.r, INFO.g, INFO.b)
-		line:SetPoint(side[1])
-		line:SetPoint(side[2])
-		line:SetHeight(2)
-	end
-	for _, side in ipairs({ { "TOPLEFT", "BOTTOMLEFT" }, { "TOPRIGHT", "BOTTOMRIGHT" } }) do
-		local line = overlay:CreateTexture(nil, "OVERLAY")
-		line:SetColorTexture(INFO.r, INFO.g, INFO.b)
-		line:SetPoint(side[1])
-		line:SetPoint(side[2])
-		line:SetWidth(2)
+		line:SetPoint(edge[1])
+		line:SetPoint(edge[2])
+		line[edge[3]](line, 2)
 	end
 	local banner = CreateFrame("Frame", nil, overlay)
 	banner:SetPoint("TOP", 0, -8)
@@ -187,6 +221,7 @@ local function SetPicking(index)
 	if panel then
 		PickOverlay():SetShown(index ~= nil)
 		panel:EnableKeyboard(index ~= nil)
+		RedrawPage()
 		Update()
 	end
 end
@@ -209,7 +244,10 @@ local function StartPick(index)
 	SetPicking(index)
 end
 
--- A page tile clicked in pick mode (Features/Spellbook/Macro-Button.lua): its spell fills the slot waiting for one.
+--[[
+	A page tile clicked in pick mode (Features/Spellbook/Macro-Button.lua): its spell fills the slot waiting for
+	one. A tile that can't be picked leaves pick mode on, with the game's error line saying why.
+]]
 function ns.PickConditionalSpell(macro)
 	local index = picking
 	local name, rank = ns.ConditionalSpellOf(macro)
@@ -320,32 +358,39 @@ local function OpenConditionMenu(owner, index, place)
 	end)
 end
 
--- A condition dropdown in a row: a dark field with the condition's name and a caret.
+--[[
+	A condition dropdown in a row: a dark field with the condition's name and a caret, as wide as its name needs,
+	so "Out Of Combat" reads whole and the spell slot keeps the rest of the row.
+]]
 local function CreateDropdown(row, place)
 	local dropdown = CreateFrame("Button", nil, row)
-	dropdown:SetSize(DROPDOWN_WIDTH, DROPDOWN_HEIGHT)
+	dropdown:SetHeight(DROPDOWN_HEIGHT)
 	Box(dropdown, FIELD_FILL, FIELD_EDGE)
 	AddHighlight(dropdown)
 	local caret = dropdown:CreateTexture(nil, "ARTWORK")
 	caret:SetTexture(TEXTURE_CARET)
-	caret:SetSize(12, 12)
-	caret:SetPoint("RIGHT", -5, 0)
+	caret:SetSize(CARET_SIZE, CARET_SIZE)
+	caret:SetPoint("RIGHT", -CARET_RIGHT, 0)
 	dropdown.text = SizedFontString(dropdown, "GameFontHighlightSmall", 12)
-	dropdown.text:SetPoint("LEFT", 8, 0)
-	dropdown.text:SetPoint("RIGHT", caret, "LEFT", -2, 0)
+	dropdown.text:SetPoint("LEFT", DROPDOWN_TEXT_LEFT, 0)
 	dropdown.text:SetJustifyH("LEFT")
 	dropdown.text:SetWordWrap(false)
+	function dropdown:SetLabel(label)
+		self.text:SetText(label)
+		local textWidth = math.ceil(self.text:GetUnboundedStringWidth())
+		self:SetWidth(math.max(DROPDOWN_MIN_WIDTH, DROPDOWN_TEXT_LEFT + textWidth + 4 + CARET_SIZE + CARET_RIGHT))
+	end
 	dropdown:SetScript("OnClick", function(self)
 		HideTooltip(self)
 		OpenConditionMenu(self, row.index, place)
 	end)
 	dropdown:SetScript("OnEnter", function(self)
-		local macro = CurrentMacro()
-		local conditional = macro and ns.Conditionals(macro)[row.index]
+		local macro, conditional = RowAt(row.index)
 		local key = conditional and conditional.when[place]
 		local condition = key and ns.ConditionRow(key)
 		if condition then
-			ShowTip(self, L[condition.labelKey], L[condition.descKey], ns.ConditionBlockReason(macro, key))
+			local reason = ns.ConditionBlockReason(macro, key) or ns.ConditionalSkipReason(macro, row.index)
+			ShowTip(self, L[condition.labelKey], L[condition.descKey], reason)
 		end
 	end)
 	dropdown:SetScript("OnLeave", HideTooltip)
@@ -364,21 +409,36 @@ local function CreateGrip(row)
 			dot:SetPoint("TOPLEFT", 3 + column * 4, -(3 + line * 5))
 		end
 	end
+	-- the row under the cursor, other than the one dragged, or nil
+	local function Target()
+		for i, other in ipairs(panel.rows) do
+			if i ~= row.index and other:IsShown() and other:IsMouseOver() then
+				return i
+			end
+		end
+		return nil
+	end
 	grip:RegisterForDrag("LeftButton")
 	grip:SetScript("OnDragStart", function()
 		HideTooltip(grip)
 		panel.dragFrom = row.index
 		row:SetAlpha(0.6)
+		-- the row it would land on shows a wash while the drag goes on
+		panel:SetScript("OnUpdate", function()
+			local to = Target()
+			for i, other in ipairs(panel.rows) do
+				other.drop:SetShown(i == to)
+			end
+		end)
 	end)
 	grip:SetScript("OnDragStop", function()
-		local from, to = panel.dragFrom, nil
-		panel.dragFrom = nil
-		for i, other in ipairs(panel.rows) do
-			if other:IsShown() and other:IsMouseOver() then
-				to = i
-			end
+		panel:SetScript("OnUpdate", nil)
+		for _, other in ipairs(panel.rows) do
+			other.drop:Hide()
 		end
-		if from and to and to ~= from then
+		local from, to = panel.dragFrom, Target()
+		panel.dragFrom = nil
+		if from and to then
 			ns.CancelConditionalPick()
 			Change(function(macro)
 				ns.MoveConditional(macro, from, to)
@@ -424,11 +484,36 @@ local function CreateSlot(row)
 	slot:SetScript("OnReceiveDrag", function()
 		DropOnSlot(row.index)
 	end)
+	--[[
+		the spell's own tooltip, as a tile shows it, or what to do while the slot is empty; then why the row never
+		casts, if it doesn't, and the clicks
+	]]
 	slot:SetScript("OnEnter", function(self)
-		local macro = CurrentMacro()
-		local conditional = macro and ns.Conditionals(macro)[row.index]
-		local spell = conditional and conditional.spell
-		ShowTip(self, spell or L["CONDITIONALS_PICK_SPELL"], L["CONDITIONALS_SLOT_DESCRIPTION"])
+		local macro, conditional = RowAt(row.index)
+		if not conditional then
+			return
+		end
+		local info = conditional.spell and C_Spell.GetSpellInfo(ns.ConditionalSpellText(conditional))
+		if info then
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetSpellByID(info.spellID)
+		else
+			ShowTip(self, conditional.spell or L["CONDITIONALS_PICK_SPELL"], L["CONDITIONALS_SLOT_DESCRIPTION"])
+		end
+		local reason = ns.ConditionalSkipReason(macro, row.index)
+		if reason then
+			GameTooltip:AddLine(" ")
+			GameTooltip:AddLine(GetColor("OFF") .. reason .. "|r", nil, nil, nil, true)
+		end
+		GameTooltip:AddLine(" ")
+		if picking == row.index then
+			AddHint(L["TOOLTIP_KEY_RIGHT_CLICK"], L["CONDITIONALS_ACTION_CANCEL"])
+		else
+			AddHint(L["TOOLTIP_KEY_CLICK"], L["CONDITIONALS_ACTION_PICK"])
+		end
+		GameTooltip:AddLine(" ")
+		AddHint(L["CONDITIONALS_KEY_DRAG"], L["CONDITIONALS_ACTION_DROP"])
+		GameTooltip:Show()
 	end)
 	slot:SetScript("OnLeave", HideTooltip)
 	return slot
@@ -441,6 +526,10 @@ local function CreateRow(parent, index)
 	row:SetWidth(INNER_WIDTH)
 	row:SetPoint("TOPLEFT", PADDING, -(ROWS_TOP + (index - 1) * (ROW_HEIGHT + ROW_GAP)))
 	Box(row, ROW_FILL, ROW_EDGE)
+	row.drop = row:CreateTexture(nil, "ARTWORK")
+	row.drop:SetColorTexture(INFO.r, INFO.g, INFO.b, DROP_ALPHA)
+	PixelInset(row.drop, row, 1)
+	row.drop:Hide()
 	row.grip = CreateGrip(row)
 	row.grip:SetPoint("LEFT", 6, 0)
 	row.first = CreateDropdown(row, 1)
@@ -480,17 +569,17 @@ end
 
 --[[
 	Draws a row: its conditions, the "and" and second dropdown only when it has two, and its spell, or the slot
-	waiting in pick mode, or the slot asking for one. A row blocked on this macro (ns.ConditionalRowBlockReason)
-	is drawn faded, since the macro text leaves it out; its dropdown's tooltip says why.
+	waiting in pick mode, or the slot asking for one. A row the macro text leaves out (ns.ConditionalSkipReason)
+	is drawn faded; its tooltips say why.
 ]]
 local function UpdateRow(row, macro, conditional)
-	row:SetAlpha(ns.ConditionalRowBlockReason(macro, conditional) and 0.5 or 1)
+	row:SetAlpha(ns.ConditionalSkipReason(macro, row.index) and SKIPPED_ALPHA or 1)
 	local when = conditional.when or {}
-	row.first.text:SetText(ConditionLabel(when[1]))
+	row.first:SetLabel(ConditionLabel(when[1]))
 	local two = when[2] ~= nil
 	row.andText:SetShown(two)
 	row.second:SetShown(two)
-	row.second.text:SetText(two and ConditionLabel(when[2]) or "")
+	row.second:SetLabel(two and ConditionLabel(when[2]) or "")
 	row.arrow:ClearAllPoints()
 	row.arrow:SetPoint("LEFT", two and row.second or row.first, "RIGHT", 6, 0)
 	local slot = row.slot
@@ -530,7 +619,7 @@ local function CreateOtherwise(parent)
 	local label = SizedFontString(row, "GameFontHighlightSmall", 13)
 	label:SetTextColor(unpack(MUTED_INK))
 	label:SetPoint("LEFT", 24, 0)
-	label:SetWidth(DROPDOWN_WIDTH)
+	label:SetWidth(OTHERWISE_LABEL_WIDTH)
 	label:SetJustifyH("LEFT")
 	label:SetText(L["CONDITIONALS_OTHERWISE"])
 	local arrow = row:CreateTexture(nil, "ARTWORK")
@@ -572,19 +661,34 @@ local function CreateFooter(parent)
 	footer.body:SetWidth(INNER_WIDTH - 20)
 	footer.body:SetJustifyH("LEFT")
 	footer.body:SetWordWrap(true)
+	footer.tooLong = SizedFontString(footer, "GameFontHighlightSmall", 12)
+	footer.tooLong:SetPoint("TOPLEFT", footer.body, "BOTTOMLEFT", 0, -6)
+	footer.tooLong:SetWidth(INNER_WIDTH - 20)
+	footer.tooLong:SetJustifyH("LEFT")
 	return footer
 end
 
--- Shows the macro text, its tag line left out though the length counts it, as the menu's Macro Text does.
+--[[
+	Shows the macro text, its tag line left out though the length counts it, as the menu's Macro Text does. The
+	meter is blue, gold once it nears what a macro holds, and red past it, where a line under the text says the
+	macro isn't written until it fits, as the tile's tooltip does.
+]]
 local function UpdateFooter(footer, macro)
 	local length, max = #macro.body, ns.MACRO_BODY_MAX_LENGTH
 	local over = length > max
+	local near = not over and length >= max * METER_WARNING
 	footer.count:SetText(GetColor(over and "OFF" or "HELP") .. L["MENU_MACRO_LENGTH"]:format(length, max) .. "|r")
-	local color = over and OFF or INFO
+	local color = over and OFF or near and WARNING or INFO
 	footer.meter:SetColorTexture(color.r, color.g, color.b)
 	footer.meter:SetWidth(math.max(1, METER_WIDTH * math.min(1, length / max)))
 	footer.body:SetText((ns.UntaggedBody(macro.body):gsub("|", "||")))
-	footer:SetHeight(30 + math.ceil(footer.body:GetStringHeight()) + 10)
+	footer.tooLong:SetShown(over)
+	footer.tooLong:SetText(GetColor("OFF") .. L["TOOLTIP_TOO_LONG"]:format(length, max) .. "|r")
+	local height = 30 + math.ceil(footer.body:GetStringHeight()) + 10
+	if over then
+		height = height + 6 + math.ceil(footer.tooLong:GetStringHeight())
+	end
+	footer:SetHeight(height)
 end
 
 --[[
@@ -601,9 +705,11 @@ Update = function()
 		return
 	end
 	panel.icon:SetTexture(macro.icon or ns.QUESTION_MARK_ICON)
+	-- a rank's own macro shares its spell's name, so its heading names the rank too
 	panel.title:SetText(
 		GetColor("TITLE")
 			.. (macro.label or macro.name)
+			.. (macro.rank and " " .. GetColor("HELP") .. macro.rank .. "|r" or "")
 			.. "|r "
 			.. GetColor("SEPARATOR")
 			.. "//|r "
@@ -619,7 +725,9 @@ Update = function()
 			UpdateRow(row, macro, conditional)
 		end
 	end
-	local y = ROWS_TOP + #conditionals * (ROW_HEIGHT + ROW_GAP)
+	-- with no rows yet, a line saying what one does stands where they go
+	panel.empty:SetShown(#conditionals == 0)
+	local y = ROWS_TOP + math.max(#conditionals, panel.empty:IsShown() and 1 or 0) * (ROW_HEIGHT + ROW_GAP)
 	panel.otherwise:SetPoint("TOPLEFT", PADDING, -y)
 	local own = ns.CastSpellName(macro)
 	panel.otherwise.icon:SetTexture(C_Spell.GetSpellTexture(own) or macro.icon or ns.QUESTION_MARK_ICON)
@@ -668,6 +776,13 @@ local function CreatePanel(page)
 	hint:SetTextColor(unpack(MUTED_INK))
 	hint:SetText(L["CONDITIONALS_HINT"])
 
+	panel.empty = SizedFontString(panel, "GameFontHighlightSmall", 13)
+	panel.empty:SetPoint("TOPLEFT", PADDING, -ROWS_TOP)
+	panel.empty:SetSize(INNER_WIDTH, ROW_HEIGHT)
+	panel.empty:SetJustifyH("LEFT")
+	panel.empty:SetJustifyV("MIDDLE")
+	panel.empty:SetText(GetColor("MUTED") .. L["CONDITIONALS_EMPTY"] .. "|r")
+
 	panel.rows = {}
 	for i = 1, ns.CONDITIONALS_MAX_ROWS do
 		panel.rows[i] = CreateRow(panel, i)
@@ -677,9 +792,15 @@ local function CreatePanel(page)
 	panel.add:SetSize(150, 22)
 	panel.add:SetText(L["CONDITIONALS_ADD"])
 	panel.add:SetMotionScriptsWhileDisabled(true)
+	-- the new row has no spell yet, so pick mode starts for it at once
 	panel.add:SetScript("OnClick", function()
 		ns.CancelConditionalPick()
 		Change(ns.AddConditional)
+		local macro = CurrentMacro()
+		local count = macro and #ns.Conditionals(macro) or 0
+		if count > 0 and not ns.Conditionals(macro)[count].spell and not InCombatLockdown() then
+			SetPicking(count)
+		end
 	end)
 	panel.add:SetScript("OnEnter", function(self)
 		ShowTip(
@@ -713,9 +834,11 @@ local function CreatePanel(page)
 	panel:SetScript("OnShow", function()
 		ns.DockSpellbookPanel(PANEL_WIDTH)
 	end)
+	-- the tile's outline goes with the panel
 	panel:SetScript("OnHide", function()
 		ns.CancelConditionalPick()
 		ns.DockSpellbookPanel(0)
+		RedrawPage()
 	end)
 	-- closing the window closes the panel, so it opens again only from a macro's menu
 	window:HookScript("OnHide", function()
@@ -734,6 +857,7 @@ function ns.ShowConditionalsPanel(macro, page)
 	ns.CancelConditionalPick()
 	panel.key = SettingsKey(macro)
 	panel:Show()
+	RedrawPage()
 	Update()
 end
 
