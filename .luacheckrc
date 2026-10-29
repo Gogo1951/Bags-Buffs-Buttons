@@ -12,6 +12,8 @@ read_globals = {
 	"C_AddOns",
 	"C_Bank",
 	"C_ChatInfo",
+	"CHAT_WHISPER_GET",
+	"ChatTypeInfo",
 	"C_Container",
 	"C_CreatureInfo",
 	"C_CVar",
@@ -94,6 +96,7 @@ read_globals = {
 	"GetMerchantItemInfo",
 	"GetMerchantItemID",
 	"GetMerchantItemLink",
+	"GetMerchantItemMaxStack",
 	"GetMerchantNumItems",
 	"GetMoney",
 	"GetNetStats",
@@ -161,6 +164,7 @@ read_globals = {
 	"MacroFrame",
 	"MacroFrame_LoadUI",
 	"MAINHANDSLOT",
+	"MAINTANK",
 	"MAX_ACCOUNT_MACROS",
 	"MAX_CHARACTER_MACROS",
 	"MAXEMOTEINDEX",
@@ -197,7 +201,6 @@ read_globals = {
 	"SOUNDKIT",
 	"SPELL_FAILED_AURA_BOUNCED",
 	"SPELL_FAILED_TARGETS_DEAD",
-	"SPELL_REQUIRED_FORM",
 	"SPELL_STAT1_NAME",
 	"SPELL_STAT2_NAME",
 	"SPELL_STAT3_NAME",
@@ -230,6 +233,7 @@ read_globals = {
 	"UnitInParty",
 	"UnitInRaid",
 	"UnitInRange",
+	"UnitIsAFK",
 	"UnitIsConnected",
 	"UnitIsDead",
 	"UnitIsDeadOrGhost",
@@ -259,9 +263,6 @@ read_globals = {
 }
 globals = {
 	"BagsBuffsButtonsDB",
-	-- MIGRATION (remove after 2026-11-25): the legacy tables Features/Core.lua copies settings from
-	"ConnoisseurDB",
-	"TFTBDB",
 	"BINDING_HEADER_BAGSBUFFSBUTTONS",
 	"BINDING_NAME_MACROSPELLBOOK_TOGGLE", -- the Key Bindings list's caption for Bindings.xml's binding
 	"BBBMute", -- called by muteErrors macros through /run
@@ -278,10 +279,11 @@ globals = {
 	"SLASH_BAGSBUFFSBUTTONS1",
 	"SLASH_BAGSBUFFSBUTTONSRESTOCK1",
 	SlashCmdList = { fields = { "BAGSBUFFSBUTTONS", "BAGSBUFFSBUTTONSRESTOCK" } },
-	-- the menu's Delete confirm
+	-- the add-on's own confirm and import popups
 	StaticPopupDialogs = {
 		fields = {
 			"BAGSBUFFSBUTTONS_DELETE_MACRO",
+			"BAGSBUFFSBUTTONS_RESET_CATEGORY",
 			"BAGSBUFFSBUTTONS_RESTOCKER_DELETE_LIST",
 			"BAGSBUFFSBUTTONS_LEGACY_RELOAD", -- MIGRATION (remove after 2026-11-25)
 			"BAGSBUFFSBUTTONS_LEGACY_IMPORT", -- MIGRATION (remove after 2026-11-25)

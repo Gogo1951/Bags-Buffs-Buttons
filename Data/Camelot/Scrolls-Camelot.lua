@@ -11,7 +11,16 @@ ns.SCROLL_DATA = {
 			{ 3012, 8115, 10, 5 }, -- Scroll of Agility
 		},
 		-- [spellID] = amount, -- Name
-		conflictSpells = {},
+		conflictSpells = {
+			[1250918] = 25, -- Elixir of Cunning
+			[11334] = 25, -- Elixir of Greater Agility
+			[17538] = 25, -- Elixir of the Mongoose
+			[10669] = 25, -- Ground Scorpok Assay
+			[1250985] = 18, -- Elixir of Ferocity
+			[11328] = 15, -- Elixir of Agility
+			[3160] = 8, -- Elixir of Lesser Agility
+			[2374] = 4, -- Elixir of Minor Agility
+		},
 	},
 	Intellect = {
 		-- {itemID, buffID, requiredLevel, amount, class token or nil}, -- Name
@@ -32,6 +41,15 @@ ns.SCROLL_DATA = {
 			[1461] = 15, -- Arcane Intellect (Rank 3)
 			[1460] = 7, -- Arcane Intellect (Rank 2)
 			[1459] = 2, -- Arcane Intellect (Rank 1)
+			[16327] = 30, -- Juju Guile
+			[10692] = 25, -- Cerebral Cortex Compound
+			[1250918] = 25, -- Elixir of Cunning
+			[11396] = 25, -- Elixir of Greater Intellect
+			[1250940] = 25, -- Elixir of the Owl
+			[17535] = 18, -- Elixir of the Sages
+			[1250989] = 10, -- Elixir of Intellect
+			[1250988] = 6, -- Elixir of Lesser Intellect
+			[3166] = 6, -- Elixir of Wisdom
 		},
 	},
 	Protection = {
@@ -43,7 +61,14 @@ ns.SCROLL_DATA = {
 			{ 3013, 8091, 1, 60 }, -- Scroll of Protection
 		},
 		-- [spellID] = amount, -- Name
-		conflictSpells = {},
+		conflictSpells = {
+			[1250920] = 500, -- Elixir of the Phalanx
+			[11348] = 450, -- Elixir of Greater Defense
+			[11349] = 250, -- Elixir of Defense
+			[15233] = 200, -- Crystal Ward
+			[3220] = 150, -- Elixir of Lesser Defense
+			[673] = 50, -- Elixir of Minor Defense
+		},
 	},
 	Stamina = {
 		-- {itemID, buffID, requiredLevel, amount}, -- Name
@@ -63,6 +88,13 @@ ns.SCROLL_DATA = {
 			[1245] = 26, -- Power Word: Fortitude (Rank 3)
 			[1244] = 10, -- Power Word: Fortitude (Rank 2)
 			[1243] = 4, -- Power Word: Fortitude (Rank 1)
+			[1293740] = 60, -- Flask of Natural Accuracy
+			[1293741] = 60, -- Flask of Natural Aggression
+			[1293742] = 60, -- Flask of Natural Precision
+			[1293743] = 60, -- Flask of Natural Swiftness
+			[24382] = 50, -- Spirit of Zanza
+			[10668] = 25, -- Lung Juice Cocktail
+			[17537] = 18, -- Elixir of Brute Force
 		},
 	},
 	Spirit = {
@@ -80,6 +112,16 @@ ns.SCROLL_DATA = {
 			[14819] = 33, -- Divine Spirit (Rank 3)
 			[14818] = 23, -- Divine Spirit (Rank 2)
 			[14752] = 17, -- Divine Spirit (Rank 1)
+			[24382] = 50, -- Spirit of Zanza
+			[15231] = 30, -- Crystal Force
+			[1250941] = 25, -- Elixir of Sages
+			[1250981] = 25, -- Elixir of the Whale
+			[10693] = 25, -- Gizzard Gum
+			[1250979] = 18, -- Elixir of Greater Spirit
+			[17535] = 18, -- Elixir of the Sages
+			[1250978] = 10, -- Elixir of Spirit
+			[1250976] = 6, -- Elixir of Lesser Spirit
+			[1250974] = 3, -- Elixir of Minor Spirit
 		},
 	},
 	Strength = {
@@ -91,7 +133,18 @@ ns.SCROLL_DATA = {
 			{ 954, 8118, 10, 5 }, -- Scroll of Strength
 		},
 		-- [spellID] = amount, -- Name
-		conflictSpells = {},
+		conflictSpells = {
+			[16323] = 30, -- Juju Power
+			[11405] = 25, -- Elixir of Greater Strength
+			[1250986] = 25, -- Elixir of the Grizzly
+			[10667] = 25, -- R.O.I.D.S.
+			[17537] = 18, -- Elixir of Brute Force
+			[1250985] = 18, -- Elixir of Ferocity
+			[1250984] = 10, -- Elixir of Strength
+			[8212] = 8, -- Elixir of Giant Growth
+			[3164] = 8, -- Elixir of Ogre Strength
+			[2367] = 4, -- Elixir of Minor Strength
+		},
 	},
 }
 
@@ -103,7 +156,8 @@ Last Validated
 
 Notes
 	- The stat scrolls, read by Features/Scanner-Auras.lua (FindBestScroll) to pick a scroll whose buff the player lacks. Each type lists its scrolls as { itemID, buffID, requiredLevel, amount }: the buff is the aura the scroll leaves, requiredLevel the level the tooltip requires, amount the stat it grants.
-	- conflictSpells lists the class buffs a scroll can't stack with, keyed by spell ID, with the amount each grants; a scroll is skipped while the player has a conflicting buff at least as strong. Agility, Protection and Strength list none: Agility stacks with everything on the Classic and TBC clients, and Protection with Devotion Aura, Stoneskin and the like.
+	- conflictSpells lists the buffs a scroll can't stack with, keyed by spell ID, with the amount each grants; a scroll is skipped while the player has a conflicting buff at least as strong. Class buffs come first. Agility, Protection and Strength list no class buffs; Protection stacks with Devotion Aura, Stoneskin and the like.
+	- After the class buffs come every elixir, flask and other consumable buff in ns.ELIXIR_BUFF_IDS and ns.FLASK_BUFF_IDS (Data/{Game}/Elixirs-{Game}.lua) that raises the same stat: a SpellEffect Mod Stat aura (29) for the stat, or aura 674 on armor (this client's armor aura) for Protection, at its amount on this build. A buff that raises two stats, such as Elixir of the Sages, is listed under both. Only Elixir of the Mongoose blocking Scroll of Agility is confirmed in game (GitHub issue #3); the rest follow the same rule without an in-game check. That errs toward skipping a scroll that would have stacked rather than building a scroll line that fails on use.
 	- The three Mage familiar scrolls carry a fifth column, the class that can use them (MAGE), because they don't bind and another class could carry one. Each one's buff is its use spell, which summons the familiar and puts the Intellect aura on the caster. Whether that aura stacks with Scroll of Intellect or Arcane Intellect is unchecked in game; counting them as one Intellect buff never builds a line that fails.
 	- WoW Forever raised Power Word: Fortitude and Prayer of Fortitude (4/10/26/42/56/70 by rank); the conflict amounts follow.
 

@@ -23,8 +23,7 @@
 ## X-Curse-Project-ID: TBD
 ## X-Wago-ID: TBD
 
-## SavedVariables: BagsBuffsButtonsDB, ConnoisseurDB, TFTBDB
-# MIGRATION (remove after 2026-11-25): ConnoisseurDB and TFTBDB are read once, to copy their settings in.
+## SavedVariables: BagsBuffsButtonsDB
 
 # Includes
 Includes/Libraries/LibStub/LibStub.lua
@@ -112,105 +111,134 @@ Data/Default-Settings.lua
 Features/Core.lua
 Features/Utilities.lua
 Features/Announcements.lua
+Features/Item-Info.lua
 
-# Connoisseur
-Features/Connoisseur/Connoisseur-Core.lua
-Features/Connoisseur/Connoisseur-Utilities.lua
-# MIGRATION (remove after 2026-10-30)
-Features/Connoisseur/Default-Profile-Migration.lua
-# MIGRATION (remove after 2026-10-30)
-Features/Connoisseur/Character-Key-Migration.lua
-Features/Connoisseur/Item-Cache.lua
-Features/Connoisseur/Scanner-Character.lua
-Features/Connoisseur/Scanner-Auras.lua
-Features/Connoisseur/Scanner-Inventory.lua
-Features/Connoisseur/Macros/Signatures.lua
-Features/Connoisseur/Macros/Smart-Spell.lua
-Features/Connoisseur/Macros/Writer.lua
-Features/Connoisseur/Macros/Body-Builder.lua
-Features/Connoisseur/Macros/Engine.lua
-Features/Connoisseur/Macros/Runtime.lua
-Features/Connoisseur/Macros/Tools-Mages.lua
-Features/Connoisseur/Macros/Tools-Warlocks.lua
-Features/Connoisseur/Macros/Tools-Rogues.lua
-Features/Connoisseur/Macros/Tools-Hunters.lua
-Features/Connoisseur/Macros/Tools-Hunters-Pet-Food.lua
-Features/Connoisseur/Macros/Tools-Forsaken.lua
-Features/Connoisseur/Macros/Bandage.lua
-Features/Connoisseur/Macros/Explosive.lua
-Features/Connoisseur/Macros/Food.lua
-Features/Connoisseur/Macros/Health-Potion.lua
-Features/Connoisseur/Macros/Healthstone.lua
-Features/Connoisseur/Macros/Mana-Gem.lua
-Features/Connoisseur/Macros/Mana-Potion.lua
-Features/Connoisseur/Macros/Soulstone.lua
-Features/Connoisseur/Macros/Water.lua
-Features/Connoisseur/Macros/Integration-Druid-Macro-Helper.lua
-Features/Connoisseur/Action-Button-Text.lua
-Features/Connoisseur/Readiness-Report-Probes.lua
-Features/Connoisseur/Readiness-Report.lua
-Features/Connoisseur/Ignore-List.lua
-Features/Connoisseur/Inventory-Report.lua
+# Macros for Consumables
+Features/Macros-for-Consumables/Macros-for-Consumables-Core.lua
+Features/Macros-for-Consumables/Macros-for-Consumables-Utilities.lua
+# MIGRATION (remove after 2026-11-25)
+Features/Macros-for-Consumables/Default-Profile-Migration.lua
+# MIGRATION (remove after 2026-11-25)
+Features/Macros-for-Consumables/Character-Key-Migration.lua
+Features/Macros-for-Consumables/Item-Cache.lua
+Features/Macros-for-Consumables/Scanner-Character.lua
+Features/Macros-for-Consumables/Scanner-Auras.lua
+Features/Macros-for-Consumables/Scanner-Ranking.lua
+Features/Macros-for-Consumables/Scanner-Inventory.lua
+Features/Macros-for-Consumables/Macros/Signatures.lua
+Features/Macros-for-Consumables/Macros/Smart-Spell.lua
+Features/Macros-for-Consumables/Macros/Writer.lua
+Features/Macros-for-Consumables/Macros/Body-Builder.lua
+Features/Macros-for-Consumables/Macros/Engine.lua
+Features/Macros-for-Consumables/Macros/Runtime.lua
+Features/Macros-for-Consumables/Macros/Tools-Mages.lua
+Features/Macros-for-Consumables/Macros/Tools-Warlocks.lua
+Features/Macros-for-Consumables/Macros/Tools-Rogues.lua
+Features/Macros-for-Consumables/Macros/Tools-Hunters.lua
+Features/Macros-for-Consumables/Macros/Tools-Hunters-Pet-Food.lua
+Features/Macros-for-Consumables/Macros/Tools-Forsaken.lua
+Features/Macros-for-Consumables/Macros/Bandage.lua
+Features/Macros-for-Consumables/Macros/Explosive.lua
+Features/Macros-for-Consumables/Macros/Food.lua
+Features/Macros-for-Consumables/Macros/Health-Potion.lua
+Features/Macros-for-Consumables/Macros/Healthstone.lua
+Features/Macros-for-Consumables/Macros/Mana-Gem.lua
+Features/Macros-for-Consumables/Macros/Mana-Potion.lua
+Features/Macros-for-Consumables/Macros/Soulstone.lua
+Features/Macros-for-Consumables/Macros/Water.lua
+Features/Macros-for-Consumables/Macros/Integration-Druid-Macro-Helper.lua
+Features/Macros-for-Consumables/Action-Button-Text.lua
+Features/Macros-for-Consumables/Readiness-Report-Probes.lua
+Features/Macros-for-Consumables/Readiness-Report.lua
+Features/Macros-for-Consumables/Ignore-List.lua
 
-# Restocker
-Features/Restocker/Restocker-List.lua
-Features/Restocker/Restocker-Saved-Lists.lua
-Features/Restocker/Restocker-Saved-Format.lua
-Features/Restocker/Restocker-Inventory-Model.lua
-Features/Restocker/Restocker-Bags.lua
-Features/Restocker/Restocker-Bank.lua
-Features/Restocker/Restocker-Merchant.lua
-Features/Restocker/Restocker-Crafting-Reagents.lua
-Features/Restocker/Restocker-Upgrade.lua
-Features/Restocker/Restocker-Window-Frame.lua
-Features/Restocker/Restocker-Window-Widgets.lua
-Features/Restocker/Restocker-Window.lua
-Features/Restocker/Restocker-Window-Columns.lua
-Features/Restocker/Restocker-Window-Filter.lua
-Features/Restocker/Restocker-Window-Rows.lua
-Features/Restocker/Restocker-Window-Categories.lua
-Features/Restocker/Restocker-Window-List-Bar.lua
-Features/Restocker/Restocker-Window-Bag-Menu.lua
-Features/Restocker/Restocker-Window-Footer.lua
-Features/Restocker/Restocker-Starter-List.lua
-Features/Restocker/Restocker-Starter-Window.lua
-Features/Restocker/Restocker-Reminders.lua
-Features/Restocker/Restocker-Events.lua
-Features/Restocker/Restocker-Slash-Command.lua
+# Inventory Restocker
+Features/Inventory-Restocker/Restocker-List.lua
+Features/Inventory-Restocker/Restocker-Saved-Lists.lua
+Features/Inventory-Restocker/Restocker-Saved-Format.lua
+Features/Inventory-Restocker/Restocker-Trace.lua
+Features/Inventory-Restocker/Restocker-Inventory-Model.lua
+Features/Inventory-Restocker/Restocker-Bags.lua
+Features/Inventory-Restocker/Restocker-Purchase-Space.lua
+Features/Inventory-Restocker/Restocker-Bank.lua
+Features/Inventory-Restocker/Restocker-Merchant.lua
+Features/Inventory-Restocker/Restocker-Shortfall.lua
+Features/Inventory-Restocker/Restocker-Crafting-Reagents.lua
+Features/Inventory-Restocker/Restocker-Upgrade.lua
+Features/Inventory-Restocker/Restocker-Window-Frame.lua
+Features/Inventory-Restocker/Restocker-Window-Widgets.lua
+Features/Inventory-Restocker/Restocker-Window.lua
+Features/Inventory-Restocker/Restocker-Window-Header.lua
+Features/Inventory-Restocker/Restocker-Window-Columns.lua
+Features/Inventory-Restocker/Restocker-Window-Filter.lua
+Features/Inventory-Restocker/Restocker-Window-Rows.lua
+Features/Inventory-Restocker/Restocker-Window-Menus.lua
+Features/Inventory-Restocker/Restocker-Window-Render.lua
+Features/Inventory-Restocker/Restocker-Window-Categories.lua
+Features/Inventory-Restocker/Restocker-Window-List-Bar.lua
+Features/Inventory-Restocker/Restocker-Window-Bag-Menu.lua
+Features/Inventory-Restocker/Restocker-Window-Footer.lua
+Features/Inventory-Restocker/Restocker-Starter-List.lua
+Features/Inventory-Restocker/Restocker-Starter-Window.lua
+Features/Inventory-Restocker/Restocker-Reminders.lua
+Features/Inventory-Restocker/Restocker-Events.lua
+Features/Inventory-Restocker/Inventory-Report-Recording.lua
+Features/Inventory-Restocker/Inventory-Report-Tooltip.lua
+Features/Inventory-Restocker/Restocker-Slash-Command.lua
 
-# Thanks for the Buff
-Features/Thanks-for-the-Buff/Thanks-for-the-Buff-Core.lua
-Features/Thanks-for-the-Buff/Thanks-for-the-Buff-Utilities.lua
-Features/Thanks-for-the-Buff/Tracked-Lookups.lua
-Features/Thanks-for-the-Buff/Praise.lua
-Features/Thanks-for-the-Buff/Buff-Tracking.lua
-Features/Thanks-for-the-Buff/Good-News.lua
-Features/Thanks-for-the-Buff/Thank-You-Button.lua
-Features/Thanks-for-the-Buff/Buff-Window-Frame.lua
-Features/Thanks-for-the-Buff/Buff-Window-Castable.lua
-Features/Thanks-for-the-Buff/Buff-Window-Units.lua
-Features/Thanks-for-the-Buff/Buff-Window-Self.lua
-Features/Thanks-for-the-Buff/Buff-Window-Outsiders.lua
-Features/Thanks-for-the-Buff/Buff-Window.lua
-Features/Thanks-for-the-Buff/Buff-Window-Keys.lua
+# Automated Appreciation
+Features/Automated-Appreciation/Automated-Appreciation-Core.lua
+Features/Automated-Appreciation/Automated-Appreciation-Utilities.lua
+Features/Automated-Appreciation/Tracked-Lookups.lua
+Features/Automated-Appreciation/Praise.lua
+Features/Automated-Appreciation/Buff-Tracking.lua
+Features/Automated-Appreciation/Buff-Tracking-Forever.lua
+Features/Automated-Appreciation/Good-News.lua
+Features/Automated-Appreciation/Thank-You-Button.lua
+Features/Automated-Appreciation/Buff-Window-Frame.lua
+Features/Automated-Appreciation/Buff-Window-Castable.lua
+Features/Automated-Appreciation/Buff-Window-Auras.lua
+Features/Automated-Appreciation/Buff-Window-Units.lua
+Features/Automated-Appreciation/Buff-Window-Weapons.lua
+Features/Automated-Appreciation/Buff-Window-Self.lua
+Features/Automated-Appreciation/Buff-Window-Outsiders.lua
+Features/Automated-Appreciation/Buff-Window.lua
+Features/Automated-Appreciation/Buff-Window-Cast-Results.lua
+Features/Automated-Appreciation/Buff-Window-Keys.lua
 
 # Spellbook
 Features/Spellbook/Spellbook-Core.lua
 Features/Spellbook/Spellbook-Utilities.lua
 Features/Spellbook/Macro-Options.lua
+Features/Spellbook/Page-Settings.lua
+Features/Spellbook/Grouped-Spells.lua
+Features/Spellbook/Page-Categories.lua
+Features/Spellbook/Target-Priority.lua
 Features/Spellbook/Macro-Copies.lua
 Features/Spellbook/Macro-Body.lua
+Features/Spellbook/Mute-Errors.lua
+Features/Spellbook/Macro-Tags.lua
 Features/Spellbook/Usable-Items.lua
+Features/Spellbook/Class-Config.lua
+Features/Spellbook/Spell-Ranks.lua
+Features/Spellbook/Group-Handover.lua
+Features/Spellbook/Ranged-Attacks.lua
 Features/Spellbook/Macro-Builder.lua
 Features/Spellbook/Unlearned-Spells.lua
 Features/Spellbook/Trainer-Recording.lua
 Features/Spellbook/Macro-Sync.lua
+Features/Spellbook/Action-Bars.lua
+Features/Spellbook/Macro-Delete.lua
 Features/Spellbook/Consumable-Macros.lua
 Features/Spellbook/Dynamic-Rank.lua
+Features/Spellbook/Menu-Utilities.lua
 Features/Spellbook/Macro-Menu.lua
+Features/Spellbook/Category-Menu.lua
 Features/Spellbook/Spellbook-Paging.lua
 Features/Spellbook/Macro-Button.lua
 Features/Spellbook/Spellbook-Page.lua
+Features/Spellbook/Spellbook-Controls.lua
+Features/Spellbook/Spellbook-Events.lua
 Features/Spellbook/Spellbook-Window.lua
 Features/Spellbook/Spellbook-Host-Classic.lua
 Features/Spellbook/Key-Bindings.lua
@@ -221,45 +249,44 @@ Features/Minimap-Button.lua
 # Diagnostics
 Diagnostics/Diagnostics-Core.lua
 Diagnostics/Manifests.lua
-Diagnostics/Manifests-Connoisseur.lua
-Diagnostics/Manifests-Restocker.lua
-Diagnostics/Manifests-Thanks-for-the-Buff.lua
+Diagnostics/Manifests-Macros-for-Consumables.lua
+Diagnostics/Manifests-Inventory-Restocker.lua
+Diagnostics/Manifests-Automated-Appreciation.lua
 Diagnostics/Manifests-Spellbook.lua
 Diagnostics/Event-Log.lua
 Diagnostics/Code-Reports.lua
 Diagnostics/Settings-Reports.lua
 Diagnostics/Validate-Data.lua
 Diagnostics/Localization-Reports.lua
-Diagnostics/Message-Length-Connoisseur.lua
-Diagnostics/Message-Length-Thanks-for-the-Buff.lua
+Diagnostics/Message-Length-Macros-for-Consumables.lua
+Diagnostics/Message-Length-Automated-Appreciation.lua
 Diagnostics/Message-Length-Spellbook.lua
 Diagnostics/Report-Runner.lua
 
 # Options
 Options/Options-Utilities.lua
-Options/Connoisseur/Options-Connoisseur-Utilities.lua
-Options/Thanks-for-the-Buff/Options-Thanks-for-the-Buff-Utilities.lua
-Options/Connoisseur/Options-Connoisseur.lua
-Options/Connoisseur/Options-Macros.lua
-Options/Connoisseur/Options-Class-Race.lua
-Options/Connoisseur/Options-Ignore-List.lua
-Options/Connoisseur/Options-Readiness-Report.lua
-Options/Restocker/Options-Restocker.lua
-Options/Thanks-for-the-Buff/Options-Thanks-for-the-Buff.lua
-Options/Thanks-for-the-Buff/Options-Stranger-Buffs.lua
-Options/Thanks-for-the-Buff/Options-Teammate-Buffs.lua
-Options/Thanks-for-the-Buff/Options-Teammate-Buffs-Tracked.lua
-Options/Thanks-for-the-Buff/Options-Send-Good-News.lua
-Options/Thanks-for-the-Buff/Options-Send-Good-News-Tracked.lua
-Options/Thanks-for-the-Buff/Options-Service-Alerts.lua
-Options/Thanks-for-the-Buff/Options-Service-Alerts-Tracked.lua
-Options/Thanks-for-the-Buff/Options-Thank-You-Button.lua
-Options/Thanks-for-the-Buff/Options-Buff-Window.lua
-Options/Thanks-for-the-Buff/Options-Buff-Window-Buffs.lua
-Options/Thanks-for-the-Buff/Options-Buff-Window-Self-Buffs.lua
-Options/Thanks-for-the-Buff/Options-Buff-Window-Weapon-Buffs.lua
-Options/Spellbook/Options-Spellbook.lua
 Options/Options-General.lua
+Options/Automated-Appreciation/Options-Automated-Appreciation-Utilities.lua
+Options/Macros-for-Consumables/Options-Connoisseur.lua
+Options/Macros-for-Consumables/Options-Macros.lua
+Options/Macros-for-Consumables/Options-Class-Race.lua
+Options/Macros-for-Consumables/Options-Ignore-List.lua
+Options/Macros-for-Consumables/Options-Readiness-Report.lua
+Options/Inventory-Restocker/Options-Restocker.lua
+Options/Automated-Appreciation/Options-Thanks-for-the-Buff.lua
+Options/Automated-Appreciation/Options-Stranger-Buffs.lua
+Options/Automated-Appreciation/Options-Teammate-Buffs.lua
+Options/Automated-Appreciation/Options-Teammate-Buffs-Tracked.lua
+Options/Automated-Appreciation/Options-Send-Good-News.lua
+Options/Automated-Appreciation/Options-Send-Good-News-Tracked.lua
+Options/Automated-Appreciation/Options-Service-Alerts.lua
+Options/Automated-Appreciation/Options-Service-Alerts-Tracked.lua
+Options/Automated-Appreciation/Options-Thank-You-Button.lua
+Options/Automated-Appreciation/Options-Buff-Window.lua
+Options/Automated-Appreciation/Options-Buff-Window-Buffs.lua
+Options/Automated-Appreciation/Options-Buff-Window-Self-Buffs.lua
+Options/Automated-Appreciation/Options-Buff-Window-Weapon-Buffs.lua
+Options/Spellbook/Options-Spellbook.lua
 Options/Options-Profiles.lua
 Options/Options-Feedback-Support.lua
 Diagnostics/Options-Diagnostics.lua

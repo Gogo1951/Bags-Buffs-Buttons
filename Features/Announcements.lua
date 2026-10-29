@@ -325,7 +325,7 @@ end
     print, but SendChatMessage rejects any message still holding one -- "Invalid
     escape code in chat message" -- and silently drops the whole line. Resolving
     it here is what lets the units come from the client's own localization in
-    every language it ships, instead of TFTB carrying its own copies.
+    every language it ships, instead of the add-on carrying its own copies.
 
     Slavic locales list a third form (one/few/many) and get their rule; two-form
     languages take a simple count check; languages that don't inflect (zhCN,

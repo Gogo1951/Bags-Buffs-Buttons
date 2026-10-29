@@ -149,7 +149,7 @@ end
     Combat first: Blizzard's Settings panel is protected in combat, so every
     route below is blocked and the player would get an ADDON_ACTION_BLOCKED
     error naming the add-on instead of an answer. The gate sits at this single
-    entry point, so the slash command and the mini-map buttons' Shift +
+    entry point, so the slash command and the mini-map button's Shift +
     Middle-Click answer identically. It returns -- never queues the open for
     when combat ends.
 ]]

@@ -48,7 +48,7 @@ local Data = ns.Data
       * ignoreList     -- the Global half of the Ignore List, hiding an
                           item from every character's macros at once; the
                           character's half keeps the same key on the profile,
-                          and Features/Ignore-List.lua reads both.
+                          and Features/Macros-for-Consumables/Ignore-List.lua reads both.
       * readiness*     -- the per-category switches under
                           readinessReportEnabled, each answered once for the
                           account like the master toggle above it. Their own
@@ -62,15 +62,15 @@ local Data = ns.Data
 
     The derived item cache (itemCache, with its itemCacheVersion and
     itemCacheFolder stamps) is deliberately NOT declared here:
-    ns.EnsureItemCache (Features/Item-Cache.lua) creates it on the profile at
+    ns.EnsureItemCache (Features/Macros-for-Consumables/Item-Cache.lua) creates it on the profile at
     login and after every profile change, and owns its stamp invalidation, so
     it never needs a default.
 
-    restockList, the name of the Restock List a profile uses, is not declared
-    either, because no list exists to name until a character logs in:
+    No profile names a Restock List: which list a character uses is kept by
+    character, in restocker.listChoices below, and
     ns.InitializeCharacterRestockList
-    (Features/Restocker/Restocker-Saved-Lists.lua) gives a profile without one
-    a list named for the character's class.
+    (Features/Inventory-Restocker/Restocker-Saved-Lists.lua) gives a character without
+    one a list named for its class.
 ]]
 ns.DATABASE_DEFAULTS = {
 	profile = {
@@ -78,7 +78,7 @@ ns.DATABASE_DEFAULTS = {
 		    The character's own half of the Ignore List, itemID to true: the
 		    items hidden from the macros of whoever is on this profile. The
 		    Global half keeps the same key on `global`, and
-		    Features/Ignore-List.lua reads both.
+		    Features/Macros-for-Consumables/Ignore-List.lua reads both.
 		]]
 		ignoreList = {},
 		--[[
@@ -143,7 +143,7 @@ ns.DATABASE_DEFAULTS = {
 		--[[
 		    Explosive macro click layout: "atplayer" fires [@player] on
 		    left-click and the standard toss on right-click; "toss" swaps
-		    the buttons. See BuildExplosiveUseLine in Features/Macros/Explosive.lua.
+		    the buttons. See BuildExplosiveUseLine in Features/Macros-for-Consumables/Macros/Explosive.lua.
 		]]
 		explosivesClickMode = "atplayer",
 		enableDruidMacroHelper = false,
@@ -160,7 +160,7 @@ ns.DATABASE_DEFAULTS = {
 		--[[
 		    Forsaken: the Food and Water macros try Cannibalize first while the
 		    target is a Humanoid or Undead and the spell is off cooldown, and
-		    eat or drink when it cannot cast (Features/Macros/Tools-Forsaken.lua). Drinking only takes effect
+		    eat or drink when it cannot cast (Features/Macros-for-Consumables/Macros/Tools-Forsaken.lua). Drinking only takes effect
 		    where Cannibalize restores mana (ns.CANNIBALIZE_RESTORES_MANA).
 		]]
 		enableCannibalizeEating = false,
@@ -193,9 +193,11 @@ ns.DATABASE_DEFAULTS = {
 		    Profile control must never reach them. Putting them on global is
 		    what guarantees that -- a profile switch or reset cannot empty a
 		    hand-built list or re-offer the Starter List to a character that
-		    already answered it. The one thing a profile holds is which list it
-		    uses, in its own restockList, so each character shops from its own
-		    list and two characters on one profile share theirs.
+		    already answered it. `listChoices` is which list each character
+		    uses, keyed by the character's name as profileKeys holds it. It is
+		    kept here and not on a profile, so two characters sharing a profile
+		    still shop from lists of their own, and switching one never moves
+		    the other.
 
 		    The two reminder modes differ on purpose: in town you are away from
 		    your bags and the detail is the whole point, while at a merchant or
@@ -209,6 +211,7 @@ ns.DATABASE_DEFAULTS = {
 		]]
 		restocker = {
 			lists = {},
+			listChoices = {},
 			framePosition = {},
 			restockReminderChat = true,
 			restockReminderSound = true,
@@ -223,7 +226,7 @@ ns.DATABASE_DEFAULTS = {
 			goldReserveAmount = 1,
 		},
 		--[[
-		    The Inventory Report in item tooltips (Features/Inventory-Report.lua).
+		    The Inventory Report in item tooltips (Features/Inventory-Restocker/Inventory-Report-Tooltip.lua).
 		    Ships ON, unlike the opt-ins above: it only ever adds lines to a
 		    tooltip the player asked for, and never acts. The switch exists
 		    because most auction add-ons print their own counts under the same
@@ -234,7 +237,7 @@ ns.DATABASE_DEFAULTS = {
 		--[[
 		    Every character's last-known bags and bank, keyed by character (the
 		    Restocker's "Name-Realm" key), each place packed into one line of
-		    "itemID:count" pairs by Features/Inventory-Report.lua. Account-wide
+		    "itemID:count" pairs by Features/Inventory-Restocker/Inventory-Report-Recording.lua. Account-wide
 		    because its whole point is showing one character what the others
 		    hold, and never a profile: switching or resetting one must not wipe
 		    what an alt was carrying. Each record also holds the character's
@@ -253,7 +256,7 @@ ns.DATABASE_DEFAULTS = {
 		    Macro-name text on the default action bars. Off by default so the
 		    add-on hides the names Blizzard recently began showing again; the
 		    "Enable Macro Names on Buttons" toggle reads it directly, so checked
-		    means the names show (see Features/Action-Button-Text.lua).
+		    means the names show (see Features/Macros-for-Consumables/Action-Button-Text.lua).
 		]]
 		showMacroNames = false,
 		--[[
@@ -421,7 +424,6 @@ local SPELLBOOK_DEFAULTS = {
 			form = {},
 			self = {},
 		},
-		mouseover = {},
 		cursor = {},
 		focus = {},
 		pet = {},
@@ -430,10 +432,8 @@ local SPELLBOOK_DEFAULTS = {
 		stopCast = {},
 		startAttack = {},
 		noToggle = {},
-		castOnSelf = {},
 		targetRank = {},
 		fixedRank = {},
-		targetTarget = {},
 		targetEnemy = {},
 		targetFriend = {},
 		combatOnly = {},
@@ -452,7 +452,7 @@ local SPELLBOOK_DEFAULTS = {
 		targetPriority = {}, -- each spell's own target priority, as a list of units (see ns.TargetPriority)
 		useItems = {},
 		macroCopies = {}, -- the Duplicate copies of each spell's macro, by spell name, as a list of copy numbers
-		trainerSpells = {},
+		trainerSpells = {}, -- by class token, then spell id -> required level (see Features/Spellbook/Trainer-Recording.lua)
 	},
 	char = {
 		ownedMacros = {}, -- character macros the add-on created, by WoW macro name
@@ -579,7 +579,7 @@ local THANKS_FOR_THE_BUFF_DEFAULTS = {
 			    The editable body of the whisper. ONE token, %a, substituted by
 			    ns:BuildGoodNewsMessage with the ability link plus -- for a short
 			    enough buff -- its duration clause. That call also adds the star
-			    marker (left off on WoW Forever) and the " // TFTB" sign-off, and
+			    marker (left off on WoW Forever) and the " // BBB" sign-off, and
 			    trims the body's closing punctuation; neither is editable.
 			]]
 		message = ns.L["DEFAULT_GOOD_NEWS"],
@@ -660,8 +660,6 @@ local THANKS_FOR_THE_BUFF_DEFAULTS = {
 		-- One of Data.BUFF_WINDOW_FAVOR_CHOICES.
 		favorSeconds = 40,
 		targetEnabled = true,
-		-- Whether the Buff Key passes over spells with a cooldown of their own (Fear Ward).
-		keySkipCooldowns = false,
 		audience = {},
 	},
 	watchedBuffs = {},

@@ -37,7 +37,6 @@ ignore:
   - README-Testing.md
   - Tests
   - Source Add-ons
-  - tools
   - Data/Wrath
   - Data/Mists
   - Data/Mainline

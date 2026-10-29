@@ -17,8 +17,9 @@ function ns.HideTooltip(owner)
 	end
 end
 
-function ns.HasTemplate(template)
-	return C_XMLUtil.GetTemplateInfo(template) ~= nil
+-- The heading of the tooltip on the game spellbook's tab: "BBB // Spellbook", gold like a tooltip title.
+function ns.SpellbookTabTitle()
+	return ns.GetColor("TITLE") .. ns.L["ADDON_SHORT_NAME"] .. " // " .. ns.L["TAB_SPELLBOOK"] .. "|r"
 end
 
 --[[
@@ -47,19 +48,6 @@ function ns.SizedFontString(parent, fontObject, size, layer)
 		fontString:SetFont(face, size, flags)
 	end
 	return fontString
-end
-
--- A solid line texture on parent, one screen pixel thick along the given axis ("HORIZONTAL" or "VERTICAL").
-function ns.PixelLine(parent, layer, color, axis)
-	local line = parent:CreateTexture(nil, layer)
-	line:SetColorTexture(color[1], color[2], color[3], color[4] or 1)
-	local setter = axis == "VERTICAL" and "SetWidth" or "SetHeight"
-	if PixelUtil then
-		PixelUtil[setter](line, 1, 1)
-	else
-		line[setter](line, 1)
-	end
-	return line
 end
 
 --------------------------------------------------------------------------------
@@ -103,7 +91,6 @@ end
 	the flyout is one macro under its book name and its five spells are left out. Era and TBC list Call Pet as
 	one spell, with no flyout, so they're unchanged.
 ]]
-local CALL_PET_FLYOUT = 9
 
 -- the Call Pet flyout's spell IDs, and the first one known (for the macro's icon and tooltip), or nil when the book has no such flyout
 local function CallPetFlyout()
@@ -112,7 +99,7 @@ local function CallPetFlyout()
 		local _, _, offset, numSlots = GetSpellTabInfo(line)
 		for slot = offset + 1, offset + numSlots do
 			local itemType, id = GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
-			if itemType == "FLYOUT" and id == CALL_PET_FLYOUT then
+			if itemType == "FLYOUT" and id == ns.CALL_PET_FLYOUT_ID then
 				found = true
 			end
 		end
@@ -121,9 +108,9 @@ local function CallPetFlyout()
 		return nil
 	end
 	local members, firstKnown = {}, nil
-	local _, _, numSlots = GetFlyoutInfo(CALL_PET_FLYOUT)
+	local _, _, numSlots = GetFlyoutInfo(ns.CALL_PET_FLYOUT_ID)
 	for flyoutSlot = 1, numSlots or 0 do
-		local spellId, _, isKnown = GetFlyoutSlotInfo(CALL_PET_FLYOUT, flyoutSlot)
+		local spellId, _, isKnown = GetFlyoutSlotInfo(ns.CALL_PET_FLYOUT_ID, flyoutSlot)
 		if spellId then
 			members[spellId] = true
 			if isKnown and not firstKnown then
@@ -139,11 +126,10 @@ end
 	(Metamorphosis : Demon Charge) though Era can't cast them. Their IDs are SoD's range, 300000 and up, the
 	same cut the Vanilla data tables make.
 ]]
-local SOD_FIRST_ID = 300000
 local HIDES_SOD_SPELLS = ns.FLAVOR == "Vanilla" and not ns.IS_DISCOVERY
 
 local function IsOtherSeasonSpell(id)
-	return HIDES_SOD_SPELLS and id ~= nil and id >= SOD_FIRST_ID
+	return HIDES_SOD_SPELLS and id ~= nil and id >= ns.SOD_FIRST_SPELL_ID
 end
 
 if C_SpellBook.GetNumSpellBookSkillLines then
@@ -184,7 +170,7 @@ else
 				then
 					local name, subName = GetSpellBookItemName(slot, BOOKTYPE_SPELL)
 					fn(CastName(id, name), GetSpellBookItemTexture(slot, BOOKTYPE_SPELL), id, lineName, line, subName)
-				elseif itemType == "FLYOUT" and id == CALL_PET_FLYOUT and callPetId then
+				elseif itemType == "FLYOUT" and id == ns.CALL_PET_FLYOUT_ID and callPetId then
 					fn(
 						GetSpellBookItemName(slot, BOOKTYPE_SPELL),
 						GetSpellBookItemTexture(slot, BOOKTYPE_SPELL),
@@ -196,42 +182,6 @@ else
 			end
 		end
 	end
-end
-
---------------------------------------------------------------------------------
--- Tooltip Lines
---------------------------------------------------------------------------------
-
---[[
-	The text of a tooltip's lines, left and right. getter is the C_TooltipInfo function and setter the
-	GameTooltip method that fill the same tooltip (e.g. "GetSpellByID" and "SetSpellByID"), both called with
-	the rest. Forever and Retail ship the C_TooltipInfo getters; the Classic engine reads a hidden tooltip.
-]]
-local SCAN_TOOLTIP_NAME = "BagsBuffsButtonsSpellbookScanTooltip"
-local TOOLTIP_SIDES = { "Left", "Right" }
-local scanTooltip
-
-function ns.ScanTooltipLines(getter, setter, ...)
-	local lines = {}
-	if C_TooltipInfo and C_TooltipInfo[getter] then
-		local data = C_TooltipInfo[getter](...)
-		for _, line in ipairs(data and data.lines or {}) do
-			lines[#lines + 1] = line.leftText
-			lines[#lines + 1] = line.rightText
-		end
-		return lines
-	end
-	scanTooltip = scanTooltip or CreateFrame("GameTooltip", SCAN_TOOLTIP_NAME, nil, "GameTooltipTemplate")
-	scanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
-	scanTooltip[setter](scanTooltip, ...)
-	for i = 1, scanTooltip:NumLines() do
-		for _, side in ipairs(TOOLTIP_SIDES) do
-			local text = _G[SCAN_TOOLTIP_NAME .. "Text" .. side .. i]
-			lines[#lines + 1] = text and text:GetText()
-		end
-	end
-	scanTooltip:Hide()
-	return lines
 end
 
 --------------------------------------------------------------------------------
@@ -250,7 +200,7 @@ if C_TooltipInfo and C_TooltipInfo.GetTrainerService then
 	end
 else
 	function ns.GetTrainerServiceSpellId(index)
-		scanTooltip = scanTooltip or CreateFrame("GameTooltip", SCAN_TOOLTIP_NAME, nil, "GameTooltipTemplate")
+		local scanTooltip = ns.GetScanTooltip()
 		scanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 		scanTooltip:SetTrainerService(index)
 		local _, spellId = scanTooltip:GetSpell()

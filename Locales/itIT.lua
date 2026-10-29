@@ -903,7 +903,7 @@ L["OPTIONS_READINESS_NONCOMBAT_GEAR_DESCRIPTION"] =
 -- Restocker Window & Chat
 --------------------------------------------------------------------------------
 
--- Chat messages printed by the Restocker feature (Features/Restocker/).
+-- Chat messages printed by the Restocker feature (Features/Inventory-Restocker/).
 L["RESTOCKER_PROFILE_EXISTS"] = 'Esiste già una lista chiamata "%s".'
 --[[
     %d is the item ID the player typed. Written into the add box itself while
@@ -935,7 +935,7 @@ L["RESTOCKER_STOPPED_ERROR"] = "Rifornimento interrotto a causa di un errore: %s
     Printed during a merchant restock when the crafting-reagent buyer stands
     down: this merchant stocks some of the reagents the Restock List needs but
     not all of them, and reagents buy all-or-nothing (VendorStocksAllReagents in
-    Features/Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
+    Features/Inventory-Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
 ]]
 L["RESTOCKER_REAGENTS_SKIPPED"] =
 	"Questo mercante non vende tutti gli ingredienti necessari ai tuoi veleni. Non ne verrà comprato nessuno."
@@ -1039,13 +1039,13 @@ L["RESTOCKER_HELP_PROFILE_USE"] = "Assegna a questo personaggio la lista con que
     Starter List pop-up, the staples window: offers staples at login when the
     Restock List is empty, and on demand from the Restock List window's Pick
     Staples button. The staples logic is in
-    Features/Restocker/Restocker-Starter-List.lua, the window in
+    Features/Inventory-Restocker/Restocker-Starter-List.lua, the window in
     Options/Options-Starter-List-Popup.lua. The six
     food staples reuse the DIET_ keys above, so each food row carries the
     client's own pet diet name.
 
-    The title is its own, and the call site puts the add-on's full name in
-    front of it (ADDON_TITLE // STARTER_POPUP_TITLE): at login this window
+    The title is its own, and the call site puts the add-on's full name
+    after it (STARTER_POPUP_TITLE // ADDON_TITLE): at login this window
     opens with nothing else of the add-on's on screen, so its title bar is
     all that says whose it is.
 
@@ -1116,8 +1116,8 @@ L["STARTER_POPUP_COUNT_DESCRIPTION"] =
 	"Quanti tenerne di scorta, ognuno in uno spazio a sé nelle borse, perché non si impilano."
 
 --[[
-    Restock List window UI. The title names what the window holds, after the
-    add-on's full name (ADDON_TITLE // RESTOCKER_WINDOW_TITLE); the feature
+    Restock List window UI. The title names what the window holds, before the
+    add-on's full name (RESTOCKER_WINDOW_TITLE // ADDON_TITLE); the feature
     that acts on it stays "Restocker".
 ]]
 L["RESTOCKER_WINDOW_TITLE"] = "Lista di rifornimento"
@@ -1618,8 +1618,9 @@ L["BUFF_WINDOW_AUDIENCE_HEALER"] = "Guaritori"
 L["BUFF_WINDOW_AUDIENCE_ALL"] = "Tutti"
 -- Each buff's dropdown tooltip; hovering the buff's name shows the spell itself.
 L["BUFF_WINDOW_AUDIENCE_DESCRIPTION"] = "Imposta a chi offrire %s."
+-- %s is the game's own Main Tank label.
 L["BUFF_WINDOW_BUFFS_DESCRIPTION"] =
-	"Scegli a chi offrire ogni potenziamento. Difensori e Guaritori si basano sul ruolo nel gruppo; chi non ne ha uno conta come Danno, a meno che Considera come difensori qui sotto non indichi altrimenti."
+	"Scegli a chi offrire ogni potenziamento. Difensori e Guaritori si basano sul ruolo nel gruppo, ma in incursione contano come difensori solo i giocatori designati come %s. Chi non ha un ruolo conta come Danno, a meno che Considera come difensori qui sotto non indichi altrimenti."
 
 L["BUFF_WINDOW_SELF_DESCRIPTION"] = "I tuoi potenziamenti, fissati in cima alla finestra."
 --[[
@@ -1685,10 +1686,7 @@ L["BUFF_KEYS_DESCRIPTION"] =
 	"Lancia il prossimo potenziamento della tua lista con un tasto o una macro, fuori dal combattimento. I potenziamenti delle armi restano un clic sulla finestra."
 L["BUFF_KEY"] = "Pulsante potenziamento"
 L["BUFF_KEY_DESCRIPTION"] =
-	"Lancia il tuo prossimo potenziamento mancante, uno per pressione: una resurrezione sul tuo bersaglio morto, poi sui morti del tuo gruppo (sacerdoti, paladini e sciamani), poi i tuoi potenziamenti personali, Ricambia il favore, il tuo bersaglio e il tuo gruppo. Un gruppo riceve il potenziamento di gruppo quando costa meno mana che potenziare uno alla volta tutti quelli a portata."
-L["BUFF_KEY_SKIP_COOLDOWNS"] = "Salta i potenziamenti con tempo di recupero"
-L["BUFF_KEY_SKIP_COOLDOWNS_DESCRIPTION"] =
-	"Salta i potenziamenti con un tempo di recupero, come Fear Ward, e passa al successivo."
+	"Lancia il tuo prossimo potenziamento mancante, uno per pressione: una resurrezione sul tuo bersaglio morto, poi sui morti del tuo gruppo (sacerdoti, paladini e sciamani), poi Ricambia il favore, il tuo bersaglio, i tuoi potenziamenti personali e il tuo gruppo. Un gruppo riceve il potenziamento di gruppo quando costa meno mana che potenziare i suoi membri uno alla volta, appena sono tutti vicini. Salta i potenziamenti con un tempo di recupero, come Fear Ward, e passa al successivo."
 -- %s is a player's name.
 L["BUFF_KEY_WAITING"] = "In attesa che %s sia a portata."
 L["BUFF_KEY_DONE"] = "Niente più da potenziare."
@@ -1826,6 +1824,8 @@ L["SUBTEXT_STANCE"] = "Postura"
 L["SUBTEXT_USE_ITEMS"] = "Usa oggetti"
 L["SUBTEXT_PET_ATTACK"] = "Attacco famiglio"
 L["SUBTEXT_DYNAMIC_RANK"] = "Grado din."
+L["SUBTEXT_DYNAMIC_ITEM"] = "Oggetto din."
+L["SUBTEXT_DYNAMIC_RANK_ITEM"] = "Grado din., Oggetto din."
 L["SUBTEXT_MAX_RANK"] = "Grado massimo"
 L["SUBTEXT_TARGET_ENEMY"] = "Nemico vicino"
 L["SUBTEXT_TARGET_FRIEND"] = "Alleato vicino"

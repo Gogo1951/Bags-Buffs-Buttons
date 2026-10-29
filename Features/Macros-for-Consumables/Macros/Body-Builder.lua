@@ -1,0 +1,441 @@
+local _, ns = ...
+
+--------------------------------------------------------------------------------
+-- Use Lines
+--------------------------------------------------------------------------------
+
+--[[
+    Builds the line that records macro-fire context through the global
+    helper defined in Features/Macros-for-Consumables/Macros/Runtime.lua, whose
+    ns.OnMacroUiErrorMessage (Core routes UI_ERROR_MESSAGE to it) reads lastID
+    and lastTime to correlate a zone-restriction error with the item that
+    triggered it.
+
+    Using the global helper instead of an inline /run snippet keeps the line
+    short, and every standard body with an item in bags carries it, so the
+    saved bytes count against the 255 macro-body ceiling in every consumable
+    macro. The helper name carries the add-on's short BBB prefix.
+]]
+local function StateWriteLine(itemID, outOfCombatID)
+	if outOfCombatID then
+		return "/run BBBFire(" .. itemID .. "," .. outOfCombatID .. ")\n"
+	end
+	return "/run BBBFire(" .. itemID .. ")\n"
+end
+
+--[[
+    Food or water out of combat (the potion macros' outOfCombatTypeName, behind
+    potionsUseFoodAndWater): the body eats or drinks and stops there while the
+    player is out of combat, and only a press in combat reaches the lines
+    below. A /stopmacro costs fewer bytes than a [combat] guard on each of up
+    to six /use lines, and leaves those lines, and the trim that sheds them,
+    as they are without it.
+
+    stealthName is the stealth the food or water's own macro casts while
+    eating or drinking (its definition's stealthSpell: Stealth Eating or
+    Stealth Drinking), cast right after it the way that macro does, and only
+    out of combat, so a press in combat never stealths.
+
+    corpseName is that macro's Cannibalize (its definition's corpseSpell),
+    tried first while the target is dead. A press that cannot cast it, on a
+    corpse out of reach or one it does not work on, falls through to the
+    eating or drinking below it.
+]]
+function ns.OutOfCombatBlock(outOfCombatID, stealthName, corpseName)
+	local block = ""
+	if corpseName then
+		block = "/cast [nocombat,dead] " .. corpseName .. "\n"
+	end
+	block = block .. "/use [nocombat] item:" .. outOfCombatID .. "\n"
+	if stealthName then
+		block = block .. "/cast [nocombat,nostealth] " .. stealthName .. "\n"
+	end
+	return block .. "/stopmacro [nocombat]\n"
+end
+
+--[[
+    The Food and Water macros' Cannibalize (their definitions' corpseSpell),
+    tried first on a dead target. A press that cannot cast it falls through to
+    the eating or drinking below, as every press on a living target does.
+]]
+local function CorpseBlock(corpseName)
+	return "/cast [dead] " .. corpseName .. "\n"
+end
+
+-- A press on a corpse with nothing in the bags cast the corpse spell, so it skips the no-item message.
+local function NoItemStop(corpseName)
+	return corpseName and "/stopmacro [dead]\n" or ""
+end
+
+-- The tooltip line of a body with an out-of-combat item: the potion in combat, the food or water out of it.
+function ns.OutOfCombatTooltipLine(itemID, outOfCombatID)
+	return "#showtooltip [combat] item:" .. itemID .. "; item:" .. outOfCombatID
+end
+
+--[[
+    Builds the stacked /use block for a multi-use macro type
+    (ns.MULTI_USE_MACRO_TYPES): one line per ranked item, best first. Items
+    within each such category share an item cooldown, so a press consumes
+    exactly one item — the first /use whose item is in bags fires and its
+    cooldown blocks the rest. The extra lines exist for combat, where
+    macros cannot be rewritten: once the best item is depleted its line
+    becomes a silent no-op and the press falls through to the next-best
+    item. On presses where the first line fires, the blocked lines emit a
+    harmless "Item is not ready yet" UI error.
+]]
+local function BuildUseBlock(useIDs)
+	local lines = {}
+	for _, id in ipairs(useIDs) do
+		lines[#lines + 1] = "/use item:" .. id
+	end
+	return table.concat(lines, "\n")
+end
+
+--------------------------------------------------------------------------------
+-- Conjure Block Builder
+--------------------------------------------------------------------------------
+
+--[[
+    Composes the conjure portion of a standard macro body. Handles both
+    learned and not-yet-learned spells: known spells emit /cast lines, and
+    not-yet-learned spells emit /run BBBTipIf calls that print a "you'll get
+    this later" tip when the user actually presses the click that would
+    have used the spell.
+
+    Returns the block string (may be empty).
+]]
+local function BuildConjureBlock(info)
+	if not info then
+		return ""
+	end
+
+	local rightName, middleName = info.rightName, info.middleName
+	local rightMiss, middleMiss = info.rightMiss, info.middleMiss
+
+	if not (rightName or middleName or rightMiss or middleMiss) then
+		return ""
+	end
+
+	local lines = {}
+
+	--[[
+	    Miss prints come first so an early /stopmacro can halt before the
+	    /cast line, avoiding a wasted cast attempt on a button the user
+	    expected to do something else.
+	]]
+	if rightMiss then
+		lines[#lines + 1] = '/run BBBTipIf("[btn:2]","' .. rightMiss .. '")'
+	end
+	if middleMiss then
+		lines[#lines + 1] = '/run BBBTipIf("[btn:3]","' .. middleMiss .. '")'
+	end
+
+	local missStop = ""
+	if rightMiss then
+		missStop = missStop .. "[btn:2]"
+	end
+	if middleMiss then
+		missStop = missStop .. "[btn:3]"
+	end
+	if missStop ~= "" then
+		lines[#lines + 1] = "/stopmacro " .. missStop
+	end
+
+	if rightName or middleName then
+		local castLine = ""
+		local stopConditions = ""
+		if middleName then
+			castLine = castLine .. "[btn:3] " .. middleName .. "; "
+			stopConditions = stopConditions .. "[btn:3]"
+		end
+		if rightName then
+			castLine = castLine .. "[btn:2] " .. rightName .. "; "
+			stopConditions = stopConditions .. "[btn:2]"
+		end
+		lines[#lines + 1] = "/cast " .. castLine
+		lines[#lines + 1] = "/stopmacro " .. stopConditions
+	end
+
+	return table.concat(lines, "\n") .. "\n"
+end
+
+--------------------------------------------------------------------------------
+-- Standard Body Builder
+--------------------------------------------------------------------------------
+
+--[[
+    Assembles a standard macro body — the single answer to "what does a
+    Connoisseur macro body look like." The canonical emitted macro is:
+
+      #showtooltip item:13446
+      /run BBBFire(13446)
+      /use item:13446
+
+    Every other line is contributed by a definition hook:
+
+      #showtooltip item:<id>  -- always first; ns.MACRO_DEFAULT_ITEM_IDS when no item;
+                                 [dead] <spell>; item:<id> with a corpse cast
+      <conjure block>         -- definition.conjure, via BuildConjureBlock: /run BBBTipIf
+                                 miss tips with their /stopmacro guard, then the
+                                 /cast [btn:3]/[btn:2] line and its /stopmacro
+      /cast [dead] <spell>    -- definition.corpseSpell (Forsaken Cannibalize), below the
+                                 conjure clicks so they still work; a press that
+                                 cannot cast it falls through to the action
+      /run BBBFire(<id>)     -- StateWriteLine (macro-fire context for the
+                                 zone-error handler); only when an item exists
+      /cast [nocombat,dead] <spell>  -- definition.outOfCombatTypeName's best item,
+      /use [nocombat] item:<id>  after its macro's Cannibalize and before its
+      /cast [nocombat,nostealth] <spell>  stealth when those are on, then its
+      /stopmacro [nocombat]      stop, above the action (the potion macros'
+                                 food or water, behind potionsUseFoodAndWater);
+                                 the tooltip line then shows it out of combat
+                                 and BBBFire takes it as a second id
+      /use item:<id>          -- the action: definition.buildUseLine's custom line(s)
+                                 (Explosive's click layout, Food's [@pet] line),
+                                 else one line per ranked id for multi-use
+                                 types, else this plain single /use
+      /use item:<stackID>     -- definition.getStackIDs ids appended below the main
+                                 block (Health Potion's healthstone stacking)
+      <appended block>        -- definition.appendBlock text (Water's Shadowmeld line)
+
+    With no item in bags the action line becomes /run BBBTip("<noItemMiss>")
+    when the class can learn the conjure, /run BBBNoItem("<typeName>",1)
+    when it already knows it, else /run BBBNoItem("<typeName>");
+    an out-of-combat item still goes above it, so that line is only reached in
+    combat.
+    Ends with the macro-length trim, which sheds the Cannibalize lines first,
+    the one extra that is a convenience rather than a consumable, then stacked
+    healthstone lines, then ranked fallback /use lines from the bottom up.
+]]
+function ns.BuildStandardBody(
+	definition,
+	itemID,
+	useIDs,
+	stackIDs,
+	conjureInfo,
+	appendText,
+	outOfCombatID,
+	outOfCombatStealth,
+	corpseCast,
+	outOfCombatCorpse
+)
+	local tooltipLine, actionBlock
+
+	-- Everything above the /use lines; the macro-length trim rebuilds only what follows it.
+	local actionHead = ""
+	if itemID then
+		actionHead = StateWriteLine(itemID, outOfCombatID)
+	elseif outOfCombatID then
+		actionHead = StateWriteLine(outOfCombatID)
+	end
+	if outOfCombatID then
+		actionHead = actionHead .. ns.OutOfCombatBlock(outOfCombatID, outOfCombatStealth, outOfCombatCorpse)
+	end
+
+	if itemID then
+		tooltipLine = "#showtooltip item:" .. itemID .. "\n"
+
+		local customLine = definition.buildUseLine and definition.buildUseLine(itemID) or nil
+		if customLine then
+			actionBlock = actionHead .. customLine
+		elseif useIDs then
+			actionBlock = actionHead .. BuildUseBlock(useIDs)
+		else
+			actionBlock = actionHead .. "/use item:" .. itemID
+		end
+
+		-- Append the stacked ranked lines (Health Potion stacking).
+		if stackIDs then
+			actionBlock = actionBlock .. "\n" .. BuildUseBlock(stackIDs)
+		end
+	elseif conjureInfo and conjureInfo.noItemMiss then
+		--[[
+		    The player's class can conjure this category but hasn't learned
+		    the spell yet. Replace the generic "no item in bags" message
+		    with the more useful "you don't know X" message so the player
+		    understands the macro will gain functionality at the right
+		    level.
+		]]
+		tooltipLine = "#showtooltip item:" .. ns.MACRO_DEFAULT_ITEM_IDS[definition.typeName] .. "\n"
+		actionBlock = actionHead .. NoItemStop(corpseCast) .. '/run BBBTip("' .. conjureInfo.noItemMiss .. '")'
+	else
+		tooltipLine = "#showtooltip item:" .. ns.MACRO_DEFAULT_ITEM_IDS[definition.typeName] .. "\n"
+		-- A class that knows the spell that makes this item is told to Right-Click for more (the ",1").
+		local canMake = conjureInfo and conjureInfo.rightName and ",1" or ""
+		actionBlock = actionHead
+			.. NoItemStop(corpseCast)
+			.. '/run BBBNoItem("'
+			.. definition.typeName
+			.. '"'
+			.. canMake
+			.. ")"
+	end
+
+	if outOfCombatID then
+		tooltipLine = ns.OutOfCombatTooltipLine(itemID or ns.MACRO_DEFAULT_ITEM_IDS[definition.typeName], outOfCombatID)
+			.. "\n"
+	elseif corpseCast then
+		-- The spell's icon while the target is dead, so the button shows what a press will do.
+		tooltipLine = "#showtooltip [dead] "
+			.. corpseCast
+			.. "; item:"
+			.. (itemID or ns.MACRO_DEFAULT_ITEM_IDS[definition.typeName])
+			.. "\n"
+	end
+
+	local conjureBlock = ""
+	if conjureInfo then
+		conjureBlock = BuildConjureBlock(conjureInfo)
+	end
+	if corpseCast then
+		conjureBlock = conjureBlock .. CorpseBlock(corpseCast)
+	end
+
+	local appendedBlock = appendText or ""
+
+	local body = tooltipLine .. conjureBlock .. actionBlock .. appendedBlock
+
+	--[[
+	    Too long: the Cannibalize lines go first, before any consumable line, so
+	    build again without them. The rebuilt body then sheds its own stones
+	    and fallbacks below if it is still too long.
+	]]
+	if #body > ns.MACRO_BODY_MAX_LENGTH and (corpseCast or outOfCombatCorpse) then
+		return ns.BuildStandardBody(
+			definition,
+			itemID,
+			useIDs,
+			stackIDs,
+			conjureInfo,
+			appendText,
+			outOfCombatID,
+			outOfCombatStealth
+		)
+	end
+
+	--[[
+	    Measured in bytes against ns.MACRO_BODY_MAX_LENGTH (Data/Data.lua),
+	    which carries the reason the unit is bytes.
+
+	    Overflow corrupts the last /use line: the warlock Healthstone conjure
+	    block plus three /use lines can overflow in multibyte locales (e.g.
+	    ruRU spell names), and Health Potion stacking adds the Healthstone
+	    lines on top. Shed the stacked Healthstone lines from the bottom
+	    first, then potion fallback lines; the rank-1 potion line is never
+	    dropped.
+	]]
+	if useIDs then
+		local keepUse = #useIDs
+		local keepStack = stackIDs and #stackIDs or 0
+		while #body > ns.MACRO_BODY_MAX_LENGTH and (keepStack > 0 or keepUse > 1) do
+			if keepStack > 0 then
+				keepStack = keepStack - 1
+			else
+				keepUse = keepUse - 1
+			end
+			local trimmed = {}
+			for rank = 1, keepUse do
+				trimmed[rank] = useIDs[rank]
+			end
+			actionBlock = actionHead .. BuildUseBlock(trimmed)
+			if keepStack > 0 then
+				local stackTrimmed = {}
+				for rank = 1, keepStack do
+					stackTrimmed[rank] = stackIDs[rank]
+				end
+				actionBlock = actionBlock .. "\n" .. BuildUseBlock(stackTrimmed)
+			end
+			body = tooltipLine .. conjureBlock .. actionBlock .. appendedBlock
+		end
+	end
+
+	return body
+end
+
+--------------------------------------------------------------------------------
+-- State Key Builder
+--------------------------------------------------------------------------------
+
+--[[
+    State encoding — captures every input that affects the written body.
+    Format:
+      ITEMIDS(+HS:stackIDs)?(_C(_M:mid)?(_R:rid)?(_MR:key)?(_MM:key)?(_NI:key)?)?(_EX:mode)?(_SM|_SE)?(_OOC:id(:S)?(:CN)?)?(_CN)?
+    where ITEMIDS is the single itemID, or a comma-joined ranked list for
+    multi-use types so a change in any fallback rank also triggers a
+    rewrite. +HS: carries the stacked Healthstone ids (Health Potion's
+    getStackIDs hook). _EX:mode comes from Explosive's stateExtras hook (its
+    click layout), so flipping the dropdown rewrites the macro; _SM and _SE
+    are the append-block flags (Water's Shadowmeld line and Food's Stealth
+    Eating line). _OOC:id is the food or water a potion macro uses out of
+    combat, with :S added while it stealths as it does and :CN while it
+    cannibalizes on a dead target. _CN marks the Food or Water macro's own
+    Cannibalize lines. Mode overrides use their own prefix
+    ("SCROLLS:...") instead, so the key spaces never collide and a
+    transition between modes always triggers a rewrite. Every input that
+    affects the body MUST appear in the key — a lossy key causes stale
+    macros.
+]]
+function ns.BuildStateKey(
+	definition,
+	itemID,
+	useIDs,
+	stackIDs,
+	conjureInfo,
+	appendFlag,
+	outOfCombatID,
+	outOfCombatStealth,
+	corpseCast,
+	outOfCombatCorpse
+)
+	local itemKey = itemID and tostring(itemID) or "none"
+	if useIDs then
+		itemKey = table.concat(useIDs, ",")
+	end
+	if stackIDs then
+		itemKey = itemKey .. "+HS:" .. table.concat(stackIDs, ",")
+	end
+	local stateParts = { itemKey }
+	if
+		conjureInfo
+		and (
+			conjureInfo.rightName
+			or conjureInfo.middleName
+			or conjureInfo.rightMiss
+			or conjureInfo.middleMiss
+			or conjureInfo.noItemMiss
+		)
+	then
+		stateParts[#stateParts + 1] = "C"
+		if conjureInfo.middleName then
+			stateParts[#stateParts + 1] = "M:" .. tostring(conjureInfo.middleID)
+		end
+		if conjureInfo.rightName then
+			stateParts[#stateParts + 1] = "R:" .. tostring(conjureInfo.rightID)
+		end
+		if conjureInfo.rightMiss then
+			stateParts[#stateParts + 1] = "MR:" .. conjureInfo.rightMiss
+		end
+		if conjureInfo.middleMiss then
+			stateParts[#stateParts + 1] = "MM:" .. conjureInfo.middleMiss
+		end
+		if conjureInfo.noItemMiss then
+			stateParts[#stateParts + 1] = "NI:" .. conjureInfo.noItemMiss
+		end
+	end
+	if definition.stateExtras then
+		definition.stateExtras(stateParts, itemID)
+	end
+	if appendFlag then
+		stateParts[#stateParts + 1] = appendFlag
+	end
+	if outOfCombatID then
+		stateParts[#stateParts + 1] = "OOC:"
+			.. outOfCombatID
+			.. (outOfCombatStealth and ":S" or "")
+			.. (outOfCombatCorpse and ":CN" or "")
+	end
+	if corpseCast then
+		stateParts[#stateParts + 1] = "CN"
+	end
+	return table.concat(stateParts, "_")
+end

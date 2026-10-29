@@ -13,8 +13,8 @@ local Spacer = ns.OptionsSpacer
 --------------------------------------------------------------------------------
 
 --[[
-	A binding cannot be set from an AceConfig panel, so the row shows the key the player bound, or a muted Not
-	Bound, and a Set Key button that opens the game's Key Bindings list through ns:OpenKeyBindings
+	The row shows the key the player bound, or a muted Not Bound, and a Set Key button that opens the game's
+	Key Bindings list through ns:OpenKeyBindings, so the key is set where the game's own are
 	(Features/Spellbook/Key-Bindings.lua). The binding name comes from Bindings.xml's name attribute; the
 	caption is the same BINDING_* string the Key Bindings list prints. ns:OnUpdateBindings repaints this panel
 	when the player changes a key.
@@ -24,9 +24,14 @@ local KEY_BINDINGS = {
 	{ "MACROSPELLBOOK_TOGGLE", "BINDING_TOGGLE_PAGE", "OPTIONS_KEY_BINDING_TOGGLE_DESCRIPTION" },
 }
 
-local KEY_LABEL_WIDTH = 1.9
-local KEY_STATUS_WIDTH = 0.85
+--[[
+	The caption takes the grid's label width, so the key lines up with every other row's control, and the key
+	and Set Key share the control width, less a little slack that keeps the unnamed group's row off the wrap
+	boundary.
+]]
+local KEY_LABEL_WIDTH = ns.OPTIONS_LABEL_WIDTH
 local KEY_BUTTON_WIDTH = 0.55
+local KEY_STATUS_WIDTH = ns.OPTIONS_CONTROL_WIDTH - KEY_BUTTON_WIDTH - 0.1
 
 local function GetBindingStatus(bindingName)
 	local key = GetBindingKey(bindingName)

@@ -933,7 +933,7 @@ L["OPTIONS_READINESS_NONCOMBAT_GEAR_DESCRIPTION"] =
 -- Restocker Window & Chat
 --------------------------------------------------------------------------------
 
--- Chat messages printed by the Restocker feature (Features/Restocker/).
+-- Chat messages printed by the Restocker feature (Features/Inventory-Restocker/).
 L["RESTOCKER_PROFILE_EXISTS"] = 'Список с именем "%s" уже существует.'
 --[[
     %d is the item ID the player typed. Written into the add box itself while
@@ -969,7 +969,7 @@ L["RESTOCKER_STOPPED_ERROR"] = "Пополнение остановлено из
     Printed during a merchant restock when the crafting-reagent buyer stands
     down: this merchant stocks some of the reagents the Restock List needs but
     not all of them, and reagents buy all-or-nothing (VendorStocksAllReagents in
-    Features/Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
+    Features/Inventory-Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
 ]]
 L["RESTOCKER_REAGENTS_SKIPPED"] =
 	"У этого торговца есть не все ингредиенты, необходимые для ваших ядов. Ни один из них не будет куплен."
@@ -1078,13 +1078,13 @@ L["RESTOCKER_HELP_PROFILE_USE"] =
     Starter List pop-up, the staples window: offers staples at login when the
     Restock List is empty, and on demand from the Restock List window's Pick
     Staples button. The staples logic is in
-    Features/Restocker/Restocker-Starter-List.lua, the window in
+    Features/Inventory-Restocker/Restocker-Starter-List.lua, the window in
     Options/Options-Starter-List-Popup.lua. The six
     food staples reuse the DIET_ keys above, so each food row carries the
     client's own pet diet name.
 
-    The title is its own, and the call site puts the add-on's full name in
-    front of it (ADDON_TITLE // STARTER_POPUP_TITLE): at login this window
+    The title is its own, and the call site puts the add-on's full name
+    after it (STARTER_POPUP_TITLE // ADDON_TITLE): at login this window
     opens with nothing else of the add-on's on screen, so its title bar is
     all that says whose it is.
 
@@ -1159,8 +1159,8 @@ L["STARTER_POPUP_COUNT_DESCRIPTION"] =
 	"Сколько держать в запасе, каждый предмет в отдельной ячейке сумки, так как они не складываются в стопки."
 
 --[[
-    Restock List window UI. The title names what the window holds, after the
-    add-on's full name (ADDON_TITLE // RESTOCKER_WINDOW_TITLE); the feature
+    Restock List window UI. The title names what the window holds, before the
+    add-on's full name (RESTOCKER_WINDOW_TITLE // ADDON_TITLE); the feature
     that acts on it stays "Restocker".
 ]]
 L["RESTOCKER_WINDOW_TITLE"] = "Список пополнения"
@@ -1687,8 +1687,9 @@ L["BUFF_WINDOW_AUDIENCE_HEALER"] = "Лекари"
 L["BUFF_WINDOW_AUDIENCE_ALL"] = "Все"
 -- Each buff's dropdown tooltip; hovering the buff's name shows the spell itself.
 L["BUFF_WINDOW_AUDIENCE_DESCRIPTION"] = "Задает, кому предлагать %s."
+-- %s is the game's own Main Tank label.
 L["BUFF_WINDOW_BUFFS_DESCRIPTION"] =
-	"Выберите, кому предлагать каждый бафф. Танки и лекари определяются по роли в группе; все без роли считаются бойцами, если в разделе Считать танками ниже не указано иное."
+	"Выберите, кому предлагать каждый бафф. Танки и лекари определяются по роли в группе, но в рейде танками считаются только игроки с отметкой %s. Все без роли считаются бойцами, если в разделе Считать танками ниже не указано иное."
 
 L["BUFF_WINDOW_SELF_DESCRIPTION"] =
 	"Ваши собственные баффы, закрепленные вверху окна."
@@ -1760,10 +1761,7 @@ L["BUFF_KEYS_DESCRIPTION"] =
 	"Накладывайте следующий бафф из списка одной клавишей или макросом вне боя. Баффы оружия по-прежнему наносятся щелчком в окне."
 L["BUFF_KEY"] = "Кнопка баффов"
 L["BUFF_KEY_DESCRIPTION"] =
-	"Накладывает следующий недостающий бафф, по одному за нажатие: воскрешение мертвой цели, затем мертвых в вашей группе (жрецы, паладины и шаманы), затем баффы на себя, Ответная любезность, ваша цель и ваша группа. Группа получает групповой бафф, если он стоит меньше маны, чем баффать по одному всех в радиусе действия."
-L["BUFF_KEY_SKIP_COOLDOWNS"] = "Пропускать баффы с перезарядкой"
-L["BUFF_KEY_SKIP_COOLDOWNS_DESCRIPTION"] =
-	"Пропускает баффы с перезарядкой (например, Защита от страха) и переходит к следующему."
+	"Накладывает следующий недостающий бафф, по одному за нажатие: воскрешение мертвой цели, затем мертвых в вашей группе (жрецы, паладины и шаманы), затем Ответная любезность, ваша цель, баффы на себя и ваша группа. Группа получает групповой бафф, если он стоит меньше маны, чем баффать её участников по одному, как только все они рядом. Пропускает баффы с перезарядкой (например, Защита от страха) и переходит к следующему."
 -- %s is a player's name.
 L["BUFF_KEY_WAITING"] = "Ожидание, пока игрок %s окажется в радиусе действия."
 L["BUFF_KEY_DONE"] = "Больше нечего накладывать."
@@ -1901,6 +1899,8 @@ L["SUBTEXT_STANCE"] = "Стойка"
 L["SUBTEXT_USE_ITEMS"] = "Предметы"
 L["SUBTEXT_PET_ATTACK"] = "Атака питомца"
 L["SUBTEXT_DYNAMIC_RANK"] = "Дин. уровень"
+L["SUBTEXT_DYNAMIC_ITEM"] = "Дин. предмет"
+L["SUBTEXT_DYNAMIC_RANK_ITEM"] = "Дин. уровень, Дин. предмет"
 L["SUBTEXT_MAX_RANK"] = "Высший уровень"
 L["SUBTEXT_TARGET_ENEMY"] = "Ближ. враг"
 L["SUBTEXT_TARGET_FRIEND"] = "Ближ. союзник"

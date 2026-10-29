@@ -15,9 +15,11 @@ function ns.RegisterMinimapIcon()
 		LibDBIcon:Register(ADDON_NAME, ns.dataBrokerObject, ns.db.global.minimap)
 		ns.minimapIconRegistered = true
 
-		-- On the Retail engine LibDBIcon leaves the square icon off-center in its ring.
-		-- Fitted by hand, not SetButtonIcon: its ResetButtonIcon calls icon:UpdateCoord(),
-		-- which errors when another add-on has replaced the button's icon.
+		--[[
+		    On the Retail engine LibDBIcon leaves the square icon off-center in its ring.
+		    Fitted by hand, not SetButtonIcon: its ResetButtonIcon calls icon:UpdateCoord(),
+		    which errors when another add-on has replaced the button's icon.
+		]]
 		local button = LibDBIcon:GetMinimapButton(ADDON_NAME)
 		if (ns.FLAVOR == "Camelot" or ns.FLAVOR == "Mainline") and button and button.icon then
 			button.icon:SetSize(20, 20)
@@ -305,8 +307,9 @@ end
     Each builder returns its class's blocks in order, or nothing while the
     character has none: an item block ({ title, itemID, itemLink,
     missingLabel }) for each item the class's own macro will use, then a notes
-    block ({ title, rows, note }) per macro. A row is listed only for a spell
-    the character knows.
+    block ({ title, rows, note, types }) per macro, types naming the
+    consumable macros it is about. A row is listed only for a spell the
+    character knows.
 ]]
 local function HunterNotes()
 	if not ns.feedPetSpellName then
@@ -327,7 +330,7 @@ local function HunterNotes()
 			itemLink = ns.bestPetFoodLink,
 			missingLabel = L["LABEL_PET_FOOD"],
 		},
-		{ title = L["NOTE_MACRO_FEED_PET"], rows = rows },
+		{ title = L["NOTE_MACRO_FEED_PET"], rows = rows, types = { "Feed Pet" } },
 	}
 end
 
@@ -349,6 +352,7 @@ local function MageNotes()
 			title = L["NOTE_MACRO_FOOD_WATER"],
 			rows = rows,
 			note = knowsFoodOrWater and L["NOTE_MAGE_TARGET_LEVEL"] or nil,
+			types = { "Food", "Water" },
 		})
 	end
 
@@ -359,6 +363,7 @@ local function MageNotes()
 				{ L["MINIMAP_RIGHT_CLICK"], L["NOTE_CONJURE"] },
 				{ L["NOTE_RIGHT_CLICK_AGAIN"], L["NOTE_LOWER_RANK_BACKUP"] },
 			},
+			types = { "Mana Gem" },
 		})
 	end
 
@@ -384,6 +389,7 @@ local function WarlockNotes()
 			title = L["NOTE_MACRO_HEALTHSTONE"],
 			rows = rows,
 			note = knowsHealthstone and L["NOTE_WARLOCK_TARGET_LEVEL"] or nil,
+			types = { "Healthstone" },
 		})
 	end
 
@@ -391,6 +397,7 @@ local function WarlockNotes()
 		tinsert(blocks, {
 			title = L["NOTE_MACRO_SOULSTONE"],
 			rows = { { L["MINIMAP_RIGHT_CLICK"], L["NOTE_CREATE"] } },
+			types = { "Soulstone" },
 		})
 	end
 
@@ -426,6 +433,7 @@ local function RogueNotes()
 				{ L["MINIMAP_MIDDLE_CLICK"], L["NOTE_POISONS_WINDOW"] },
 			},
 			note = L["NOTE_POISONS_REPLACED"],
+			types = { "Poisons" },
 		},
 	}
 end
@@ -464,6 +472,25 @@ local function AddClassNotes(tooltip)
 			AddItemBlock(tooltip, block.title, block.itemID, block.itemLink, block.missingLabel)
 		end
 	end
+end
+
+--[[
+    The class-colored header and the notes block for one consumable macro
+    type, as the mini-map tooltip shows them, for the Spellbook page's tooltip
+    under the macro's text. False, drawing nothing, when the player's class
+    has no notes for that macro.
+]]
+function ns.AddConsumableMacroNotes(tooltip, macroType)
+	local className, playerClass = UnitClass("player")
+	local buildNotes = CLASS_NOTES[playerClass]
+	for _, block in ipairs(buildNotes and buildNotes() or {}) do
+		if block.rows and tContains(block.types, macroType) then
+			tooltip:AddLine((ns.GetClassColor(playerClass) or GetColor("TEXT")) .. className .. "|r")
+			AddMacroNotes(tooltip, block.title, block.rows, block.note)
+			return true
+		end
+	end
+	return false
 end
 
 --------------------------------------------------------------------------------

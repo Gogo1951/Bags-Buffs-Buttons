@@ -4,7 +4,7 @@ if not ns.IS_DISCOVERY then
 	return
 end
 
--- [classToken] = { mouseoverEnemy, mouseoverFriend, resurrect, utility, attacks, crowdControl, offensives, defensives, selfBuffs, pageBuffs, heals, noCooldown, traps, totems, seals, blessings, curses, shocks, finishers, pets, teleports, threat, buffs, cursor, channeled, stealth = { spellId }, noToggle = { spellId }, stanceSlots = { stanceSpellId }, stances = { [spellId] = { stanceSpellId } }, petAbilities = { [summonSpellId] = { abilityId, familyId } }, extraSpells = { spellId }, autoShot = spellId }
+-- [classToken] = { mouseoverEnemy, mouseoverFriend, resurrect, utility, attacks, crowdControl, offensives, defensives, selfBuffs, pageBuffs, heals, noCooldown, traps, totems, seals, blessings, curses, shocks, finishers, pets, teleports, threat, buffs, cursor, channeled, stealth = { spellId }, noToggle = { spellId }, stanceSlots = { stanceSpellId }, stances = { [spellId] = { stanceSpellId } }, forms = { [spellId] = { formSpellId } }, petAbilities = { [summonSpellId] = { abilityId, familyId } }, extraSpells = { spellId }, autoShot = spellId }
 ns.CLASS_SPELL_LISTS = {
 	DRUID = {
 		mouseoverEnemy = {
@@ -105,6 +105,93 @@ ns.CLASS_SPELL_LISTS = {
 			1066, -- Aquatic Form
 			8946, -- Cure Poison
 			18960, -- Teleport: Moonglade
+		},
+		forms = {
+			[99] = { 5487, 9634 }, -- Demoralizing Roar: Bear Form, Dire Bear Form
+			[769] = { 5487, 9634 }, -- Swipe: Bear Form, Dire Bear Form
+			[779] = { 5487, 9634 }, -- Swipe: Bear Form, Dire Bear Form
+			[780] = { 5487, 9634 }, -- Swipe: Bear Form, Dire Bear Form
+			[1079] = { 768 }, -- Rip: Cat Form
+			[1082] = { 768 }, -- Claw: Cat Form
+			[1735] = { 5487, 9634 }, -- Demoralizing Roar: Bear Form, Dire Bear Form
+			[1822] = { 768 }, -- Rake: Cat Form
+			[1823] = { 768 }, -- Rake: Cat Form
+			[1824] = { 768 }, -- Rake: Cat Form
+			[1850] = { 768 }, -- Dash: Cat Form
+			[3029] = { 768 }, -- Claw: Cat Form
+			[5201] = { 768 }, -- Claw: Cat Form
+			[5209] = { 5487, 9634 }, -- Challenging Roar: Bear Form, Dire Bear Form
+			[5211] = { 5487, 9634 }, -- Bash: Bear Form, Dire Bear Form
+			[5215] = { 768 }, -- Prowl: Cat Form
+			[5217] = { 768 }, -- Tiger's Fury: Cat Form
+			[5221] = { 768 }, -- Shred: Cat Form
+			[5225] = { 768 }, -- Track Humanoids: Cat Form
+			[5229] = { 5487, 9634 }, -- Enrage: Bear Form, Dire Bear Form
+			[6783] = { 768 }, -- Prowl: Cat Form
+			[6785] = { 768 }, -- Ravage: Cat Form
+			[6787] = { 768 }, -- Ravage: Cat Form
+			[6793] = { 768 }, -- Tiger's Fury: Cat Form
+			[6795] = { 5487, 9634 }, -- Growl: Bear Form, Dire Bear Form
+			[6798] = { 5487, 9634 }, -- Bash: Bear Form, Dire Bear Form
+			[6800] = { 768 }, -- Shred: Cat Form
+			[6807] = { 5487, 9634 }, -- Maul: Bear Form, Dire Bear Form
+			[6808] = { 5487, 9634 }, -- Maul: Bear Form, Dire Bear Form
+			[6809] = { 5487, 9634 }, -- Maul: Bear Form, Dire Bear Form
+			[8972] = { 5487, 9634 }, -- Maul: Bear Form, Dire Bear Form
+			[8983] = { 5487, 9634 }, -- Bash: Bear Form, Dire Bear Form
+			[8992] = { 768 }, -- Shred: Cat Form
+			[8998] = { 768 }, -- Cower: Cat Form
+			[9000] = { 768 }, -- Cower: Cat Form
+			[9005] = { 768 }, -- Pounce: Cat Form
+			[9490] = { 5487, 9634 }, -- Demoralizing Roar: Bear Form, Dire Bear Form
+			[9492] = { 768 }, -- Rip: Cat Form
+			[9493] = { 768 }, -- Rip: Cat Form
+			[9745] = { 5487, 9634 }, -- Maul: Bear Form, Dire Bear Form
+			[9747] = { 5487, 9634 }, -- Demoralizing Roar: Bear Form, Dire Bear Form
+			[9752] = { 768 }, -- Rip: Cat Form
+			[9754] = { 5487, 9634 }, -- Swipe: Bear Form, Dire Bear Form
+			[9821] = { 768 }, -- Dash: Cat Form
+			[9823] = { 768 }, -- Pounce: Cat Form
+			[9827] = { 768 }, -- Pounce: Cat Form
+			[9829] = { 768 }, -- Shred: Cat Form
+			[9830] = { 768 }, -- Shred: Cat Form
+			[9845] = { 768 }, -- Tiger's Fury: Cat Form
+			[9846] = { 768 }, -- Tiger's Fury: Cat Form
+			[9849] = { 768 }, -- Claw: Cat Form
+			[9850] = { 768 }, -- Claw: Cat Form
+			[9866] = { 768 }, -- Ravage: Cat Form
+			[9867] = { 768 }, -- Ravage: Cat Form
+			[9880] = { 5487, 9634 }, -- Maul: Bear Form, Dire Bear Form
+			[9881] = { 5487, 9634 }, -- Maul: Bear Form, Dire Bear Form
+			[9892] = { 768 }, -- Cower: Cat Form
+			[9894] = { 768 }, -- Rip: Cat Form
+			[9896] = { 768 }, -- Rip: Cat Form
+			[9898] = { 5487, 9634 }, -- Demoralizing Roar: Bear Form, Dire Bear Form
+			[9904] = { 768 }, -- Rake: Cat Form
+			[9908] = { 5487, 9634 }, -- Swipe: Bear Form, Dire Bear Form
+			[9913] = { 768 }, -- Prowl: Cat Form
+			[16857] = { 768, 5487, 9634 }, -- Faerie Fire (Feral): Cat Form, Bear Form, Dire Bear Form
+			[16979] = { 5487, 9634 }, -- Feral Charge: Bear Form, Dire Bear Form
+			[17390] = { 768, 5487, 9634 }, -- Faerie Fire (Feral): Cat Form, Bear Form, Dire Bear Form
+			[17391] = { 768, 5487, 9634 }, -- Faerie Fire (Feral): Cat Form, Bear Form, Dire Bear Form
+			[17392] = { 768, 5487, 9634 }, -- Faerie Fire (Feral): Cat Form, Bear Form, Dire Bear Form
+			[22568] = { 768 }, -- Ferocious Bite: Cat Form
+			[22570] = { 768 }, -- Mangle: Cat Form
+			[22827] = { 768 }, -- Ferocious Bite: Cat Form
+			[22828] = { 768 }, -- Ferocious Bite: Cat Form
+			[22829] = { 768 }, -- Ferocious Bite: Cat Form
+			[22842] = { 5487, 9634 }, -- Frenzied Regeneration: Bear Form, Dire Bear Form
+			[22895] = { 5487, 9634 }, -- Frenzied Regeneration: Bear Form, Dire Bear Form
+			[22896] = { 5487, 9634 }, -- Frenzied Regeneration: Bear Form, Dire Bear Form
+			[24907] = { 24858 }, -- Moonkin Aura: Moonkin Form
+			[31018] = { 768 }, -- Ferocious Bite: Cat Form
+			[407993] = { 768 }, -- Mangle: Cat Form
+			[407995] = { 5487, 9634 }, -- Mangle: Bear Form, Dire Bear Form
+			[410176] = { 768, 5487, 9634 }, -- Skull Bash: Cat Form, Bear Form, Dire Bear Form
+			[411128] = { 768 }, -- Swipe: Cat Form
+			[414644] = { 5487, 9634 }, -- Lacerate: Bear Form, Dire Bear Form
+			[414687] = { 5487, 9634 }, -- Sunfire: Bear Form, Dire Bear Form
+			[414689] = { 768 }, -- Sunfire: Cat Form
 		},
 	},
 	HUNTER = {
@@ -603,6 +690,27 @@ ns.CLASS_SPELL_LISTS = {
 			13750, -- Adrenaline Rush
 			{ 14166, 14165, 14167 }, -- Improved Slice and Dice
 		},
+		forms = {
+			[703] = { 1784 }, -- Garrote: Stealth
+			[921] = { 1784 }, -- Pick Pocket: Stealth
+			[1833] = { 1784 }, -- Cheap Shot: Stealth
+			[2070] = { 1784 }, -- Sap: Stealth
+			[6770] = { 1784 }, -- Sap: Stealth
+			[8631] = { 1784 }, -- Garrote: Stealth
+			[8632] = { 1784 }, -- Garrote: Stealth
+			[8633] = { 1784 }, -- Garrote: Stealth
+			[8676] = { 1784 }, -- Ambush: Stealth
+			[8724] = { 1784 }, -- Ambush: Stealth
+			[8725] = { 1784 }, -- Ambush: Stealth
+			[11267] = { 1784 }, -- Ambush: Stealth
+			[11268] = { 1784 }, -- Ambush: Stealth
+			[11269] = { 1784 }, -- Ambush: Stealth
+			[11289] = { 1784 }, -- Garrote: Stealth
+			[11290] = { 1784 }, -- Garrote: Stealth
+			[11297] = { 1784 }, -- Sap: Stealth
+			[14183] = { 1784 }, -- Premeditation: Stealth
+			[399985] = { 1784 }, -- Shadowstrike: Stealth
+		},
 	},
 	SHAMAN = {
 		mouseoverEnemy = {
@@ -936,6 +1044,66 @@ ns.CLASS_SPELL_LISTS = {
 			{ 23881, 23880, 23885, 23886, 23887, 23888, 23889, 23890, 23891, 23892, 23893, 23894 }, -- Bloodthirst
 			{ 12292, 12723 }, -- Sweeping Strikes
 			{ 12294, 21551, 21552, 21553 }, -- Mortal Strike
+		},
+		forms = {
+			[72] = { 2457, 71 }, -- Shield Bash: Battle Stance, Defensive Stance
+			[100] = { 2457 }, -- Charge: Battle Stance
+			[355] = { 71 }, -- Taunt: Defensive Stance
+			[676] = { 71 }, -- Disarm: Defensive Stance
+			[694] = { 2457 }, -- Mocking Blow: Battle Stance
+			[772] = { 2457, 71 }, -- Rend: Battle Stance, Defensive Stance
+			[871] = { 71 }, -- Shield Wall: Defensive Stance
+			[1671] = { 2457, 71 }, -- Shield Bash: Battle Stance, Defensive Stance
+			[1672] = { 2457, 71 }, -- Shield Bash: Battle Stance, Defensive Stance
+			[1680] = { 2458 }, -- Whirlwind: Berserker Stance
+			[1715] = { 2457, 2458 }, -- Hamstring: Battle Stance, Berserker Stance
+			[1719] = { 2458 }, -- Recklessness: Berserker Stance
+			[2565] = { 71 }, -- Shield Block: Defensive Stance
+			[5308] = { 2457, 2458 }, -- Execute: Battle Stance, Berserker Stance
+			[6178] = { 2457 }, -- Charge: Battle Stance
+			[6343] = { 2457 }, -- Thunder Clap: Battle Stance
+			[6546] = { 2457, 71 }, -- Rend: Battle Stance, Defensive Stance
+			[6547] = { 2457, 71 }, -- Rend: Battle Stance, Defensive Stance
+			[6548] = { 2457, 71 }, -- Rend: Battle Stance, Defensive Stance
+			[6552] = { 2458 }, -- Pummel: Berserker Stance
+			[6554] = { 2458 }, -- Pummel: Berserker Stance
+			[6572] = { 71 }, -- Revenge: Defensive Stance
+			[6574] = { 71 }, -- Revenge: Defensive Stance
+			[7372] = { 2457, 2458 }, -- Hamstring: Battle Stance, Berserker Stance
+			[7373] = { 2457, 2458 }, -- Hamstring: Battle Stance, Berserker Stance
+			[7379] = { 71 }, -- Revenge: Defensive Stance
+			[7384] = { 2457 }, -- Overpower: Battle Stance
+			[7400] = { 2457 }, -- Mocking Blow: Battle Stance
+			[7402] = { 2457 }, -- Mocking Blow: Battle Stance
+			[7887] = { 2457 }, -- Overpower: Battle Stance
+			[8198] = { 2457 }, -- Thunder Clap: Battle Stance
+			[8204] = { 2457 }, -- Thunder Clap: Battle Stance
+			[8205] = { 2457 }, -- Thunder Clap: Battle Stance
+			[11572] = { 2457, 71 }, -- Rend: Battle Stance, Defensive Stance
+			[11573] = { 2457, 71 }, -- Rend: Battle Stance, Defensive Stance
+			[11574] = { 2457, 71 }, -- Rend: Battle Stance, Defensive Stance
+			[11578] = { 2457 }, -- Charge: Battle Stance
+			[11580] = { 2457 }, -- Thunder Clap: Battle Stance
+			[11581] = { 2457 }, -- Thunder Clap: Battle Stance
+			[11584] = { 2457 }, -- Overpower: Battle Stance
+			[11585] = { 2457 }, -- Overpower: Battle Stance
+			[11600] = { 71 }, -- Revenge: Defensive Stance
+			[11601] = { 71 }, -- Revenge: Defensive Stance
+			[12292] = { 2457 }, -- Sweeping Strikes: Battle Stance
+			[18499] = { 2458 }, -- Berserker Rage: Berserker Stance
+			[20230] = { 2457 }, -- Retaliation: Battle Stance
+			[20252] = { 2458 }, -- Intercept: Berserker Stance
+			[20559] = { 2457 }, -- Mocking Blow: Battle Stance
+			[20560] = { 2457 }, -- Mocking Blow: Battle Stance
+			[20616] = { 2458 }, -- Intercept: Berserker Stance
+			[20617] = { 2458 }, -- Intercept: Berserker Stance
+			[20658] = { 2457, 2458 }, -- Execute: Battle Stance, Berserker Stance
+			[20660] = { 2457, 2458 }, -- Execute: Battle Stance, Berserker Stance
+			[20661] = { 2457, 2458 }, -- Execute: Battle Stance, Berserker Stance
+			[20662] = { 2457, 2458 }, -- Execute: Battle Stance, Berserker Stance
+			[25288] = { 71 }, -- Revenge: Defensive Stance
+			[403338] = { 71 }, -- Intervene: Defensive Stance
+			[440488] = { 71 }, -- Shockwave: Defensive Stance
 		},
 	},
 }

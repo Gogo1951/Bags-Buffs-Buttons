@@ -29,6 +29,7 @@ ns.Version = GetVersion()
 ]]
 ns.EVENT_NAMES = {
 	"ACTIONBAR_SLOT_CHANGED",
+	"ADDON_LOADED",
 	"BAG_UPDATE_DELAYED",
 	"BANKFRAME_CLOSED",
 	"BANKFRAME_OPENED",
@@ -166,15 +167,17 @@ end
     turned on, so the import can read them only in a session where it runs:
 
       turned on   Its settings are copied in at login, before AceDB opens the
-                  table, once per add-on. They win over what is here, which is
-                  at most what a first login wrote (a fresh profile, a starter
-                  list). Restock Lists merge by name. Then every old add-on
+                  table, once per add-on. They win key by key over what is
+                  here, and keys only this add-on has (the Spellbook's, say)
+                  are kept, since the copy can land on a profile that has been
+                  played. Restock Lists merge by name. Then every old add-on
                   still running is turned off for all characters, and the
                   player is offered a reload so the old copy stops rewriting
                   the same macros.
-      turned off  The player is asked once whether to bring its settings over.
+      turned off  The player is asked whether to bring its settings over.
                   Yes turns it on for this character and reloads, which lands
-                  in the case above; No is remembered and never asked again.
+                  in the case above; No is remembered and never asked again;
+                  Escape puts the question off to the next login.
                   While the question is open, the Staples window stays shut
                   (ns.IsLegacyImportPending): an import may be about to fill
                   the Restock List.
@@ -186,6 +189,9 @@ end
 ]]
 local legacyNotices = {}
 local legacyToTurnOn = {}
+-- Titles of the old add-ons turned off this session, and of those whose settings were copied in on the way.
+local legacyTurnedOff = {}
+local legacyCopied = {}
 
 --[[
     What an add-on's entry in ns.db.global.legacyImported holds once its
@@ -199,7 +205,6 @@ local LEGACY_IMPORT_VERSION = 2
 local function IsSettled(entry)
 	return entry == LEGACY_IMPORT_VERSION or entry == "declined"
 end
-local legacyTurnedOff = {}
 
 local function CopyTable(source)
 	if type(source) ~= "table" then
@@ -226,7 +231,12 @@ local LEGACY_IMPORTERS = {
 		saved.profiles = saved.profiles or {}
 		saved.profileKeys = saved.profileKeys or {}
 		saved.global = saved.global or {}
-		CopyOver(saved.profiles, legacy.profiles)
+		for name, legacyProfile in pairs(legacy.profiles or {}) do
+			if type(legacyProfile) == "table" then
+				saved.profiles[name] = saved.profiles[name] or {}
+				CopyOver(saved.profiles[name], legacyProfile)
+			end
+		end
 		CopyOver(saved.profileKeys, legacy.profileKeys)
 		CopyOver(saved.global, legacy.global, { restocker = true, legacyImported = true })
 		local restocker = legacy.global and legacy.global.restocker
@@ -254,13 +264,13 @@ local function LegacyTitle(legacy)
 	return C_AddOns.GetAddOnMetadata(legacy.folder, "Title") or legacy.folder
 end
 
--- Whether the old add-on is installed but turned off, so this session cannot read its settings.
+-- Whether the player switched the old add-on off, so turning it back on lets this session read its settings.
 local function IsInstalledButOff(legacy)
 	if C_AddOns.IsAddOnLoaded(legacy.folder) then
 		return false
 	end
-	local name, _, _, _, reason = C_AddOns.GetAddOnInfo(legacy.folder)
-	return name ~= nil and reason ~= "MISSING"
+	local _, _, _, _, reason = C_AddOns.GetAddOnInfo(legacy.folder)
+	return reason == "DISABLED"
 end
 
 local function ImportLegacySettings()
@@ -278,6 +288,7 @@ local function ImportLegacySettings()
 				if type(legacyTable) == "table" then
 					LEGACY_IMPORTERS[key](saved, legacyTable)
 					legacyNotices[#legacyNotices + 1] = L["CHAT_LEGACY_IMPORTED"]:format(LegacyTitle(legacy))
+					legacyCopied[#legacyCopied + 1] = LegacyTitle(legacy)
 				end
 				imported[key] = LEGACY_IMPORT_VERSION
 			end
@@ -294,7 +305,7 @@ function ns.IsLegacyImportPending()
 end
 
 StaticPopupDialogs.BAGSBUFFSBUTTONS_LEGACY_RELOAD = {
-	text = L["POPUP_LEGACY_RELOAD"],
+	text = L["POPUP_LEGACY_RELOAD_TURNED_OFF"],
 	button1 = L["POPUP_LEGACY_RELOAD_ACCEPT"],
 	button2 = L["POPUP_LEGACY_LATER"],
 	OnAccept = function()
@@ -307,7 +318,7 @@ StaticPopupDialogs.BAGSBUFFSBUTTONS_LEGACY_RELOAD = {
 }
 
 StaticPopupDialogs.BAGSBUFFSBUTTONS_LEGACY_IMPORT = {
-	text = L["POPUP_LEGACY_IMPORT"],
+	text = L["POPUP_LEGACY_IMPORT_SETTINGS"],
 	button1 = L["POPUP_LEGACY_IMPORT_ACCEPT"],
 	button2 = L["POPUP_LEGACY_IMPORT_DECLINE"],
 	OnAccept = function()
@@ -326,6 +337,7 @@ StaticPopupDialogs.BAGSBUFFSBUTTONS_LEGACY_IMPORT = {
 	timeout = 0,
 	whileDead = true,
 	hideOnEscape = true,
+	noCancelOnEscape = true,
 	preferredIndex = 3,
 }
 
@@ -336,12 +348,23 @@ end
 -- Asked once the player is in the world, after the welcome line.
 local function OfferLegacySteps()
 	if #legacyTurnedOff > 0 then
-		StaticPopup_Show("BAGSBUFFSBUTTONS_LEGACY_RELOAD", JoinTitles(legacyTurnedOff))
+		local dialog = StaticPopupDialogs.BAGSBUFFSBUTTONS_LEGACY_RELOAD
+		if #legacyCopied > 0 then
+			dialog.text = L["POPUP_LEGACY_RELOAD_COPIED"]
+			StaticPopup_Show("BAGSBUFFSBUTTONS_LEGACY_RELOAD", JoinTitles(legacyCopied), JoinTitles(legacyTurnedOff))
+		else
+			dialog.text = L["POPUP_LEGACY_RELOAD_TURNED_OFF"]
+			StaticPopup_Show("BAGSBUFFSBUTTONS_LEGACY_RELOAD", JoinTitles(legacyTurnedOff))
+		end
 	elseif #legacyToTurnOn > 0 then
 		local titles = {}
+		local bringsLists = false
 		for index, legacy in ipairs(legacyToTurnOn) do
 			titles[index] = LegacyTitle(legacy)
+			bringsLists = bringsLists or legacy.savedVariables == "ConnoisseurDB"
 		end
+		StaticPopupDialogs.BAGSBUFFSBUTTONS_LEGACY_IMPORT.text = bringsLists and L["POPUP_LEGACY_IMPORT_LISTS"]
+			or L["POPUP_LEGACY_IMPORT_SETTINGS"]
 		StaticPopup_Show("BAGSBUFFSBUTTONS_LEGACY_IMPORT", JoinTitles(titles))
 	end
 end
@@ -400,14 +423,14 @@ local function InitializeDatabase()
 	UseOwnProfileWhenUnnamed()
 
 	--[[
-	    MIGRATION (remove after 2026-10-30)
+	    MIGRATION (remove after 2026-11-25)
 	    Connoisseur & Restocker's saved-data repairs, run on what it copied in:
 	    first each Forever character's list choice, staples answer and
 	    Inventory Report record move to its whole-name key, then every
 	    character still on the shared Default profile gets one of its own. Both
 	    run before the callbacks below are wired, so their profile switch fires
-	    no handler halfway through login. Features/Connoisseur/Character-Key-Migration.lua
-	    and Features/Connoisseur/Default-Profile-Migration.lua list the pieces
+	    no handler halfway through login. Features/Macros-for-Consumables/Character-Key-Migration.lua
+	    and Features/Macros-for-Consumables/Default-Profile-Migration.lua list the pieces
 	    that come out together.
 	]]
 	ns.RekeyCharactersByFullName()
@@ -421,8 +444,9 @@ end
 --[[
     A profile switch, copy or reset swaps every per-character setting at once.
     Settings read live from the database update themselves; each feature
-    re-applies what it applied imperatively (macro bodies, aura tracking, the
-    mini-map buttons), and every open options panel redraws.
+    re-applies what it applied imperatively (macro bodies, aura tracking), and
+    every open options panel redraws. The Restock List in use is the
+    character's own choice, not the profile's, so a switch leaves it alone.
 ]]
 function ns:ApplyProfile()
 	if ns.ApplyConnoisseurProfile then
@@ -454,6 +478,7 @@ function ns:PrintWelcome()
 	if ns.db.global.showWelcome then
 		ns:PrintMessage(L["CHAT_LOADED"]:format(ns.Version))
 	end
+	-- MIGRATION (remove after 2026-11-25)
 	for _, notice in ipairs(legacyNotices) do
 		ns:PrintMessage(notice)
 	end
@@ -482,6 +507,8 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "PLAYER_LOGIN" then
 		InitializeDatabase()
 		ns.RegisterOptionsPanels()
+		-- The one mini-map button every feature shares; LibDBIcon reads its saved position from ns.db.
+		ns.RegisterMinimapIcon()
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		ns:PrintWelcome()
 	elseif event == "PLAYER_LOGOUT" then

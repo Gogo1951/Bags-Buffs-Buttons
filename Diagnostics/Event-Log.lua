@@ -87,8 +87,8 @@ local GATED_EVENTS = {
     Connoisseur & Restocker's correlations, beside Thanks for the Buff's
     ns.IsCorrelatedMessage, each the exact test its live handler makes: the
     two errors the consumable macros read by text, ERR_ITEM_WRONG_ZONE
-    (Features/Connoisseur/Macros/Runtime.lua) and SPELL_FAILED_TARGETS_DEAD
-    (Features/Connoisseur/Macros/Tools-Hunters.lua); a consumable's item info,
+    (Features/Macros-for-Consumables/Macros/Runtime.lua) and SPELL_FAILED_TARGETS_DEAD
+    (Features/Macros-for-Consumables/Macros/Tools-Hunters.lua); a consumable's item info,
     which can change a macro (ns.HasRawData); and a cast of the player's that
     changes what a macro holds (ns.SpellCastChangesMacros).
 ]]

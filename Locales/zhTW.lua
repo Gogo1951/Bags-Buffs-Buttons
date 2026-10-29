@@ -889,7 +889,7 @@ L["OPTIONS_READINESS_NONCOMBAT_GEAR_DESCRIPTION"] =
 -- Restocker Window & Chat
 --------------------------------------------------------------------------------
 
--- Chat messages printed by the Restocker feature (Features/Restocker/).
+-- Chat messages printed by the Restocker feature (Features/Inventory-Restocker/).
 L["RESTOCKER_PROFILE_EXISTS"] = '已存在名為"%s"的清單。'
 --[[
     %d is the item ID the player typed. Written into the add box itself while
@@ -920,7 +920,7 @@ L["RESTOCKER_STOPPED_ERROR"] = "補貨因錯誤而停止：%s"
     Printed during a merchant restock when the crafting-reagent buyer stands
     down: this merchant stocks some of the reagents the Restock List needs but
     not all of them, and reagents buy all-or-nothing (VendorStocksAllReagents in
-    Features/Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
+    Features/Inventory-Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
 ]]
 L["RESTOCKER_REAGENTS_SKIPPED"] =
 	"這個商人沒有販售你的毒藥所需的全部材料。跳過購買這些材料。"
@@ -1024,13 +1024,13 @@ L["RESTOCKER_HELP_PROFILE_USE"] = "將此角色切換到該名稱的清單。"
     Starter List pop-up, the staples window: offers staples at login when the
     Restock List is empty, and on demand from the Restock List window's Pick
     Staples button. The staples logic is in
-    Features/Restocker/Restocker-Starter-List.lua, the window in
+    Features/Inventory-Restocker/Restocker-Starter-List.lua, the window in
     Options/Options-Starter-List-Popup.lua. The six
     food staples reuse the DIET_ keys above, so each food row carries the
     client's own pet diet name.
 
-    The title is its own, and the call site puts the add-on's full name in
-    front of it (ADDON_TITLE // STARTER_POPUP_TITLE): at login this window
+    The title is its own, and the call site puts the add-on's full name
+    after it (STARTER_POPUP_TITLE // ADDON_TITLE): at login this window
     opens with nothing else of the add-on's on screen, so its title bar is
     all that says whose it is.
 
@@ -1099,8 +1099,8 @@ L["STARTER_POPUP_COUNT_DESCRIPTION"] =
 	"要保持備足多少個；這些物品無法堆疊，因此每個都會佔用一個背包格。"
 
 --[[
-    Restock List window UI. The title names what the window holds, after the
-    add-on's full name (ADDON_TITLE // RESTOCKER_WINDOW_TITLE); the feature
+    Restock List window UI. The title names what the window holds, before the
+    add-on's full name (RESTOCKER_WINDOW_TITLE // ADDON_TITLE); the feature
     that acts on it stays "Restocker".
 ]]
 L["RESTOCKER_WINDOW_TITLE"] = "補貨清單"
@@ -1591,8 +1591,9 @@ L["BUFF_WINDOW_AUDIENCE_HEALER"] = "治療者"
 L["BUFF_WINDOW_AUDIENCE_ALL"] = "所有人"
 -- Each buff's dropdown tooltip; hovering the buff's name shows the spell itself.
 L["BUFF_WINDOW_AUDIENCE_DESCRIPTION"] = "設定 %s 提供給誰。"
+-- %s is the game's own Main Tank label.
 L["BUFF_WINDOW_BUFFS_DESCRIPTION"] =
-	"選擇每個增益提供給誰。坦克和治療者依隊伍職責判定；沒有職責的人視為傷害輸出，除非下方的視為坦克另有設定。"
+	"選擇每個增益提供給誰。坦克和治療者依隊伍職責判定，但在團隊中只有被設為%s的玩家才算坦克。沒有職責的人視為傷害輸出，除非下方的視為坦克另有設定。"
 
 L["BUFF_WINDOW_SELF_DESCRIPTION"] = "你自己的增益，固定在視窗頂部。"
 --[[
@@ -1658,10 +1659,7 @@ L["BUFF_KEYS_DESCRIPTION"] =
 	"脫離戰鬥時，用一個按鍵或巨集施放清單中的下一個增益。武器增益仍需在視窗中點擊施加。"
 L["BUFF_KEY"] = "增益按鈕"
 L["BUFF_KEY_DESCRIPTION"] =
-	"每按一次施放下一個缺少的增益：先復活死亡的目標，再復活隊伍中死亡的成員（牧師、聖騎士和薩滿），然後是自身增益、禮尚往來、你的目標和你的隊伍。當隊伍增益比逐一為範圍內所有人施放單體增益消耗更少法力時，就施放隊伍增益。"
-L["BUFF_KEY_SKIP_COOLDOWNS"] = "跳過有冷卻時間的增益"
-L["BUFF_KEY_SKIP_COOLDOWNS_DESCRIPTION"] =
-	"跳過有冷卻時間的增益（例如防護恐懼結界），繼續施放下一個。"
+	"每按一次施放下一個缺少的增益：先復活死亡的目標，再復活隊伍中死亡的成員（牧師、聖騎士和薩滿），然後是禮尚往來、你的目標、自身增益和你的隊伍。等隊伍成員都在附近後，若隊伍增益比逐一為成員施放單體增益消耗更少法力，就施放隊伍增益。跳過有冷卻時間的增益（例如防護恐懼結界），繼續施放下一個。"
 -- %s is a player's name.
 L["BUFF_KEY_WAITING"] = "正在等待 %s 進入範圍。"
 L["BUFF_KEY_DONE"] = "沒有需要施放的增益了。"
@@ -1792,6 +1790,8 @@ L["SUBTEXT_STANCE"] = "姿態"
 L["SUBTEXT_USE_ITEMS"] = "使用物品"
 L["SUBTEXT_PET_ATTACK"] = "寵物攻擊"
 L["SUBTEXT_DYNAMIC_RANK"] = "動態等級"
+L["SUBTEXT_DYNAMIC_ITEM"] = "動態物品"
+L["SUBTEXT_DYNAMIC_RANK_ITEM"] = "動態等級，動態物品"
 L["SUBTEXT_MAX_RANK"] = "最高等級"
 L["SUBTEXT_TARGET_ENEMY"] = "最近敵人"
 L["SUBTEXT_TARGET_FRIEND"] = "最近友方"

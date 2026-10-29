@@ -903,7 +903,7 @@ L["OPTIONS_READINESS_NONCOMBAT_GEAR_DESCRIPTION"] =
 -- Restocker Window & Chat
 --------------------------------------------------------------------------------
 
--- Chat messages printed by the Restocker feature (Features/Restocker/).
+-- Chat messages printed by the Restocker feature (Features/Inventory-Restocker/).
 L["RESTOCKER_PROFILE_EXISTS"] = 'Já existe uma lista chamada "%s".'
 --[[
     %d is the item ID the player typed. Written into the add box itself while
@@ -935,7 +935,7 @@ L["RESTOCKER_STOPPED_ERROR"] = "Reabastecimento interrompido por um erro: %s"
     Printed during a merchant restock when the crafting-reagent buyer stands
     down: this merchant stocks some of the reagents the Restock List needs but
     not all of them, and reagents buy all-or-nothing (VendorStocksAllReagents in
-    Features/Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
+    Features/Inventory-Restocker/Restocker-Merchant.lua). Silent at vendors stocking none.
 ]]
 L["RESTOCKER_REAGENTS_SKIPPED"] =
 	"Este mercador não tem todos os ingredientes de que seus venenos precisam. Nenhum será comprado."
@@ -1039,13 +1039,13 @@ L["RESTOCKER_HELP_PROFILE_USE"] = "Troca este personagem para a lista com esse n
     Starter List pop-up, the staples window: offers staples at login when the
     Restock List is empty, and on demand from the Restock List window's Pick
     Staples button. The staples logic is in
-    Features/Restocker/Restocker-Starter-List.lua, the window in
+    Features/Inventory-Restocker/Restocker-Starter-List.lua, the window in
     Options/Options-Starter-List-Popup.lua. The six
     food staples reuse the DIET_ keys above, so each food row carries the
     client's own pet diet name.
 
-    The title is its own, and the call site puts the add-on's full name in
-    front of it (ADDON_TITLE // STARTER_POPUP_TITLE): at login this window
+    The title is its own, and the call site puts the add-on's full name
+    after it (STARTER_POPUP_TITLE // ADDON_TITLE): at login this window
     opens with nothing else of the add-on's on screen, so its title bar is
     all that says whose it is.
 
@@ -1115,8 +1115,8 @@ L["STARTER_POPUP_COUNT_DESCRIPTION"] =
 	"Quantos manter em estoque, cada um em seu próprio espaço na bolsa, já que não empilham."
 
 --[[
-    Restock List window UI. The title names what the window holds, after the
-    add-on's full name (ADDON_TITLE // RESTOCKER_WINDOW_TITLE); the feature
+    Restock List window UI. The title names what the window holds, before the
+    add-on's full name (RESTOCKER_WINDOW_TITLE // ADDON_TITLE); the feature
     that acts on it stays "Restocker".
 ]]
 L["RESTOCKER_WINDOW_TITLE"] = "Lista de reabastecimento"
@@ -1612,8 +1612,9 @@ L["BUFF_WINDOW_AUDIENCE_HEALER"] = "Curadores"
 L["BUFF_WINDOW_AUDIENCE_ALL"] = "Todos"
 -- Each buff's dropdown tooltip; hovering the buff's name shows the spell itself.
 L["BUFF_WINDOW_AUDIENCE_DESCRIPTION"] = "Define para quem oferecer %s."
+-- %s is the game's own Main Tank label.
 L["BUFF_WINDOW_BUFFS_DESCRIPTION"] =
-	"Escolha para quem cada buff é oferecido. Tanques e Curadores seguem a função no grupo; quem não tiver uma conta como Dano, a menos que Contar como tanques, abaixo, diga o contrário."
+	"Escolha para quem cada buff é oferecido. Tanques e Curadores seguem a função no grupo, mas em raide só contam como tanques os jogadores marcados como %s. Quem não tiver função conta como Dano, a menos que Contar como tanques, abaixo, diga o contrário."
 
 L["BUFF_WINDOW_SELF_DESCRIPTION"] = "Seus próprios buffs, fixados no topo da janela."
 --[[
@@ -1679,10 +1680,7 @@ L["BUFF_KEYS_DESCRIPTION"] =
 	"Lance o próximo buff da sua lista com uma tecla ou macro, fora de combate. Os buffs de arma continuam sendo um clique na janela."
 L["BUFF_KEY"] = "Botão de buff"
 L["BUFF_KEY_DESCRIPTION"] =
-	"Lança seu próximo buff em falta, um por toque: uma ressurreição no seu alvo morto, depois nos mortos do seu grupo (sacerdotes, paladinos e xamãs), depois seus buffs próprios, Retribuir o favor, seu alvo e seu grupo. Um grupo recebe o buff de grupo quando ele custa menos mana do que buffar um por um todos ao alcance."
-L["BUFF_KEY_SKIP_COOLDOWNS"] = "Pular buffs com tempo de recarga"
-L["BUFF_KEY_SKIP_COOLDOWNS_DESCRIPTION"] =
-	"Ignora buffs com tempo de recarga, como Proteção contra Medo, e passa para o próximo."
+	"Lança seu próximo buff em falta, um por toque: uma ressurreição no seu alvo morto, depois nos mortos do seu grupo (sacerdotes, paladinos e xamãs), depois Retribuir o favor, seu alvo, seus buffs próprios e seu grupo. Um grupo recebe o buff de grupo quando ele custa menos mana do que buffar seus membros um por um, assim que todos estão por perto. Ignora buffs com tempo de recarga, como Proteção contra Medo, e passa para o próximo."
 -- %s is a player's name.
 L["BUFF_KEY_WAITING"] = "Esperando %s chegar ao alcance."
 L["BUFF_KEY_DONE"] = "Nada mais para buffar."
@@ -1819,6 +1817,8 @@ L["SUBTEXT_STANCE"] = "Postura"
 L["SUBTEXT_USE_ITEMS"] = "Usar itens"
 L["SUBTEXT_PET_ATTACK"] = "Ataque ajudante"
 L["SUBTEXT_DYNAMIC_RANK"] = "Grau dinâm."
+L["SUBTEXT_DYNAMIC_ITEM"] = "Item dinâm."
+L["SUBTEXT_DYNAMIC_RANK_ITEM"] = "Grau dinâm., Item dinâm."
 L["SUBTEXT_MAX_RANK"] = "Grau máximo"
 L["SUBTEXT_TARGET_ENEMY"] = "Inimigo próximo"
 L["SUBTEXT_TARGET_FRIEND"] = "Aliado próximo"

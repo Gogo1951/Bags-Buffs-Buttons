@@ -6,13 +6,23 @@ local _, ns = ...
 	game shows them.
 ]]
 
+local NO_SPELLS = {}
+
 --[[
-	The character profile's trainerSpells: spell id -> required level, for each spell a trainer offered (every
-	rank: Features/Unlearned-Spells.lua keeps rank 1).
+	The character profile's trainerSpells for this character's class: spell id -> required level, for each
+	spell a trainer offered (every rank: Features/Spellbook/Unlearned-Spells.lua keeps rank 1). Kept by class
+	token, so a profile copied from another class's character never lists that class's spells. Don't modify
+	it unless create is set, which makes the class's table if there is none.
 ]]
-local function Recorded()
-	return ns.db.profile.trainerSpells
+local function Recorded(create)
+	local byClass, class = ns.db.profile.trainerSpells, select(2, UnitClass("player"))
+	if create and not byClass[class] then
+		byClass[class] = {}
+	end
+	return byClass[class] or NO_SPELLS
 end
+
+ns.RecordedTrainerSpellLevels = Recorded
 
 -- The recorded trainer spells as Data/ style entries ({level, id}), lowest level first.
 function ns.RecordedTrainerSpells()
@@ -51,7 +61,7 @@ local function RecordServices()
 	if not ns.db or not IsClassTrainer() then
 		return
 	end
-	local spells = Recorded()
+	local spells = Recorded(true)
 	for index = 1, GetNumTrainerServices() or 0 do
 		local id = ns.GetTrainerServiceSpellId(index)
 		if id then

@@ -2,11 +2,12 @@ local _, ns = ...
 local L = ns.L
 
 --[[
-	Connoisseur's macros on the page, in a BBB Consumables section after every other: the Bandage, Food and
-	Water macros it keeps pointed at the best item in the bags. Connoisseur writes and owns those WoW macros
-	(Features/Connoisseur/Macros); the page only shows the ones that exist and picks them up, so nothing here
-	creates, rewrites or tags one. A tile's icon is the item the macro uses now, its note that item's name, and
-	both are read again whenever the tile is drawn, as Connoisseur rewrites the macro when the bags change.
+	Connoisseur's macros on the page, in a BBB Consumables section after every other: the consumable macros
+	it keeps pointed at the best item in the bags. Connoisseur writes and owns those WoW macros
+	(Features/Macros-for-Consumables/Macros); the page only shows the ones that exist and picks them up, so nothing here
+	creates, rewrites or tags one. A tile's icon is the item the macro uses now, read again whenever the tile is
+	drawn, as Connoisseur rewrites the macro when the bags change; its note is Dynamic Item rather than the
+	item's name, which changes with the bags.
 ]]
 
 -- In the order the Macros panel's Which Macros to Create toggles list them, keyed by ns.MACRO_CONFIG's type.
@@ -22,6 +23,19 @@ local TYPES = {
 	"Poisons",
 	"Soulstone",
 	"Water",
+}
+
+--[[
+	The types whose macro can also cast a spell for the class that has it, at a rank of its own (Conjure Food,
+	Create Healthstone, Feed Pet): their note reads Dynamic Rank as well as Dynamic Item for that class.
+]]
+local SPELL_CLASSES = {
+	["Feed Pet"] = "HUNTER",
+	["Food"] = "MAGE",
+	["Healthstone"] = "WARLOCK",
+	["Mana Gem"] = "MAGE",
+	["Soulstone"] = "WARLOCK",
+	["Water"] = "MAGE",
 }
 
 --[[
@@ -46,10 +60,12 @@ end
 --[[
 	The page macros for the Connoisseur macros that exist, in TYPES' order. Each carries consumable = true, its
 	WoW macro's name as wowName (Connoisseur's own, "- Food", in place of the page's prefix), and its name as
-	the Macros panel shows it, without the dash.
+	the Macros panel shows it, without the dash. dynamicRank marks a type the player's class can also cast
+	(SPELL_CLASSES).
 ]]
 function ns.ConsumablePageMacros()
 	local macros = {}
+	local playerClass = select(2, UnitClass("player"))
 	for position, type in ipairs(TYPES) do
 		local config = ns.MACRO_CONFIG[type]
 		if config and GetMacroIndexByName(config.macro) > 0 then
@@ -61,6 +77,7 @@ function ns.ConsumablePageMacros()
 				macroName = config.macro,
 				category = L["SECTION_CONSUMABLES"],
 				priority = position,
+				dynamicRank = SPELL_CLASSES[type] == playerClass,
 			}
 			ns.ReadConsumableMacro(macro)
 			macros[#macros + 1] = macro

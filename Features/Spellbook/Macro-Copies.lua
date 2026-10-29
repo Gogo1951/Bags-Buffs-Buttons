@@ -71,12 +71,9 @@ function ns.ResetMacroSettings(macro)
 	end
 end
 
---[[
-	Hands a spell's settings to the spell that replaced it in its group (see ns.HandOverMacro), setting by
-	setting where the new spell has none of its own, and drops the old spell's.
-]]
-function ns.MoveSpellSettings(from, to)
-	for _, key in ipairs(COPIED_SETTINGS) do
+-- Moves each listed setting from one settings key to another where the second has none, and drops the first's.
+local function MoveSettings(keys, from, to)
+	for _, key in ipairs(keys) do
 		local settings = SpellSettings(key)
 		if settings[to] == nil then
 			settings[to] = settings[from]
@@ -86,9 +83,24 @@ function ns.MoveSpellSettings(from, to)
 end
 
 --[[
-	Takes a copy off the page and drops its settings. Its WoW macro is left as it is, wherever it sits on the
-	bars, so nothing the player placed stops working; the add-on just stops rewriting it.
+	Hands a spell's settings to the spell that replaced it in its group (see ns.HandOverMacro), setting by
+	setting where the new spell has none of its own, and drops the old spell's. Its focus copy and its
+	Duplicates go with it, each Duplicate keeping its number and its own settings, unless the new spell has
+	Duplicates of its own.
 ]]
+function ns.MoveSpellSettings(from, to)
+	MoveSettings(COPIED_SETTINGS, from, to)
+	MoveSettings({ "focus" }, from, to)
+	local copies = ns.db.profile.macroCopies
+	if copies[from] and not copies[to] then
+		for _, number in ipairs(copies[from]) do
+			MoveSettings(COPIED_SETTINGS, from .. " #" .. number, to .. " #" .. number)
+		end
+		copies[to], copies[from] = copies[from], nil
+	end
+end
+
+-- Takes a copy off the page and drops its settings.
 function ns.RemoveMacroCopy(macro)
 	local copies = ns.db.profile.macroCopies
 	local list = copies[macro.name] or {}

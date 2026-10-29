@@ -1,9 +1,8 @@
 local _, ns = ...
 
 --[[
-	The class spells the player hasn't learned yet, for the page's Show Unlearned Spells option. Classic Era,
-	TBC and Forever only: their class trainers teach spell ranks the bundled data lists. MoP Classic and Retail
-	leave this file out of their TOCs.
+	The class spells the player hasn't learned yet, for the page's Show Unlearned Spells option: the class
+	trainers teach spell ranks the bundled data lists.
 ]]
 
 -- The rank in a spell's subtext ("Rank 2"), or nil for a spell without ranks.

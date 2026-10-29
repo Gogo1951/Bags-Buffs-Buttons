@@ -41,7 +41,7 @@ local function HasUseEffect(slot, link)
 		return true
 	end
 	local prefix = ITEM_SPELL_TRIGGER_ONUSE
-	for _, text in ipairs(ns.ScanTooltipLines("GetInventoryItem", "SetInventoryItem", "player", slot)) do
+	for _, text in ipairs(ns.ReadTooltipLines("GetInventoryItem", "SetInventoryItem", "player", slot)) do
 		if type(text) == "string" and text:sub(1, #prefix) == prefix then
 			return true
 		end
